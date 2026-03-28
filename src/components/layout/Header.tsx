@@ -16,8 +16,9 @@ export function Header() {
 
   useEffect(() => {
     setMounted(true);
+    const supabase = createClient();
+
     const checkAuth = async () => {
-      const supabase = createClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -25,7 +26,6 @@ export function Header() {
     };
     checkAuth();
 
-    const supabase = createClient();
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {

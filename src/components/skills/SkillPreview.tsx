@@ -34,7 +34,7 @@ export function SkillPreview({ previewHtml, title, slug }: SkillPreviewProps) {
       <div className="relative h-[400px] w-full bg-white">
         <iframe
           srcDoc={previewHtml}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          sandbox="allow-scripts allow-forms allow-popups"
           title={`Preview: ${title}`}
           className="absolute inset-0 h-full w-full border-0"
           loading="lazy"

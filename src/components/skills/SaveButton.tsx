@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
 interface SaveButtonProps {
@@ -34,18 +35,30 @@ export function SaveButton({
       return;
     }
 
+    const wasSaved = saved;
+
     if (saved) {
       setSaved(false);
-      await supabase
+      const { error } = await supabase
         .from("skill_saves")
         .delete()
         .eq("user_id", user.id)
         .eq("skill_id", skillId);
+      if (error) {
+        setSaved(wasSaved);
+        toast.error("Failed to unsave. Please try again.");
+        return;
+      }
     } else {
       setSaved(true);
-      await supabase
+      const { error } = await supabase
         .from("skill_saves")
         .insert({ user_id: user.id, skill_id: skillId });
+      if (error) {
+        setSaved(wasSaved);
+        toast.error("Failed to save. Please try again.");
+        return;
+      }
     }
 
     startTransition(() => {

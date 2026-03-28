@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 interface CopyButtonProps {
@@ -9,12 +9,21 @@ interface CopyButtonProps {
 
 export function CopyButton({ content }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content);
     setCopied(true);
     toast.success("Skill copied to clipboard!");
-    setTimeout(() => setCopied(false), 2000);
+    timeoutRef.current = setTimeout(() => setCopied(false), 2000);
   };
 
   return (

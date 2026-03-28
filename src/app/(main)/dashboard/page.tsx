@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 
 export const metadata = {
@@ -11,15 +12,19 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    redirect("/login");
+  }
+
   const [{ count: savedCount }, { count: likedCount }] = await Promise.all([
     supabase
       .from("skill_saves")
       .select("*", { count: "exact", head: true })
-      .eq("user_id", user!.id),
+      .eq("user_id", user.id),
     supabase
       .from("skill_likes")
       .select("*", { count: "exact", head: true })
-      .eq("user_id", user!.id),
+      .eq("user_id", user.id),
   ]);
 
   const stats = [

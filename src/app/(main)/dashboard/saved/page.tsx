@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 import { SkillGrid } from "@/components/skills/SkillGrid";
 import type { Skill } from "@/types/skill";
 
@@ -12,10 +14,14 @@ export default async function SavedSkillsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    redirect("/login");
+  }
+
   const { data: saves } = await supabase
     .from("skill_saves")
     .select("skill_id")
-    .eq("user_id", user!.id)
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   const skillIds = saves?.map((s) => s.skill_id) ?? [];
@@ -45,12 +51,12 @@ export default async function SavedSkillsPage() {
           <p className="text-muted-foreground">
             You have not saved any skills yet.
           </p>
-          <a
+          <Link
             href="/skills"
             className="mt-4 inline-block border-2 border-primary px-4 py-2 text-xs font-semibold tracking-widest text-primary uppercase hover:bg-primary hover:text-primary-foreground"
           >
             EXPLORE SKILLS
-          </a>
+          </Link>
         </div>
       ) : (
         <SkillGrid skills={skills} />

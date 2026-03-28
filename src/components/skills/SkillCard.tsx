@@ -113,7 +113,7 @@ export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              title="Open preview in new tab"
+              aria-label="Open preview in new tab"
               className="border border-border p-1 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
             >
               <svg
@@ -130,7 +130,7 @@ export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
             {/* Copy */}
             <button
               onClick={handleCopy}
-              title="Copy SKILL.md"
+              aria-label="Copy SKILL.md"
               className="border border-border p-1 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
             >
               <svg
@@ -148,7 +148,7 @@ export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
             {/* Download */}
             <button
               onClick={handleDownload}
-              title="Download .md file"
+              aria-label="Download .md file"
               className="border border-border p-1 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
             >
               <svg
