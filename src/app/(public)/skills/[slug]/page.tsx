@@ -8,6 +8,7 @@ import { DownloadButton } from "@/components/skills/DownloadButton";
 import { LikeButton } from "@/components/skills/LikeButton";
 import { SaveButton } from "@/components/skills/SaveButton";
 import { createClient } from "@/lib/supabase/server";
+import type { Skill } from "@/types/skill";
 
 interface SkillDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: SkillDetailPageProps) {
     .from("skills")
     .select("title, short_description")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
 
   if (!skill) return { title: "Skill Not Found" };
 
@@ -36,72 +37,103 @@ export default async function SkillDetailPage({
   const { slug } = await params;
   const supabase = await createClient();
 
-  // Get skill
-  const { data: skill } = await supabase
+  // Get skill - use maybeSingle() instead of single() to avoid errors
+  const { data: skill, error: skillError } = await supabase
     .from("skills")
     .select("*")
     .eq("slug", slug)
     .eq("status", "published")
-    .single();
+    .maybeSingle();
 
-  if (!skill) notFound();
+  if (skillError || !skill) {
+    notFound();
+  }
 
-  // Get current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const isAuthenticated = !!user;
+  // Get current user (non-critical, don't fail if this errors)
+  let user = null;
+  try {
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+  } catch {
+    // Auth check failed, continue as unauthenticated
+  }
 
-  // Get counts
-  const [{ count: likesCount }, { count: viewsCount }] = await Promise.all([
-    supabase
-      .from("skill_likes")
-      .select("*", { count: "exact", head: true })
-      .eq("skill_id", skill.id),
-    supabase
-      .from("skill_views")
-      .select("*", { count: "exact", head: true })
-      .eq("skill_id", skill.id),
-  ]);
+  // Get counts (non-critical, default to 0 on error)
+  let likesCount = 0;
+  let viewsCount = 0;
+  try {
+    const [likesResult, viewsResult] = await Promise.all([
+      supabase
+        .from("skill_likes")
+        .select("*", { count: "exact", head: true })
+        .eq("skill_id", skill.id),
+      supabase
+        .from("skill_views")
+        .select("*", { count: "exact", head: true })
+        .eq("skill_id", skill.id),
+    ]);
+    likesCount = likesResult.count ?? 0;
+    viewsCount = viewsResult.count ?? 0;
+  } catch {
+    // Count queries failed, use defaults
+  }
 
-  // Check if user liked/saved
+  // Check if user liked/saved (non-critical)
   let isLiked = false;
   let isSaved = false;
   if (user) {
-    const [{ data: like }, { data: save }] = await Promise.all([
-      supabase
-        .from("skill_likes")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("skill_id", skill.id)
-        .maybeSingle(),
-      supabase
-        .from("skill_saves")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("skill_id", skill.id)
-        .maybeSingle(),
-    ]);
-    isLiked = !!like;
-    isSaved = !!save;
+    try {
+      const [likeResult, saveResult] = await Promise.all([
+        supabase
+          .from("skill_likes")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("skill_id", skill.id)
+          .maybeSingle(),
+        supabase
+          .from("skill_saves")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("skill_id", skill.id)
+          .maybeSingle(),
+      ]);
+      isLiked = !!likeResult.data;
+      isSaved = !!saveResult.data;
+    } catch {
+      // Like/save check failed, continue
+    }
 
-    // Record view
-    await supabase
-      .from("skill_views")
-      .insert({ skill_id: skill.id, user_id: user.id });
+    // Record view (fire and forget)
+    try {
+      await supabase
+        .from("skill_views")
+        .insert({ skill_id: skill.id, user_id: user.id });
+    } catch {
+      // View recording failed, continue
+    }
   } else {
-    // Record anonymous view
-    await supabase.from("skill_views").insert({ skill_id: skill.id });
+    // Record anonymous view (fire and forget)
+    try {
+      await supabase.from("skill_views").insert({ skill_id: skill.id });
+    } catch {
+      // View recording failed, continue
+    }
   }
 
-  // Get related skills
-  const { data: relatedSkills } = await supabase
-    .from("skills")
-    .select("id, slug, title, short_description, category")
-    .eq("status", "published")
-    .eq("category", skill.category)
-    .neq("id", skill.id)
-    .limit(3);
+  // Get related skills (non-critical)
+  let relatedSkills: Skill[] = [];
+  try {
+    const { data } = await supabase
+      .from("skills")
+      .select("id, slug, title, short_description, category")
+      .eq("status", "published")
+      .eq("category", skill.category)
+      .neq("id", skill.id)
+      .limit(3);
+    relatedSkills = (data as Skill[]) ?? [];
+  } catch {
+    // Related skills query failed, continue
+  }
 
   return (
     <Container className="py-12">
@@ -152,18 +184,18 @@ export default async function SkillDetailPage({
         {/* Stats + Actions */}
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <span className="text-xs tracking-wider text-muted-foreground">
-            {viewsCount ?? 0} VIEWS
+            {viewsCount} VIEWS
           </span>
           <LikeButton
             skillId={skill.id}
             initialLiked={isLiked}
-            initialCount={likesCount ?? 0}
-            isAuthenticated={isAuthenticated}
+            initialCount={likesCount}
+            isAuthenticated={!!user}
           />
           <SaveButton
             skillId={skill.id}
             initialSaved={isSaved}
-            isAuthenticated={isAuthenticated}
+            isAuthenticated={!!user}
           />
           <CopyButton content={skill.skill_markdown} />
           <DownloadButton slug={skill.slug} content={skill.skill_markdown} />
@@ -199,10 +231,10 @@ export default async function SkillDetailPage({
       </div>
 
       {/* Related Skills */}
-      {relatedSkills && relatedSkills.length > 0 && (
+      {relatedSkills.length > 0 && (
         <div className="border-t-2 border-border pt-8">
           <p className="mb-2 text-xs font-semibold tracking-[0.2em] text-primary">
-            {/* RELATED */}
+            // RELATED
           </p>
           <h2 className="mb-6 font-display text-2xl font-bold tracking-wide">
             MORE {skill.category.toUpperCase()} SKILLS

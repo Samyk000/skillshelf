@@ -14,8 +14,11 @@ interface SkillFormProps {
 function generateSlug(title: string) {
   return title
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+    .trim()
+    .replace(/[^\w\s-]/g, "")  // remove special chars
+    .replace(/[\s_]+/g, "-")    // spaces/underscores to hyphens
+    .replace(/-+/g, "-")        // collapse multiple hyphens
+    .replace(/^-|-$/g, "");     // trim leading/trailing hyphens
 }
 
 export function SkillForm({ skill }: SkillFormProps) {
@@ -59,6 +62,13 @@ export function SkillForm({ skill }: SkillFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+
+    // Validate slug is URL-safe
+    if (!/^[a-z0-9-]+$/.test(form.slug)) {
+      toast.error("Slug must only contain lowercase letters, numbers, and hyphens");
+      setSaving(false);
+      return;
+    }
 
     const supabase = createClient();
     const {

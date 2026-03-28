@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Container } from "./Container";
 import { MobileMenu } from "./MobileMenu";
+import { UserMenu } from "./UserMenu";
 
 const navLinks = [
   { href: "/skills", label: "EXPLORE" },
@@ -41,21 +42,8 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Desktop Auth */}
-          <div className="hidden items-center gap-4 md:flex">
-            <Link
-              href="/login"
-              className="border-2 border-border px-4 py-2 text-sm font-semibold tracking-widest text-foreground uppercase transition-colors hover:border-primary hover:text-primary"
-            >
-              LOGIN
-            </Link>
-            <Link
-              href="/signup"
-              className="border-2 border-primary bg-primary px-4 py-2 text-sm font-semibold tracking-widest text-primary-foreground uppercase transition-colors hover:bg-transparent hover:text-primary"
-            >
-              SIGN UP
-            </Link>
-          </div>
+          {/* Desktop Auth - Now auth-aware */}
+          <UserMenu />
 
           {/* Mobile Menu Button */}
           <button

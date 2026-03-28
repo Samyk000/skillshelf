@@ -1,16 +1,32 @@
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
+import { createClient } from "@/lib/supabase/server";
+import { SkillCard } from "@/components/skills/SkillCard";
+import type { Skill } from "@/types/skill";
 
 const categories = [
-  { name: "PAPER", count: 0 },
-  { name: "MINIMAL SAAS", count: 0 },
-  { name: "EDITORIAL", count: 0 },
-  { name: "SOFT DASHBOARD", count: 0 },
-  { name: "BRUTALIST", count: 0 },
-  { name: "ENTERPRISE", count: 0 },
+  { name: "PAPER" },
+  { name: "MINIMAL SAAS" },
+  { name: "EDITORIAL" },
+  { name: "SOFT DASHBOARD" },
+  { name: "BRUTALIST" },
+  { name: "ENTERPRISE" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+
+  // Fetch featured skills
+  const { data: featuredSkills } = await supabase
+    .from("skills")
+    .select("*")
+    .eq("status", "published")
+    .eq("featured", true)
+    .order("created_at", { ascending: false })
+    .limit(6);
+
+  const skills = (featuredSkills as Skill[]) ?? [];
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -46,7 +62,7 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* Featured Skills Placeholder */}
+      {/* Featured Skills */}
       <section className="border-b-2 border-border py-16">
         <Container>
           <div className="mb-8 flex items-center justify-between">
@@ -65,21 +81,22 @@ export default function HomePage() {
               VIEW ALL
             </Link>
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="border-2 border-border bg-card p-6 transition-colors hover:border-primary"
-              >
-                <div className="mb-4 h-4 w-24 animate-pulse bg-muted" />
-                <div className="mb-2 h-3 w-full animate-pulse bg-muted" />
-                <div className="h-3 w-3/4 animate-pulse bg-muted" />
-              </div>
-            ))}
-          </div>
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Skills will appear here once published from the admin panel.
-          </p>
+          {skills.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {skills.map((skill) => (
+                <SkillCard key={skill.id} skill={skill} />
+              ))}
+            </div>
+          ) : (
+            <div className="border-2 border-border bg-card p-12 text-center">
+              <p className="text-xs font-semibold tracking-[0.2em] text-primary mb-2">
+                // NO FEATURED SKILLS YET
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Mark skills as featured from the admin panel to see them here.
+              </p>
+            </div>
+          )}
         </Container>
       </section>
 
