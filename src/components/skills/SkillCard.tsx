@@ -11,13 +11,23 @@ export function SkillCard({ skill }: SkillCardProps) {
       href={`/skills/${skill.slug}`}
       className="group flex flex-col border-2 border-border bg-card transition-colors hover:border-primary"
     >
-      {/* Cover Image or Placeholder */}
+      {/* Preview or Cover Image or Placeholder */}
       {skill.cover_image_url ? (
         <div className="aspect-video w-full overflow-hidden border-b-2 border-border">
           <img
             src={skill.cover_image_url}
             alt={skill.title}
             className="h-full w-full object-cover"
+          />
+        </div>
+      ) : skill.preview_html ? (
+        <div className="aspect-video w-full overflow-hidden border-b-2 border-border bg-white">
+          <iframe
+            srcDoc={skill.preview_html}
+            sandbox="allow-scripts"
+            title={`Preview: ${skill.title}`}
+            className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
+            loading="lazy"
           />
         </div>
       ) : (

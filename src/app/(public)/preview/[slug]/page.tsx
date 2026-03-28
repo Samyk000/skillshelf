@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: PreviewPageProps) {
     .from("skills")
     .select("title")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
 
   return {
     title: skill ? `Preview: ${skill.title}` : "Preview Not Found",
@@ -28,7 +28,7 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
     .select("title, preview_html")
     .eq("slug", slug)
     .eq("status", "published")
-    .single();
+    .maybeSingle();
 
   if (!skill || !skill.preview_html) notFound();
 
@@ -36,7 +36,7 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
     <div className="fixed inset-0 bg-white">
       <iframe
         srcDoc={skill.preview_html}
-        sandbox="allow-scripts"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
         title={`Preview: ${skill.title}`}
         className="h-full w-full border-0"
       />

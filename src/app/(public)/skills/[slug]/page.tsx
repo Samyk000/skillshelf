@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { SkillPreview } from "@/components/skills/SkillPreview";
-import { SkillMarkdown } from "@/components/skills/SkillMarkdown";
 import { CopyButton } from "@/components/skills/CopyButton";
 import { DownloadButton } from "@/components/skills/DownloadButton";
 import { LikeButton } from "@/components/skills/LikeButton";
@@ -37,7 +36,6 @@ export default async function SkillDetailPage({
   const { slug } = await params;
   const supabase = await createClient();
 
-  // Get skill - use maybeSingle() instead of single() to avoid errors
   const { data: skill, error: skillError } = await supabase
     .from("skills")
     .select("*")
@@ -49,7 +47,6 @@ export default async function SkillDetailPage({
     notFound();
   }
 
-  // Get current user (non-critical, don't fail if this errors)
   let user = null;
   try {
     const result = await supabase.auth.getUser();
@@ -58,7 +55,6 @@ export default async function SkillDetailPage({
     // Auth check failed, continue as unauthenticated
   }
 
-  // Get counts (non-critical, default to 0 on error)
   let likesCount = 0;
   let viewsCount = 0;
   try {
@@ -78,7 +74,6 @@ export default async function SkillDetailPage({
     // Count queries failed, use defaults
   }
 
-  // Check if user liked/saved (non-critical)
   let isLiked = false;
   let isSaved = false;
   if (user) {
@@ -103,7 +98,6 @@ export default async function SkillDetailPage({
       // Like/save check failed, continue
     }
 
-    // Record view (fire and forget)
     try {
       await supabase
         .from("skill_views")
@@ -112,7 +106,6 @@ export default async function SkillDetailPage({
       // View recording failed, continue
     }
   } else {
-    // Record anonymous view (fire and forget)
     try {
       await supabase.from("skill_views").insert({ skill_id: skill.id });
     } catch {
@@ -120,7 +113,6 @@ export default async function SkillDetailPage({
     }
   }
 
-  // Get related skills (non-critical)
   let relatedSkills: Skill[] = [];
   try {
     const { data } = await supabase
@@ -181,7 +173,7 @@ export default async function SkillDetailPage({
           </div>
         )}
 
-        {/* Stats + Actions */}
+        {/* Actions */}
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <span className="text-xs tracking-wider text-muted-foreground">
             {viewsCount} VIEWS
@@ -216,19 +208,16 @@ export default async function SkillDetailPage({
       {skill.preview_html && (
         <div className="mb-8">
           <SkillPreview previewHtml={skill.preview_html} title={skill.title} />
-          <Link
+          <a
             href={`/preview/${skill.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-2 inline-block text-xs tracking-wider text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
           >
             OPEN FULL PREVIEW IN NEW TAB &rarr;
-          </Link>
+          </a>
         </div>
       )}
-
-      {/* Markdown */}
-      <div className="mb-12">
-        <SkillMarkdown content={skill.skill_markdown} />
-      </div>
 
       {/* Related Skills */}
       {relatedSkills.length > 0 && (
