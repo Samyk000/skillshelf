@@ -59,25 +59,19 @@ export default async function HomePage() {
                   CREATE ACCOUNT
                 </Link>
               </div>
-            </div>
-            <div className="flex flex-col gap-4">
-              {[
-                { step: "01", title: "BROWSE", description: "Explore the library" },
-                { step: "02", title: "PREVIEW", description: "See it in action" },
-                { step: "03", title: "COPY & USE", description: "One-click download" },
-              ].map((item) => (
-                <div key={item.step} className="flex items-baseline gap-3">
-                  <span className="text-sm font-bold text-primary font-display">
-                    {item.step}
-                  </span>
-                  <span className="text-sm font-bold tracking-wider text-foreground">
-                    {item.title}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    — {item.description}
-                  </span>
-                </div>
-              ))}
+              <div className="flex items-center gap-4 text-[11px] tracking-wider text-muted-foreground">
+                {[
+                  { step: "01", title: "BROWSE" },
+                  { step: "02", title: "PREVIEW" },
+                  { step: "03", title: "COPY & USE" },
+                ].map((item, index) => (
+                  <div key={item.step} className="flex items-center gap-2">
+                    <span className="font-bold text-primary">{item.step}</span>
+                    <span className="font-semibold">{item.title}</span>
+                    {index < 2 && <span className="text-border">/</span>}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </Container>

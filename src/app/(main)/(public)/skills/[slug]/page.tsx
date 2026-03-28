@@ -128,9 +128,9 @@ export default async function SkillDetailPage({
   }
 
   return (
-    <Container className="py-12">
+    <Container className="py-8">
       {/* Breadcrumb */}
-      <nav className="mb-8 flex items-center gap-2 text-xs tracking-wider text-muted-foreground">
+      <nav className="mb-6 flex items-center gap-2 text-xs tracking-wider text-muted-foreground">
         <Link href="/" className="hover:text-primary">
           HOME
         </Link>
@@ -142,80 +142,105 @@ export default async function SkillDetailPage({
         <span className="text-primary">{skill.title.toUpperCase()}</span>
       </nav>
 
-      {/* Hero */}
-      <div className="mb-8">
-        <span className="mb-3 inline-block border border-primary px-2 py-0.5 text-[10px] font-semibold tracking-[0.15em] text-primary">
-          {skill.category.toUpperCase()}
-        </span>
-        <h1 className="font-display text-3xl font-bold tracking-wide md:text-4xl">
-          {skill.title}
-        </h1>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
+      {/* Title Row: Category + Title + Description */}
+      <div className="mb-6">
+        <div className="mb-2 flex flex-wrap items-center gap-3">
+          <span className="inline-block border border-primary px-2 py-0.5 text-[10px] font-semibold tracking-[0.15em] text-primary">
+            {skill.category.toUpperCase()}
+          </span>
+          <h1 className="font-display text-2xl font-bold tracking-wide md:text-3xl">
+            {skill.title}
+          </h1>
+        </div>
+        <p className="max-w-2xl text-sm text-muted-foreground">
           {skill.short_description}
         </p>
-        {skill.long_description && (
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            {skill.long_description}
-          </p>
-        )}
+      </div>
 
-        {/* Tags */}
-        {skill.tags.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {skill.tags.map((tag: string) => (
-              <span
-                key={tag}
-                className="border border-border px-2 py-0.5 text-[10px] tracking-wider text-muted-foreground"
-              >
-                {tag.toUpperCase()}
+      {/* Main Content: Preview (left) + Actions (right) */}
+      <div className="mb-8 flex flex-col gap-4 lg:flex-row">
+        {/* Preview - Left */}
+        <div className="min-w-0 flex-1">
+          {skill.preview_html ? (
+            <SkillPreview
+              previewHtml={skill.preview_html}
+              title={skill.title}
+              slug={skill.slug}
+            />
+          ) : (
+            <div className="flex h-[400px] items-center justify-center border-2 border-border bg-muted">
+              <span className="font-display text-lg font-bold tracking-wider text-muted-foreground">
+                // NO PREVIEW AVAILABLE
               </span>
-            ))}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
 
-        {/* Actions */}
-        <div className="mt-6 flex flex-wrap items-center gap-4">
-          <span className="text-xs tracking-wider text-muted-foreground">
-            {viewsCount} VIEWS
-          </span>
+        {/* Actions Sidebar - Right */}
+        <div className="flex shrink-0 flex-col gap-3 lg:w-[180px]">
+          {/* Views */}
+          <div className="flex items-center gap-2 border-2 border-border px-4 py-2.5 text-sm text-muted-foreground">
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <span className="tracking-wider">
+              {viewsCount} VIEWS
+            </span>
+          </div>
+
+          {/* Save */}
+          <SaveButton
+            skillId={skill.id}
+            initialSaved={isSaved}
+            isAuthenticated={!!user}
+          />
+
+          {/* Copy */}
+          <CopyButton content={skill.skill_markdown} />
+
+          {/* Download */}
+          <DownloadButton slug={skill.slug} content={skill.skill_markdown} />
+
+          {/* Like */}
           <LikeButton
             skillId={skill.id}
             initialLiked={isLiked}
             initialCount={likesCount}
             isAuthenticated={!!user}
           />
-          <SaveButton
-            skillId={skill.id}
-            initialSaved={isSaved}
-            isAuthenticated={!!user}
-          />
-          <CopyButton content={skill.skill_markdown} />
-          <DownloadButton slug={skill.slug} content={skill.skill_markdown} />
+
+          {/* External Preview */}
           {skill.preview_external_url && (
             <a
               href={skill.preview_external_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="border-2 border-border px-4 py-2 text-sm font-semibold tracking-wider text-muted-foreground uppercase transition-colors hover:border-primary hover:text-primary"
+              className="border-2 border-border px-4 py-2.5 text-center text-sm font-semibold tracking-wider text-muted-foreground uppercase transition-colors hover:border-primary hover:text-primary"
             >
-              OPEN EXTERNAL PREVIEW
+              EXTERNAL LINK
             </a>
           )}
         </div>
       </div>
 
-      {/* Preview */}
-      {skill.preview_html && (
-        <div className="mb-8">
-          <SkillPreview previewHtml={skill.preview_html} title={skill.title} />
-          <a
-            href={`/preview/${skill.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 inline-block text-xs tracking-wider text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
-          >
-            OPEN FULL PREVIEW IN NEW TAB &rarr;
-          </a>
+      {/* Tags */}
+      {skill.tags.length > 0 && (
+        <div className="mb-8 flex flex-wrap gap-2">
+          {skill.tags.map((tag: string) => (
+            <span
+              key={tag}
+              className="border border-border px-2 py-0.5 text-[10px] tracking-wider text-muted-foreground"
+            >
+              {tag.toUpperCase()}
+            </span>
+          ))}
         </div>
       )}
 
