@@ -27,7 +27,7 @@ export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
   };
 
   return (
-    <div className="group relative flex flex-col overflow-hidden border-2 border-border bg-card transition-colors hover:border-primary">
+    <div className="group relative flex flex-col overflow-hidden rounded-lg border-2 border-border bg-card transition-colors hover:border-primary">
       {/* Clickable Link Wrapper */}
       <Link href={`/skills/${skill.slug}`} className="flex flex-1 flex-col">
         {/* Preview */}
@@ -43,7 +43,7 @@ export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
           <div className="aspect-[4/3] w-full overflow-hidden bg-white">
             <iframe
               srcDoc={skill.preview_html}
-              sandbox="allow-scripts"
+              sandbox="allow-scripts allow-same-origin"
               title={`Preview: ${skill.title}`}
               className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
               loading="lazy"

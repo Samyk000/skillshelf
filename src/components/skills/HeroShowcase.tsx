@@ -28,7 +28,7 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
 
   if (skills.length === 0) {
     return (
-      <div className="flex h-[500px] items-center justify-center border-2 border-border bg-card">
+      <div className="flex h-[500px] items-center justify-center rounded-lg border-2 border-border bg-card">
         <div className="text-center">
           <p className="font-display text-lg font-bold tracking-wider text-muted-foreground">
             // NO SHOWCASE YET
@@ -42,11 +42,19 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
   }
 
   return (
-    <div
-      className="relative h-[500px] overflow-hidden border-2 border-border bg-card"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
+    <div className="relative">
+      {/* Featured Badge - Outside the box at top left */}
+      <div className="absolute -left-3 -top-4 z-30">
+        <span className="inline-block rounded-full bg-primary px-4 py-1.5 text-[10px] font-bold tracking-[0.15em] text-primary-foreground uppercase shadow-md">
+          Featured
+        </span>
+      </div>
+
+      <div
+        className="relative h-[500px] overflow-hidden rounded-lg border-2 border-border bg-card"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
       {/* Slides */}
       {skills.map((skill, index) => (
         <div
@@ -71,7 +79,7 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
               <div className="h-full w-full bg-white">
                 <iframe
                   srcDoc={skill.preview_html}
-                  sandbox="allow-scripts"
+                  sandbox="allow-scripts allow-same-origin"
                   title={`Preview: ${skill.title}`}
                   className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
                   loading="lazy"
@@ -85,13 +93,6 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
               </div>
             )}
           </Link>
-
-          {/* Featured Badge */}
-          <div className="absolute -left-1 -top-1 z-30 -rotate-12">
-            <span className="bg-primary px-4 py-1.5 text-[10px] font-bold tracking-[0.15em] text-primary-foreground uppercase shadow-md">
-              Featured
-            </span>
-          </div>
 
           {/* Skill Info Overlay */}
           <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6">
@@ -129,6 +130,7 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }
