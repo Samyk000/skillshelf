@@ -64,34 +64,9 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 
   if (!open) return null;
 
-  const navLinks = [
-    { href: "/skills", label: "EXPLORE" },
-  ];
-
   return (
     <div className="border-t-2 border-border bg-background md:hidden">
       <nav className="flex flex-col gap-1 p-4">
-        {navLinks.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            onClick={onClose}
-            className="border-2 border-transparent px-4 py-3 text-sm font-semibold tracking-widest text-muted-foreground uppercase transition-colors hover:border-primary hover:text-primary"
-          >
-            {link.label}
-          </Link>
-        ))}
-
-        {user && (
-          <Link
-            href="/dashboard"
-            onClick={onClose}
-            className="border-2 border-transparent px-4 py-3 text-sm font-semibold tracking-widest text-muted-foreground uppercase transition-colors hover:border-primary hover:text-primary"
-          >
-            DASHBOARD
-          </Link>
-        )}
-
         {user?.role === "admin" && (
           <Link
             href="/admin"

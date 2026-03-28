@@ -24,6 +24,9 @@ export const metadata: Metadata = {
   description:
     "A curated library of free design skills. Browse, preview, copy, and download SKILL.md files for your AI tools.",
   keywords: ["design skills", "AI tools", "SKILL.md", "design system", "cursor", "claude", "chatgpt"],
+  icons: {
+    icon: "/favicon.svg",
+  },
   openGraph: {
     title: "Skillshelf — Free Design Skill Library",
     description: "Browse, preview, and copy design skills for your AI tools.",

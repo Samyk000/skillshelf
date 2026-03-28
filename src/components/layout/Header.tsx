@@ -6,33 +6,14 @@ import { useTheme } from "next-themes";
 import { Container } from "./Container";
 import { MobileMenu } from "./MobileMenu";
 import { UserMenu } from "./UserMenu";
-import { createClient } from "@/lib/supabase/client";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const supabase = createClient();
-
-    const checkAuth = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-    };
-    checkAuth();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
 
   return (
@@ -44,29 +25,13 @@ export function Header() {
             href="/"
             className="flex items-center gap-2 font-display text-lg font-bold tracking-wider text-primary uppercase"
           >
-            <span className="border-2 border-primary px-1.5 py-0.5 text-primary text-xs">
-              {"//"}
+            <span className="flex items-center justify-center border-2 border-primary px-1.5 py-0.5 text-primary text-xs">
+              <span className="animate-spin-slow inline-block leading-none">
+                {"//"}
+              </span>
             </span>
             <span>SKILLSHELF</span>
           </Link>
-
-          {/* Desktop Nav */}
-          <nav className="hidden items-center gap-6 md:flex">
-            <Link
-              href="/skills"
-              className="text-xs font-semibold tracking-widest text-muted-foreground uppercase transition-colors hover:text-primary"
-            >
-              EXPLORE
-            </Link>
-            {isAuthenticated && (
-              <Link
-                href="/dashboard"
-                className="text-xs font-semibold tracking-widest text-muted-foreground uppercase transition-colors hover:text-primary"
-              >
-                DASHBOARD
-              </Link>
-            )}
-          </nav>
 
           {/* Right Side */}
           <div className="hidden items-center gap-3 md:flex">

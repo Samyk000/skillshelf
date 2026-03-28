@@ -2,30 +2,30 @@ import Link from "next/link";
 import { Container } from "@/components/layout/Container";
 import { createClient } from "@/lib/supabase/server";
 import { SkillCard } from "@/components/skills/SkillCard";
+import { HeroShowcase } from "@/components/skills/HeroShowcase";
 import type { Skill } from "@/types/skill";
-
-const categories = [
-  { name: "PAPER" },
-  { name: "MINIMAL SAAS" },
-  { name: "EDITORIAL" },
-  { name: "SOFT DASHBOARD" },
-  { name: "BRUTALIST" },
-  { name: "ENTERPRISE" },
-];
 
 export default async function HomePage() {
   const supabase = await createClient();
 
-  // Fetch featured skills
-  const { data: featuredSkills } = await supabase
-    .from("skills")
-    .select("*")
-    .eq("status", "published")
-    .eq("featured", true)
-    .order("created_at", { ascending: false })
-    .limit(6);
+  const [{ data: showcaseData }, { data: allSkillsData }] = await Promise.all([
+    supabase
+      .from("skills")
+      .select("*")
+      .eq("status", "published")
+      .eq("featured", true)
+      .order("updated_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("skills")
+      .select("*")
+      .eq("status", "published")
+      .order("updated_at", { ascending: false })
+      .limit(6),
+  ]);
 
-  const skills = (featuredSkills as Skill[]) ?? [];
+  const showcaseSkills = (showcaseData as Skill[]) ?? [];
+  const allSkills = (allSkillsData as Skill[]) ?? [];
 
   return (
     <div className="flex flex-col">
@@ -33,32 +33,23 @@ export default async function HomePage() {
       <section className="border-b-2 border-border py-12 md:py-16">
         <Container>
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
+            {/* Left: Copy */}
             <div className="flex flex-col items-start gap-6">
-              <p className="text-xs font-semibold tracking-[0.2em] text-primary">
-                // FREE DESIGN SKILL LIBRARY
+              <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.2em] text-primary">
+                <span className="inline-block animate-spin-slow text-lg leading-none">
+                  //
+                </span>
+                FREE DESIGN SKILL LIBRARY
               </p>
               <h1 className="max-w-4xl font-display text-3xl font-bold leading-tight tracking-tight md:text-5xl">
-                BROWSE. PREVIEW.{" "}
-                <span className="text-primary">COPY.</span>
+                YOUR AI CODES.{" "}
+                <span className="text-primary">YOUR DESIGN.</span>
               </h1>
               <p className="max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                A curated collection of design skills for your AI tools. Each skill
-                includes a SKILL.md file, live preview, and one-click copy or download.
+                Stop shipping ugly. Get SKILL.md files that turn your AI-generated
+                code into premium, pixel-perfect UI. No more basic mess — just clean,
+                intentional design that actually looks good.
               </p>
-              <div className="flex flex-col gap-4 sm:flex-row">
-                <Link
-                  href="/skills"
-                  className="border-2 border-primary bg-primary px-8 py-3 text-center text-sm font-bold tracking-widest text-primary-foreground uppercase transition-colors hover:bg-transparent hover:text-primary"
-                >
-                  EXPLORE SKILLS
-                </Link>
-                <Link
-                  href="/signup"
-                  className="border-2 border-border px-8 py-3 text-center text-sm font-bold tracking-widest text-foreground uppercase transition-colors hover:border-primary hover:text-primary"
-                >
-                  CREATE ACCOUNT
-                </Link>
-              </div>
               <div className="flex items-center gap-4 text-[11px] tracking-wider text-muted-foreground">
                 {[
                   { step: "01", title: "BROWSE" },
@@ -73,93 +64,67 @@ export default async function HomePage() {
                 ))}
               </div>
             </div>
+
+            {/* Right: Showcase */}
+            <HeroShowcase skills={showcaseSkills} />
           </div>
         </Container>
       </section>
 
-      {/* Featured Skills */}
-      <section className="border-b-2 border-border py-10">
+      {/* Skills */}
+      <section className="py-12">
         <Container>
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold tracking-[0.2em] text-primary">
-                // FEATURED
-              </p>
-              <h2 className="mt-2 font-display text-2xl font-bold tracking-wide md:text-3xl">
-                CURATED SKILLS
-              </h2>
-            </div>
-            <Link
-              href="/skills"
-              className="border-2 border-border px-4 py-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase transition-colors hover:border-primary hover:text-primary"
-            >
-              VIEW ALL
-            </Link>
+          <div className="mb-8">
+            <p className="text-xs font-semibold tracking-[0.2em] text-primary">
+              // LIBRARY
+            </p>
+            <h2 className="mt-2 font-display text-2xl font-bold tracking-wide md:text-3xl">
+              SKILLS
+            </h2>
           </div>
-          {skills.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {skills.map((skill) => (
-                <SkillCard key={skill.id} skill={skill} />
-              ))}
-            </div>
+          {allSkills.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {allSkills.map((skill) => (
+                  <SkillCard key={skill.id} skill={skill} />
+                ))}
+              </div>
+              <div className="mt-10 text-center">
+                <Link
+                  href="/skills"
+                  className="inline-block border-2 border-primary bg-primary px-10 py-3 text-sm font-bold tracking-widest text-primary-foreground uppercase transition-colors hover:bg-transparent hover:text-primary"
+                >
+                  EXPLORE ALL
+                </Link>
+              </div>
+            </>
           ) : (
             <div className="border-2 border-border bg-card p-12 text-center">
-              <p className="text-xs font-semibold tracking-[0.2em] text-primary mb-2">
-                // NO FEATURED SKILLS YET
+              <p className="mb-2 text-xs font-semibold tracking-[0.2em] text-primary">
+                // NO SKILLS YET
               </p>
               <p className="text-sm text-muted-foreground">
-                Mark skills as featured from the admin panel to see them here.
+                Skills will appear here once they are published.
               </p>
             </div>
           )}
         </Container>
       </section>
 
-      {/* Categories */}
-      <section className="border-b-2 border-border py-10">
+      {/* Stay Tuned */}
+      <section className="border-t-2 border-border py-16">
         <Container>
-          <p className="mb-2 text-xs font-semibold tracking-[0.2em] text-primary">
-            // CATEGORIES
-          </p>
-          <h2 className="mb-8 font-display text-2xl font-bold tracking-wide md:text-3xl">
-            BROWSE BY STYLE
-          </h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {categories.map((cat) => (
-              <Link
-                key={cat.name}
-                href={`/skills?category=${encodeURIComponent(cat.name)}`}
-                className="border-2 border-border bg-card p-4 text-center transition-colors hover:border-primary"
-              >
-                <p className="text-sm font-bold tracking-wider text-foreground">
-                  {cat.name}
-                </p>
-              </Link>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20">
-        <Container>
-          <div className="border-2 border-primary bg-card p-12 text-center">
+          <div className="border-2 border-primary bg-card p-10 text-center md:p-14">
             <p className="mb-2 text-xs font-semibold tracking-[0.2em] text-primary">
-              // GET STARTED
+              // PRICING
             </p>
             <h2 className="mb-4 font-display text-3xl font-bold tracking-wide md:text-4xl">
-              READY TO EXPLORE?
+              STAY TUNED
             </h2>
-            <p className="mx-auto mb-8 max-w-lg text-muted-foreground">
-              Browse the full library of design skills, preview them live, and
-              download the ones you need.
+            <p className="mx-auto max-w-lg text-sm leading-relaxed text-muted-foreground">
+              Enjoy free until it&apos;s paid. Once premium, many more skills will be
+              uploaded.
             </p>
-            <Link
-              href="/skills"
-              className="inline-block border-2 border-primary bg-primary px-12 py-4 text-sm font-bold tracking-widest text-primary-foreground uppercase transition-colors hover:bg-transparent hover:text-primary"
-            >
-              EXPLORE ALL SKILLS
-            </Link>
           </div>
         </Container>
       </section>
