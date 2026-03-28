@@ -30,40 +30,61 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="border-b-2 border-border py-20 md:py-32">
+      <section className="border-b-2 border-border py-12 md:py-16">
         <Container>
-          <div className="flex flex-col items-start gap-6">
-            <p className="text-xs font-semibold tracking-[0.2em] text-primary">
-              // FREE DESIGN SKILL LIBRARY
-            </p>
-            <h1 className="max-w-4xl font-display text-4xl font-bold leading-tight tracking-tight md:text-6xl lg:text-7xl">
-              BROWSE. PREVIEW.{" "}
-              <span className="text-primary">COPY.</span>
-            </h1>
-            <p className="max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-              A curated collection of design skills for your AI tools. Each skill
-              includes a SKILL.md file, live preview, and one-click copy or download.
-            </p>
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/skills"
-                className="border-2 border-primary bg-primary px-8 py-3 text-center text-sm font-bold tracking-widest text-primary-foreground uppercase transition-colors hover:bg-transparent hover:text-primary"
-              >
-                EXPLORE SKILLS
-              </Link>
-              <Link
-                href="/signup"
-                className="border-2 border-border px-8 py-3 text-center text-sm font-bold tracking-widest text-foreground uppercase transition-colors hover:border-primary hover:text-primary"
-              >
-                CREATE ACCOUNT
-              </Link>
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
+            <div className="flex flex-col items-start gap-6">
+              <p className="text-xs font-semibold tracking-[0.2em] text-primary">
+                // FREE DESIGN SKILL LIBRARY
+              </p>
+              <h1 className="max-w-4xl font-display text-3xl font-bold leading-tight tracking-tight md:text-5xl">
+                BROWSE. PREVIEW.{" "}
+                <span className="text-primary">COPY.</span>
+              </h1>
+              <p className="max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
+                A curated collection of design skills for your AI tools. Each skill
+                includes a SKILL.md file, live preview, and one-click copy or download.
+              </p>
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <Link
+                  href="/skills"
+                  className="border-2 border-primary bg-primary px-8 py-3 text-center text-sm font-bold tracking-widest text-primary-foreground uppercase transition-colors hover:bg-transparent hover:text-primary"
+                >
+                  EXPLORE SKILLS
+                </Link>
+                <Link
+                  href="/signup"
+                  className="border-2 border-border px-8 py-3 text-center text-sm font-bold tracking-widest text-foreground uppercase transition-colors hover:border-primary hover:text-primary"
+                >
+                  CREATE ACCOUNT
+                </Link>
+              </div>
+            </div>
+            <div className="flex flex-col gap-4">
+              {[
+                { step: "01", title: "BROWSE", description: "Explore the library" },
+                { step: "02", title: "PREVIEW", description: "See it in action" },
+                { step: "03", title: "COPY & USE", description: "One-click download" },
+              ].map((item) => (
+                <div key={item.step} className="flex items-baseline gap-3">
+                  <span className="text-sm font-bold text-primary font-display">
+                    {item.step}
+                  </span>
+                  <span className="text-sm font-bold tracking-wider text-foreground">
+                    {item.title}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    — {item.description}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </Container>
       </section>
 
       {/* Featured Skills */}
-      <section className="border-b-2 border-border py-16">
+      <section className="border-b-2 border-border py-10">
         <Container>
           <div className="mb-8 flex items-center justify-between">
             <div>
@@ -100,57 +121,8 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* How It Works */}
-      <section className="border-b-2 border-border py-16">
-        <Container>
-          <p className="mb-2 text-xs font-semibold tracking-[0.2em] text-primary">
-            // HOW IT WORKS
-          </p>
-          <h2 className="mb-12 font-display text-2xl font-bold tracking-wide md:text-3xl">
-            THREE STEPS
-          </h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {[
-              {
-                step: "01",
-                title: "BROWSE",
-                description:
-                  "Explore the library of curated design skills. Filter by category, search by keyword.",
-              },
-              {
-                step: "02",
-                title: "PREVIEW",
-                description:
-                  "See what the skill looks like. Live preview rendered in a sandboxed environment.",
-              },
-              {
-                step: "03",
-                title: "COPY & USE",
-                description:
-                  "Copy or download the SKILL.md file. Paste it directly into Claude, Cursor, or ChatGPT.",
-              },
-            ].map((item) => (
-              <div
-                key={item.step}
-                className="border-2 border-border bg-card p-8 transition-colors hover:border-primary"
-              >
-                <p className="mb-4 text-4xl font-bold text-primary font-display">
-                  {item.step}
-                </p>
-                <h3 className="mb-2 font-display text-lg font-bold tracking-wider">
-                  {item.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
-
       {/* Categories */}
-      <section className="border-b-2 border-border py-16">
+      <section className="border-b-2 border-border py-10">
         <Container>
           <p className="mb-2 text-xs font-semibold tracking-[0.2em] text-primary">
             // CATEGORIES

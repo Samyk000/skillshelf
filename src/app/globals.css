@@ -99,6 +99,30 @@ body {
 }
 
 /* ========================================
+   LIGHT MODE
+   ======================================== */
+.light,
+[data-theme="light"] {
+  --background: #FFFFFF;
+  --foreground: #0A0A0A;
+  --card: #F5F5F5;
+  --card-foreground: #0A0A0A;
+  --popover: #F5F5F5;
+  --popover-foreground: #0A0A0A;
+  --muted: #F0F0F0;
+  --muted-foreground: #666666;
+  --border: #E0E0E0;
+  --input: #E0E0E0;
+  --ring: #39FF14;
+  --primary: #2ACC0D;
+  --primary-foreground: #FFFFFF;
+  --accent: #CCB000;
+  --accent-foreground: #0A0A0A;
+  --destructive: #CC2828;
+  --destructive-foreground: #FFFFFF;
+}
+
+/* ========================================
    TYPOGRAPHY
    ======================================== */
 

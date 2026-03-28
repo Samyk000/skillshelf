@@ -33,13 +33,11 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
   if (!skill || !skill.preview_html) notFound();
 
   return (
-    <div className="fixed inset-0 bg-white">
-      <iframe
-        srcDoc={skill.preview_html}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-        title={`Preview: ${skill.title}`}
-        className="h-full w-full border-0"
-      />
-    </div>
+    <iframe
+      srcDoc={skill.preview_html}
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+      title={`Preview: ${skill.title}`}
+      className="h-screen w-full border-0"
+    />
   );
 }
