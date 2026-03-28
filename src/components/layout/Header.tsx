@@ -26,7 +26,7 @@ export function Header() {
             className="flex items-center gap-2 font-display text-lg font-bold tracking-wider text-primary uppercase"
           >
             <span className="flex items-center justify-center border-2 border-primary px-1.5 py-0.5 text-primary text-xs">
-              <span className="animate-spin-slow inline-block leading-none">
+              <span className="inline-block leading-none">
                 {"//"}
               </span>
             </span>

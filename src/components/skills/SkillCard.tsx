@@ -58,8 +58,8 @@ export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
         )}
       </Link>
 
-      {/* Footer - Hidden by default, smooth pop-up on hover */}
-      <div className="max-h-0 overflow-hidden border-t-2 border-transparent bg-card px-3 transition-all duration-300 ease-out group-hover:max-h-[60px] group-hover:border-border group-hover:py-2.5">
+      {/* Footer - Absolute positioned, overlays bottom on hover */}
+      <div className="absolute inset-x-0 bottom-0 translate-y-full border-t-2 border-transparent bg-card px-3 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:border-border group-hover:py-2.5">
         <div className="flex items-center justify-between">
           <Link
             href={`/skills/${skill.slug}`}
