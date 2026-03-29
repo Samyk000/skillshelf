@@ -6,7 +6,7 @@
 
 **Stop shipping ugly.** Get SKILL.md files that turn your AI-generated code into premium, pixel-perfect UI.
 
-[Live Demo](#) · [Report Bug](https://github.com/Samyk000/skillshelf/issues) · [Request Feature](https://github.com/Samyk000/skillshelf/issues)
+[Live Demo](https://skillshelf-liart.vercel.app/) · [Report Bug](https://github.com/Samyk000/skillshelf/issues) · [Request Feature](https://github.com/Samyk000/skillshelf/issues)
 
 ---
 
