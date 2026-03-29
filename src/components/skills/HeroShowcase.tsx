@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { stripExternalFonts } from "@/lib/preview";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Skill } from "@/types/skill";
 
@@ -91,8 +90,8 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
               <div className="h-full w-full bg-white">
                 {loadedSlides.has(index) ? (
                   <iframe
-                    srcDoc={stripExternalFonts(skill.preview_html)}
-                    sandbox="allow-scripts allow-same-origin"
+                    srcDoc={skill.preview_html}
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                     title={`Preview: ${skill.title}`}
                     className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
                     loading="lazy"

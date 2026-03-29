@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { downloadMarkdown } from "@/lib/download";
-import { stripExternalFonts } from "@/lib/preview";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Skill } from "@/types/skill";
 
@@ -72,8 +71,8 @@ export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
           <div className="aspect-[4/3] w-full overflow-hidden bg-white">
             {isVisible ? (
               <iframe
-                srcDoc={stripExternalFonts(skill.preview_html)}
-                sandbox="allow-scripts allow-same-origin"
+                srcDoc={skill.preview_html}
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                 title={`Preview: ${skill.title}`}
                 className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
                 loading="lazy"
