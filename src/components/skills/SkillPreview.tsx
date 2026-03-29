@@ -1,5 +1,8 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+
 interface SkillPreviewProps {
   previewHtml: string;
   title: string;
@@ -7,8 +10,30 @@ interface SkillPreviewProps {
 }
 
 export function SkillPreview({ previewHtml, title, slug }: SkillPreviewProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Load iframe when the preview section enters the viewport
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "100px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="border-2 border-border">
+    <div ref={containerRef} className="border-2 border-border">
       <div className="flex items-center justify-between border-b-2 border-border bg-muted px-4 py-2">
         <span className="text-xs font-semibold tracking-[0.15em] text-primary">
           // PREVIEW
@@ -32,14 +57,32 @@ export function SkillPreview({ previewHtml, title, slug }: SkillPreviewProps) {
         </a>
       </div>
       <div className="relative h-[400px] w-full bg-white">
-        <iframe
-          srcDoc={previewHtml}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-          title={`Preview: ${title}`}
-          className="absolute inset-0 h-full w-full border-0"
-          loading="lazy"
-        />
+        {isVisible ? (
+          <iframe
+            srcDoc={previewHtml}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            title={`Preview: ${title}`}
+            className="absolute inset-0 h-full w-full border-0"
+          />
+        ) : (
+          <PreviewSkeleton />
+        )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Skeleton placeholder for the detail-page preview while it loads.
+ */
+function PreviewSkeleton() {
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-muted p-8">
+      <Skeleton className="h-6 w-1/4" />
+      <Skeleton className="h-4 w-1/3" />
+      <Skeleton className="mt-4 h-40 w-3/4" />
+      <Skeleton className="h-4 w-1/2" />
+      <Skeleton className="h-4 w-2/5" />
     </div>
   );
 }

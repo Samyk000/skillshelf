@@ -2,12 +2,33 @@ import { Suspense } from "react";
 import { Container } from "@/components/layout/Container";
 import { SearchBar } from "@/components/explore/SearchBar";
 import { FilterChips } from "@/components/explore/FilterChips";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SkillsList } from "./SkillsList";
 
 export const metadata = {
   title: "Explore Skills",
   description: "Browse and search the full library of design skills.",
 };
+
+function SkillGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div
+          key={i}
+          className="border-2 border-border bg-card overflow-hidden"
+        >
+          <Skeleton className="aspect-[4/3] w-full" />
+          <div className="p-4 space-y-3">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-full" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function SkillsPage({
   searchParams,
@@ -30,7 +51,18 @@ export default function SkillsPage({
       </div>
 
       {/* Search + Filter */}
-      <Suspense fallback={<div className="mb-8 h-14 animate-pulse bg-muted" />}>
+      <Suspense
+        fallback={
+          <div className="mb-8 flex flex-col gap-4">
+            <Skeleton className="h-12 w-full" />
+            <div className="flex gap-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-8 w-20" />
+              ))}
+            </div>
+          </div>
+        }
+      >
         <div className="mb-8 flex flex-col gap-4">
           <SearchBar />
           <FilterChips />
@@ -38,25 +70,7 @@ export default function SkillsPage({
       </Suspense>
 
       {/* Skills Grid */}
-      <Suspense
-        fallback={
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                className="border-2 border-border bg-card animate-pulse"
-              >
-                <div className="aspect-video bg-muted" />
-                <div className="p-5 space-y-3">
-                  <div className="h-4 w-20 bg-muted" />
-                  <div className="h-5 w-3/4 bg-muted" />
-                  <div className="h-3 w-full bg-muted" />
-                </div>
-              </div>
-            ))}
-          </div>
-        }
-      >
+      <Suspense fallback={<SkillGridSkeleton />}>
         <SkillsList searchParams={searchParams} />
       </Suspense>
     </Container>

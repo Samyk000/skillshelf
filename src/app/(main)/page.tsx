@@ -1,11 +1,20 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Container } from "@/components/layout/Container";
 import { createClient } from "@/lib/supabase/server";
 import { SkillCard } from "@/components/skills/SkillCard";
 import { HeroShowcase } from "@/components/skills/HeroShowcase";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Skill } from "@/types/skill";
 
-export default async function HomePage() {
+/**
+ * Revalidate this page every 60 seconds.
+ * Repeat visitors get edge-cached responses; new/updated skills
+ * appear within a minute.
+ */
+export const revalidate = 60;
+
+async function HomeContent() {
   const supabase = await createClient();
 
   const [{ data: showcaseData }, { data: allSkillsData }] = await Promise.all([
@@ -129,5 +138,54 @@ export default async function HomePage() {
         </Container>
       </section>
     </div>
+  );
+}
+
+/**
+ * Skeleton fallback for the entire home page while data is loading.
+ */
+function HomePageSkeleton() {
+  return (
+    <div className="flex flex-col">
+      {/* Hero Skeleton */}
+      <section className="border-b-2 border-border py-12 md:py-16">
+        <Container>
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
+            <div className="flex flex-col gap-6">
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-12 w-full max-w-md" />
+              <Skeleton className="h-16 w-full max-w-xl" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+            <Skeleton className="h-[500px] w-full rounded-lg" />
+          </div>
+        </Container>
+      </section>
+
+      {/* Skills Grid Skeleton */}
+      <section className="py-12">
+        <Container>
+          <div className="mb-8">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="mt-2 h-8 w-32" />
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="border-2 border-border bg-card">
+                <Skeleton className="aspect-[4/3] w-full" />
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+    </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<HomePageSkeleton />}>
+      <HomeContent />
+    </Suspense>
   );
 }

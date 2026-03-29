@@ -1,8 +1,11 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { downloadMarkdown } from "@/lib/download";
+import { stripExternalFonts } from "@/lib/preview";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Skill } from "@/types/skill";
 
 interface SkillCardProps {
@@ -12,6 +15,9 @@ interface SkillCardProps {
 }
 
 export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
   const handleCopy = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -26,8 +32,30 @@ export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
     toast.success("Downloaded!");
   };
 
+  // Lazy load iframe only when the card enters the viewport
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" } // Start loading 200px before entering viewport
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-lg border-2 border-border bg-card transition-colors hover:border-primary">
+    <div
+      ref={cardRef}
+      className="group relative flex flex-col overflow-hidden rounded-lg border-2 border-border bg-card transition-colors hover:border-primary"
+    >
       {/* Clickable Link Wrapper */}
       <Link href={`/skills/${skill.slug}`} className="flex flex-1 flex-col">
         {/* Preview */}
@@ -37,17 +65,22 @@ export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
               src={skill.cover_image_url}
               alt={skill.title}
               className="h-full w-full object-cover"
+              loading="lazy"
             />
           </div>
         ) : skill.preview_html ? (
           <div className="aspect-[4/3] w-full overflow-hidden bg-white">
-            <iframe
-              srcDoc={skill.preview_html}
-              sandbox="allow-scripts allow-same-origin"
-              title={`Preview: ${skill.title}`}
-              className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
-              loading="lazy"
-            />
+            {isVisible ? (
+              <iframe
+                srcDoc={stripExternalFonts(skill.preview_html)}
+                sandbox="allow-scripts allow-same-origin"
+                title={`Preview: ${skill.title}`}
+                className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
+                loading="lazy"
+              />
+            ) : (
+              <SkillCardSkeleton />
+            )}
           </div>
         ) : (
           <div className="flex aspect-[4/3] w-full items-center justify-center bg-muted">
@@ -164,6 +197,26 @@ export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Skeleton placeholder shown while the iframe is off-screen.
+ * Matches the aspect-[4/3] container of the real preview.
+ */
+function SkillCardSkeleton() {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-muted p-6">
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-3 w-3 rounded-full" />
+        <Skeleton className="h-3 w-3 rounded-full" />
+        <Skeleton className="h-3 w-3 rounded-full" />
+      </div>
+      <Skeleton className="h-4 w-3/4" />
+      <Skeleton className="h-3 w-1/2" />
+      <Skeleton className="mt-2 h-24 w-full" />
+      <Skeleton className="h-3 w-2/3" />
     </div>
   );
 }

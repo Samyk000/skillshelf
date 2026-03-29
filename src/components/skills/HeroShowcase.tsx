@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { stripExternalFonts } from "@/lib/preview";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Skill } from "@/types/skill";
 
 interface HeroShowcaseProps {
@@ -11,16 +13,25 @@ interface HeroShowcaseProps {
 export function HeroShowcase({ skills }: HeroShowcaseProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  // Track which slides have been viewed so their iframes stay rendered
+  const [loadedSlides, setLoadedSlides] = useState<Set<number>>(
+    () => new Set([0])
+  );
 
   const goToSlide = useCallback((index: number) => {
     setCurrentIndex(index);
+    setLoadedSlides((prev) => new Set(prev).add(index));
   }, []);
 
   useEffect(() => {
     if (isPaused || skills.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % skills.length);
+      setCurrentIndex((prev) => {
+        const next = (prev + 1) % skills.length;
+        setLoadedSlides((prevSet) => new Set(prevSet).add(next));
+        return next;
+      });
     }, 5000);
 
     return () => clearInterval(interval);
@@ -74,16 +85,21 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
                 src={skill.cover_image_url}
                 alt={skill.title}
                 className="h-full w-full object-cover"
+                loading={index === 0 ? "eager" : "lazy"}
               />
             ) : skill.preview_html ? (
               <div className="h-full w-full bg-white">
-                <iframe
-                  srcDoc={skill.preview_html}
-                  sandbox="allow-scripts allow-same-origin"
-                  title={`Preview: ${skill.title}`}
-                  className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
-                  loading="lazy"
-                />
+                {loadedSlides.has(index) ? (
+                  <iframe
+                    srcDoc={stripExternalFonts(skill.preview_html)}
+                    sandbox="allow-scripts allow-same-origin"
+                    title={`Preview: ${skill.title}`}
+                    className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
+                    loading="lazy"
+                  />
+                ) : (
+                  <ShowcaseSlideSkeleton />
+                )}
               </div>
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -131,6 +147,20 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
         </div>
       )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Skeleton placeholder for carousel slides before their iframe is loaded.
+ */
+function ShowcaseSlideSkeleton() {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-muted p-8">
+      <Skeleton className="h-6 w-1/3" />
+      <Skeleton className="h-4 w-1/2" />
+      <Skeleton className="mt-4 h-48 w-3/4" />
+      <Skeleton className="h-4 w-2/5" />
     </div>
   );
 }
