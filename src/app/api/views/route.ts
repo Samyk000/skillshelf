@@ -3,6 +3,28 @@ import { createClient } from "@/lib/supabase/server";
 
 const RATE_LIMIT_HOURS = 24;
 
+// In-memory rate limiter for anonymous views (IP + skill_id)
+const viewTracker = new Map<string, number>();
+
+// Clean up old entries every hour
+setInterval(
+  () => {
+    const cutoff = Date.now() - RATE_LIMIT_HOURS * 60 * 60 * 1000;
+    for (const [key, timestamp] of viewTracker.entries()) {
+      if (timestamp < cutoff) {
+        viewTracker.delete(key);
+      }
+    }
+  },
+  60 * 60 * 1000
+);
+
+function getClientIp(request: NextRequest): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  const realIp = request.headers.get("x-real-ip");
+  return forwarded?.split(",")[0]?.trim() || realIp || "unknown";
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { skill_id } = await request.json();
@@ -52,6 +74,7 @@ export async function POST(request: NextRequest) {
         response.cookies.set(cookieName, "1", {
           httpOnly: true,
           sameSite: "lax",
+          secure: true,
           maxAge: RATE_LIMIT_HOURS * 60 * 60,
           path: "/",
         });
@@ -62,6 +85,24 @@ export async function POST(request: NextRequest) {
         .from("skill_views")
         .insert({ skill_id, user_id: user.id });
     } else {
+      // Server-side rate limiting for anonymous users by IP
+      const clientIp = getClientIp(request);
+      const rateLimitKey = `${clientIp}:${skill_id}`;
+      const lastView = viewTracker.get(rateLimitKey);
+
+      if (lastView && Date.now() - lastView < RATE_LIMIT_HOURS * 60 * 60 * 1000) {
+        const response = NextResponse.json({ viewed: true, rate_limited: true });
+        response.cookies.set(cookieName, "1", {
+          httpOnly: true,
+          sameSite: "lax",
+          secure: true,
+          maxAge: RATE_LIMIT_HOURS * 60 * 60,
+          path: "/",
+        });
+        return response;
+      }
+
+      viewTracker.set(rateLimitKey, Date.now());
       await supabase.from("skill_views").insert({ skill_id });
     }
 
@@ -69,6 +110,7 @@ export async function POST(request: NextRequest) {
     response.cookies.set(cookieName, "1", {
       httpOnly: true,
       sameSite: "lax",
+      secure: true,
       maxAge: RATE_LIMIT_HOURS * 60 * 60,
       path: "/",
     });

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { updateProfile } from "@/app/actions/user";
+import { signOut } from "@/app/actions/auth";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -41,33 +43,18 @@ export default function SettingsPage() {
     e.preventDefault();
     setSaving(true);
 
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const result = await updateProfile(displayName);
 
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-
-    const { error } = await supabase
-      .from("profiles")
-      .update({ display_name: displayName })
-      .eq("id", user.id);
-
-    if (error) {
-      toast.error("Failed to update profile");
+    if (result.error) {
+      toast.error(result.error);
     } else {
       toast.success("Profile updated!");
-      router.refresh();
     }
     setSaving(false);
   };
 
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    await signOut();
     router.push("/");
     router.refresh();
   };

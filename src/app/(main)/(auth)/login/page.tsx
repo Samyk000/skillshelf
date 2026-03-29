@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
+import { loginUser } from "@/app/actions/auth";
 import { Container } from "@/components/layout/Container";
 
 export default function LoginPage() {
@@ -18,15 +19,12 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const result = await loginUser(email, password);
 
-    if (error) {
-      setError(error.message);
+    if (result.error) {
+      setError(result.error);
     } else {
+      toast.success("Logged in successfully!");
       router.push("/dashboard");
       router.refresh();
     }

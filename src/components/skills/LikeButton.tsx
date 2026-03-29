@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
+import { toggleLike } from "@/app/actions/user";
 
 interface LikeButtonProps {
   skillId: string;
@@ -29,44 +29,19 @@ export function LikeButton({
       return;
     }
 
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-
     const wasLiked = liked;
     const prevCount = count;
 
-    if (liked) {
-      setLiked(false);
-      setCount((c) => c - 1);
-      const { error } = await supabase
-        .from("skill_likes")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("skill_id", skillId);
-      if (error) {
-        setLiked(wasLiked);
-        setCount(prevCount);
-        toast.error("Failed to unlike. Please try again.");
-        return;
-      }
-    } else {
-      setLiked(true);
-      setCount((c) => c + 1);
-      const { error } = await supabase
-        .from("skill_likes")
-        .insert({ user_id: user.id, skill_id: skillId });
-      if (error) {
-        setLiked(wasLiked);
-        setCount(prevCount);
-        toast.error("Failed to like. Please try again.");
-        return;
-      }
+    setLiked(!wasLiked);
+    setCount((c) => (wasLiked ? c - 1 : c + 1));
+
+    const result = await toggleLike(skillId);
+
+    if (result.error) {
+      setLiked(wasLiked);
+      setCount(prevCount);
+      toast.error(result.error);
+      return;
     }
 
     startTransition(() => {

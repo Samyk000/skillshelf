@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { CATEGORIES, TAGS } from "@/lib/constants";
+import { createSkill, updateSkill } from "@/app/actions/admin";
 import type { Skill } from "@/types/skill";
 
 interface SkillFormProps {
@@ -68,39 +68,23 @@ export function SkillForm({ skill, status, featured, onStatusChange, onFeaturedC
       return;
     }
 
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-
     const payload = {
       ...form,
       status,
       featured,
       preview_html: form.preview_html || null,
       short_description: form.short_description || null,
-      created_by: user.id,
     };
 
-    let error;
+    let result;
     if (isEditing) {
-      const result = await supabase
-        .from("skills")
-        .update(payload)
-        .eq("id", skill.id);
-      error = result.error;
+      result = await updateSkill(skill.id, payload);
     } else {
-      const result = await supabase.from("skills").insert(payload);
-      error = result.error;
+      result = await createSkill(payload);
     }
 
-    if (error) {
-      toast.error(`Failed to ${isEditing ? "update" : "create"} skill: ${error.message}`);
+    if (result.error) {
+      toast.error(`Failed to ${isEditing ? "update" : "create"} skill: ${result.error}`);
     } else {
       toast.success(`Skill ${isEditing ? "updated" : "created"}!`);
       router.push("/admin");

@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { deleteSkill, toggleSkillStatus } from "@/app/actions/admin";
 import type { Skill } from "@/types/skill";
 
 interface SkillTableProps {
@@ -12,36 +13,37 @@ interface SkillTableProps {
 
 export function SkillTable({ skills }: SkillTableProps) {
   const router = useRouter();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
-  const togglePublish = async (skill: Skill) => {
-    const supabase = createClient();
-    const newStatus = skill.status === "published" ? "draft" : "published";
+  const handleTogglePublish = async (skill: Skill) => {
+    setTogglingId(skill.id);
+    const result = await toggleSkillStatus(skill.id, skill.status);
 
-    const { error } = await supabase
-      .from("skills")
-      .update({ status: newStatus })
-      .eq("id", skill.id);
-
-    if (error) {
+    if (result.error) {
       toast.error("Failed to update status");
     } else {
-      toast.success(`Skill ${newStatus === "published" ? "published" : "unpublished"}`);
+      toast.success(
+        `Skill ${result.newStatus === "published" ? "published" : "unpublished"}`
+      );
       router.refresh();
     }
+    setTogglingId(null);
   };
 
-  const deleteSkill = async (skill: Skill) => {
+  const handleDelete = async (skill: Skill) => {
     if (!confirm(`Delete "${skill.title}"? This cannot be undone.`)) return;
 
-    const supabase = createClient();
-    const { error } = await supabase.from("skills").delete().eq("id", skill.id);
+    setDeletingId(skill.id);
+    const result = await deleteSkill(skill.id);
 
-    if (error) {
+    if (result.error) {
       toast.error("Failed to delete skill");
     } else {
       toast.success("Skill deleted");
       router.refresh();
     }
+    setDeletingId(null);
   };
 
   if (skills.length === 0) {
@@ -115,16 +117,18 @@ export function SkillTable({ skills }: SkillTableProps) {
                     EDIT
                   </Link>
                   <button
-                    onClick={() => togglePublish(skill)}
-                    className="border border-border px-2 py-1 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase hover:border-primary hover:text-primary"
+                    onClick={() => handleTogglePublish(skill)}
+                    disabled={togglingId === skill.id}
+                    className="border border-border px-2 py-1 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase hover:border-primary hover:text-primary disabled:opacity-50"
                   >
                     {skill.status === "published" ? "UNPUBLISH" : "PUBLISH"}
                   </button>
                   <button
-                    onClick={() => deleteSkill(skill)}
-                    className="border border-border px-2 py-1 text-[10px] font-semibold tracking-wider text-destructive uppercase hover:border-destructive"
+                    onClick={() => handleDelete(skill)}
+                    disabled={deletingId === skill.id}
+                    className="border border-border px-2 py-1 text-[10px] font-semibold tracking-wider text-destructive uppercase hover:border-destructive disabled:opacity-50"
                   >
-                    DELETE
+                    {deletingId === skill.id ? "DELETING..." : "DELETE"}
                   </button>
                 </div>
               </td>

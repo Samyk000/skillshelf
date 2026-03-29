@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { sanitizeSearchQuery } from "@/lib/sanitize";
 import { SkillGrid } from "@/components/skills/SkillGrid";
 import type { Skill } from "@/types/skill";
 
@@ -17,13 +18,19 @@ export async function SkillsList({ searchParams }: SkillsListProps) {
     .order("created_at", { ascending: false });
 
   if (q) {
-    query = query.or(
-      `title.ilike.%${q}%,short_description.ilike.%${q}%,tags.cs.{${q}}`
-    );
+    const sanitizedQuery = sanitizeSearchQuery(q);
+    if (sanitizedQuery.length > 0) {
+      query = query.or(
+        `title.ilike.%${sanitizedQuery}%,short_description.ilike.%${sanitizedQuery}%,tags.cs.{${sanitizedQuery}}`
+      );
+    }
   }
 
   if (category) {
-    query = query.eq("category", category);
+    const sanitizedCategory = sanitizeSearchQuery(category);
+    if (sanitizedCategory.length > 0) {
+      query = query.eq("category", sanitizedCategory);
+    }
   }
 
   const { data: skills, error } = await query;
@@ -31,7 +38,7 @@ export async function SkillsList({ searchParams }: SkillsListProps) {
   if (error) {
     return (
       <div className="border-2 border-destructive p-6 text-destructive">
-        Error loading skills: {error.message}
+        Error loading skills.
       </div>
     );
   }
