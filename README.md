@@ -1,6 +1,6 @@
 <div align="center">
 
-# SKILLSHELF
+<img src="ImageforReadmeHeader.png" alt="Skillshelf" width="100%" />
 
 ### **// Free Design Skill Library**
 
