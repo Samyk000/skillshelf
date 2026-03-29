@@ -15,10 +15,10 @@ function generateSlug(title: string) {
   return title
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, "")  // remove special chars
-    .replace(/[\s_]+/g, "-")    // spaces/underscores to hyphens
-    .replace(/-+/g, "-")        // collapse multiple hyphens
-    .replace(/^-|-$/g, "");     // trim leading/trailing hyphens
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export function SkillForm({ skill }: SkillFormProps) {
@@ -29,14 +29,11 @@ export function SkillForm({ skill }: SkillFormProps) {
     title: skill?.title ?? "",
     slug: skill?.slug ?? "",
     short_description: skill?.short_description ?? "",
-    long_description: skill?.long_description ?? "",
     category: skill?.category ?? CATEGORIES[0],
     tags: skill?.tags ?? [],
     status: skill?.status ?? "draft",
     skill_markdown: skill?.skill_markdown ?? "",
     preview_html: skill?.preview_html ?? "",
-    preview_external_url: skill?.preview_external_url ?? "",
-    cover_image_url: skill?.cover_image_url ?? "",
     featured: skill?.featured ?? false,
   });
 
@@ -63,7 +60,6 @@ export function SkillForm({ skill }: SkillFormProps) {
     e.preventDefault();
     setSaving(true);
 
-    // Validate slug is URL-safe
     if (!/^[a-z0-9-]+$/.test(form.slug)) {
       toast.error("Slug must only contain lowercase letters, numbers, and hyphens");
       setSaving(false);
@@ -83,9 +79,7 @@ export function SkillForm({ skill }: SkillFormProps) {
     const payload = {
       ...form,
       preview_html: form.preview_html || null,
-      preview_external_url: form.preview_external_url || null,
-      cover_image_url: form.cover_image_url || null,
-      long_description: form.long_description || null,
+      short_description: form.short_description || null,
       created_by: user.id,
     };
 
@@ -113,87 +107,70 @@ export function SkillForm({ skill }: SkillFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Title */}
-      <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-          TITLE *
-        </label>
-        <input
-          type="text"
-          value={form.title}
-          onChange={(e) => handleTitleChange(e.target.value)}
-          required
-          className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-          placeholder="e.g. Paper Design System"
-        />
+      {/* Title + Slug */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+            TITLE *
+          </label>
+          <input
+            type="text"
+            value={form.title}
+            onChange={(e) => handleTitleChange(e.target.value)}
+            required
+            className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            placeholder="e.g. Paper Design"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+            SLUG *
+          </label>
+          <input
+            type="text"
+            value={form.slug}
+            onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
+            required
+            className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            placeholder="paper-design"
+          />
+        </div>
       </div>
 
-      {/* Slug */}
-      <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-          SLUG *
-        </label>
-        <input
-          type="text"
-          value={form.slug}
-          onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
-          required
-          className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-          placeholder="paper-design-system"
-        />
-      </div>
-
-      {/* Short Description */}
-      <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-          SHORT DESCRIPTION *
-        </label>
-        <input
-          type="text"
-          value={form.short_description}
-          onChange={(e) =>
-            setForm((prev) => ({ ...prev, short_description: e.target.value }))
-          }
-          required
-          className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-          placeholder="A one-line description"
-        />
-      </div>
-
-      {/* Long Description */}
-      <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-          LONG DESCRIPTION
-        </label>
-        <textarea
-          value={form.long_description}
-          onChange={(e) =>
-            setForm((prev) => ({ ...prev, long_description: e.target.value }))
-          }
-          rows={3}
-          className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-          placeholder="A longer description (optional)"
-        />
-      </div>
-
-      {/* Category */}
-      <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-          CATEGORY *
-        </label>
-        <select
-          value={form.category}
-          onChange={(e) =>
-            setForm((prev) => ({ ...prev, category: e.target.value }))
-          }
-          className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-        >
-          {CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+      {/* Description + Category */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+            DESCRIPTION
+          </label>
+          <input
+            type="text"
+            value={form.short_description}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, short_description: e.target.value }))
+            }
+            className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            placeholder="A one-line description"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+            CATEGORY *
+          </label>
+          <select
+            value={form.category}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, category: e.target.value }))
+            }
+            className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+          >
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Tags */}
@@ -259,69 +236,37 @@ export function SkillForm({ skill }: SkillFormProps) {
         </div>
       </div>
 
-      {/* Skill Markdown */}
-      <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-          SKILL MARKDOWN *
-        </label>
-        <textarea
-          value={form.skill_markdown}
-          onChange={(e) =>
-            setForm((prev) => ({ ...prev, skill_markdown: e.target.value }))
-          }
-          required
-          rows={12}
-          className="border-2 border-input bg-background px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-          placeholder="Paste your SKILL.md content here..."
-        />
-      </div>
-
-      {/* Preview HTML */}
-      <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-          PREVIEW HTML
-        </label>
-        <textarea
-          value={form.preview_html}
-          onChange={(e) =>
-            setForm((prev) => ({ ...prev, preview_html: e.target.value }))
-          }
-          rows={8}
-          className="border-2 border-input bg-background px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-          placeholder="Paste full HTML for the preview..."
-        />
-      </div>
-
-      {/* Preview External URL */}
-      <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-          PREVIEW EXTERNAL URL
-        </label>
-        <input
-          type="url"
-          value={form.preview_external_url}
-          onChange={(e) =>
-            setForm((prev) => ({ ...prev, preview_external_url: e.target.value }))
-          }
-          className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-          placeholder="https://..."
-        />
-      </div>
-
-      {/* Cover Image URL */}
-      <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-          COVER IMAGE URL
-        </label>
-        <input
-          type="url"
-          value={form.cover_image_url}
-          onChange={(e) =>
-            setForm((prev) => ({ ...prev, cover_image_url: e.target.value }))
-          }
-          className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-          placeholder="https://..."
-        />
+      {/* Skill Markdown + Preview HTML */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+            SKILL MARKDOWN *
+          </label>
+          <textarea
+            value={form.skill_markdown}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, skill_markdown: e.target.value }))
+            }
+            required
+            rows={14}
+            className="border-2 border-input bg-background px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            placeholder="Paste your SKILL.md content here..."
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+            PREVIEW HTML
+          </label>
+          <textarea
+            value={form.preview_html}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, preview_html: e.target.value }))
+            }
+            rows={14}
+            className="border-2 border-input bg-background px-3 py-2 font-mono text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            placeholder="Paste full HTML for the preview..."
+          />
+        </div>
       </div>
 
       {/* Submit */}
