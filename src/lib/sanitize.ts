@@ -1,8 +1,8 @@
-const DANGEROUS_TAGS = [
-  "script",
-  "iframe",
-  "object",
-  "embed",
+// Tags that need to be removed WITH their content
+const DANGEROUS_TAGS_WITH_CONTENT = ["script", "iframe", "object", "embed"];
+
+// Self-closing or empty tags to remove (no content to preserve)
+const DANGEROUS_TAGS_EMPTY = [
   "form",
   "input",
   "textarea",
@@ -41,8 +41,25 @@ function escapeHtml(str: string): string {
 export function sanitizePreviewHtml(html: string): string {
   let sanitized = html;
 
-  // Remove dangerous tags and their content
-  for (const tag of DANGEROUS_TAGS) {
+  // Remove dangerous tags WITH their content (script, iframe, object, embed)
+  for (const tag of DANGEROUS_TAGS_WITH_CONTENT) {
+    const tagWithContentRegex = new RegExp(
+      `<${tag}\\b[^>]*>[\\s\\S]*?<\\/${tag}>`,
+      "gi"
+    );
+    sanitized = sanitized.replace(tagWithContentRegex, "");
+
+    // Also remove self-closing variants
+    const selfClosingRegex = new RegExp(`<${tag}\\b[^>]*\\/>`, "gi");
+    sanitized = sanitized.replace(selfClosingRegex, "");
+
+    // Remove any remaining unclosed tags
+    const openTagRegex = new RegExp(`<${tag}\\b[^>]*>`, "gi");
+    sanitized = sanitized.replace(openTagRegex, "");
+  }
+
+  // Remove self-closing or empty dangerous tags (form, input, meta, etc.)
+  for (const tag of DANGEROUS_TAGS_EMPTY) {
     const openTagRegex = new RegExp(`<${tag}\\b[^>]*>`, "gi");
     const closeTagRegex = new RegExp(`<\\/${tag}>`, "gi");
     const selfClosingRegex = new RegExp(`<${tag}\\b[^>]*\\/>`, "gi");
