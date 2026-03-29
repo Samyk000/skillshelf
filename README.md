@@ -19,39 +19,96 @@
 
 ---
 
-## // What Is This
+## // The Problem
 
-Skillshelf is a curated library of **design skills** for your AI coding tools. Each skill includes a `SKILL.md` file that teaches your AI assistant how to build beautiful, consistent UI components.
+You spend hours prompting your AI for a decent UI. You type *"make it look premium"*. It gives you a gradient. You say *"minimal and clean"*. It removes all the padding. You ask for *"modern design"*. It adds a carousel from 2012.
 
-**No more AI slop.** Just clean, intentional design that actually looks good.
+**The result?** A generic, soulless interface that screams "I was generated in 30 seconds."
+
+Your AI is smart. But it doesn't understand design. It doesn't know what makes a button feel intentional, what spacing creates hierarchy, or why certain typography choices make a page feel premium.
 
 ---
 
-## // Features
+## // The Solution
+
+**Skillshelf fixes this.**
+
+Each skill is a `SKILL.md` file — a design instruction set that teaches your AI assistant exactly how to build beautiful, consistent UI. Drop it into your project, and watch your AI go from "basic mess" to "pixel-perfect."
+
+### What You Get
 
 ```
-01 BROWSE        Explore the library of design skills by category and tags
-02 PREVIEW       See live previews of each skill before downloading
-03 COPY          One-click copy to clipboard — paste directly into your project
-04 DOWNLOAD      Download .md files to use with Cursor, Claude, ChatGPT, etc.
-05 LIKE & SAVE   Bookmark your favorites for quick access
-06 ADMIN PANEL   Manage skills, categories, and featured items
+01 CURATED DESIGNS        Hand-crafted design systems, not random AI guesses
+02 LIVE PREVIEWS          See exactly what you're getting before you use it
+03 ONE-CLICK COPY         Paste directly into your project — no friction
+04 INSTANT DOWNLOAD       Save .md files for Cursor, Claude, ChatGPT, v0
+05 MULTIPLE STYLES        From brutalist to minimal, pick what fits your vibe
+06 ALWAYS FREE            No paywalls, no subscriptions, just good design
 ```
 
-### Design Categories
+---
 
-| Category | Description |
-|----------|-------------|
-| `Paper` | Clean, paper-inspired minimal designs |
-| `Minimal SaaS` | Simple, elegant SaaS landing pages |
-| `Editorial` | Magazine-style editorial layouts |
-| `Soft Dashboard` | Gentle, approachable dashboard UIs |
-| `Brutalist` | Bold, raw brutalist design systems |
-| `Enterprise` | Professional enterprise-grade interfaces |
-| `Premium Dark` | Luxurious dark-themed experiences |
-| `Bento Product` | Grid-based bento box layouts |
-| `Docs-Focused` | Documentation-first designs |
-| `Pricing-Page-Focused` | Conversion-optimized pricing pages |
+## // Why It Works
+
+Your AI doesn't need to *understand* design. It just needs the right instructions.
+
+A `SKILL.md` file contains:
+
+- **Design tokens** — exact colors, spacing, typography values
+- **Component patterns** — how to structure buttons, cards, layouts
+- **Interaction rules** — hover states, transitions, responsive behavior
+- **Visual hierarchy** — what to emphasize, what to downplay
+
+Instead of fighting with prompts for hours, you copy one file. Your AI reads it. It builds exactly what you want.
+
+**10 seconds vs 10 hours.** That's the difference.
+
+---
+
+## // Design Styles
+
+| Style | Vibe |
+|-------|------|
+| `Paper` | Clean, paper-inspired minimal — for when less is more |
+| `Minimal SaaS` | Simple, elegant landing pages — conversion-focused |
+| `Editorial` | Magazine-style layouts — content that commands attention |
+| `Soft Dashboard` | Gentle, approachable UIs — data that feels friendly |
+| `Brutalist` | Bold, raw, unapologetic — for brands that don't blend in |
+| `Enterprise` | Professional interfaces — serious software, seriously designed |
+| `Premium Dark` | Luxurious dark themes — for when black isn't dark enough |
+| `Bento Product` | Grid-based layouts — organized chaos, beautifully contained |
+| `Docs-Focused` | Documentation-first — because good docs deserve good design |
+| `Pricing Pages` | Conversion-optimized — turn visitors into customers |
+
+---
+
+## // How To Use
+
+### Step 1: Browse
+
+Visit the [library](https://skillshelf.dev/skills) and find a design style that matches your project.
+
+### Step 2: Preview
+
+Click any skill to see a live preview. Check the colors, spacing, typography — make sure it fits your vision.
+
+### Step 3: Copy or Download
+
+Click **"COPY SKILL"** to grab the `SKILL.md` content, or **"DOWNLOAD .MD"** to save it locally.
+
+### Step 4: Paste Into Your Project
+
+**Cursor:** Add the content to your `.cursorrules` file or project instructions.
+
+**Claude:** Paste it at the start of your conversation as system context.
+
+**ChatGPT:** Use it as a custom instruction or paste it in your prompt.
+
+**v0:** Include it in your prompt for instant design consistency.
+
+### Step 5: Watch The Magic
+
+Your AI now understands design. It builds components that actually look good. No more generic gradients. No more soulless interfaces.
 
 ---
 
@@ -65,7 +122,6 @@ Skillshelf is a curated library of **design skills** for your AI coding tools. E
 | **Components** | shadcn/ui |
 | **Database** | Supabase (PostgreSQL) |
 | **Auth** | Supabase Auth |
-| **Storage** | Supabase Storage |
 | **Markdown** | react-markdown + Shiki |
 | **Fonts** | Space Grotesk + JetBrains Mono |
 
@@ -88,7 +144,7 @@ cd skillshelf
 # Install dependencies
 npm install
 
-# Copy environment variables
+# Set up environment variables
 cp .env.example .env.local
 
 # Start development server
@@ -97,172 +153,12 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
----
-
-## // Environment Variables
-
-Create a `.env.local` file in the root directory:
+### Environment Variables
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
-
-Get these values from your [Supabase Dashboard](https://supabase.com/dashboard) → Project Settings → API.
-
----
-
-## // Database Setup
-
-### Tables
-
-Run these SQL commands in your Supabase SQL Editor:
-
-```sql
--- Profiles (extends Supabase auth.users)
-create table profiles (
-  id uuid references auth.users on delete cascade primary key,
-  email text not null,
-  display_name text,
-  role text default 'user' check (role in ('user', 'admin')),
-  created_at timestamptz default now()
-);
-
--- Skills
-create table skills (
-  id uuid default gen_random_uuid() primary key,
-  slug text unique not null,
-  title text not null,
-  short_description text not null,
-  long_description text,
-  category text not null,
-  tags text[] default '{}',
-  status text default 'draft' check (status in ('draft', 'published', 'archived')),
-  skill_markdown text not null,
-  preview_html text,
-  preview_external_url text,
-  cover_image_url text,
-  featured boolean default false,
-  created_by uuid references auth.users,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
-
--- Skill Likes
-create table skill_likes (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references auth.users on delete cascade not null,
-  skill_id uuid references skills on delete cascade not null,
-  created_at timestamptz default now(),
-  unique(user_id, skill_id)
-);
-
--- Skill Saves
-create table skill_saves (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references auth.users on delete cascade not null,
-  skill_id uuid references skills on delete cascade not null,
-  created_at timestamptz default now(),
-  unique(user_id, skill_id)
-);
-
--- Skill Views
-create table skill_views (
-  id uuid default gen_random_uuid() primary key,
-  skill_id uuid references skills on delete cascade not null,
-  user_id uuid references auth.users,
-  created_at timestamptz default now()
-);
-```
-
-### Row Level Security
-
-```sql
--- Enable RLS on all tables
-alter table profiles enable row level security;
-alter table skills enable row level security;
-alter table skill_likes enable row level security;
-alter table skill_saves enable row level security;
-alter table skill_views enable row level security;
-
--- Public read access to published skills
-create policy "Published skills are viewable by everyone"
-  on skills for select using (status = 'published');
-
--- Admins can manage all skills
-create policy "Admins can manage skills"
-  on skills for all using (
-    exists (select 1 from profiles where id = auth.uid() and role = 'admin')
-  );
-
--- Users can like/save skills
-create policy "Users can manage their likes"
-  on skill_likes for all using (auth.uid() = user_id);
-
-create policy "Users can manage their saves"
-  on skill_saves for all using (auth.uid() = user_id);
-```
-
----
-
-## // Project Structure
-
-```
-skillshelf/
-├── src/
-│   ├── app/
-│   │   ├── (main)/
-│   │   │   ├── page.tsx              # Homepage
-│   │   │   ├── (public)/
-│   │   │   │   ├── skills/           # Browse & detail pages
-│   │   │   │   └── preview/          # Full-screen preview
-│   │   │   ├── (auth)/               # Login, signup, forgot password
-│   │   │   ├── dashboard/            # User dashboard (saved, liked)
-│   │   │   └── admin/                # Admin panel
-│   │   └── api/auth/callback/        # Supabase auth callback
-│   ├── components/
-│   │   ├── admin/                    # SkillForm, SkillTable
-│   │   ├── auth/                     # LoginForm, SignupForm
-│   │   ├── explore/                  # SearchBar, FilterChips
-│   │   ├── layout/                   # Header, Footer, Container
-│   │   ├── skills/                   # SkillCard, SkillPreview, etc.
-│   │   └── ui/                       # shadcn/ui components
-│   ├── lib/
-│   │   ├── supabase/                 # Client, server, middleware
-│   │   ├── constants.ts              # Categories & tags
-│   │   └── download.ts               # Download utility
-│   └── types/                        # TypeScript types
-├── public/                           # Static assets
-├── next.config.ts                    # Next.js config with security headers
-└── package.json
-```
-
----
-
-## // Usage
-
-### For Users
-
-1. **Browse** — Visit `/skills` to explore the library
-2. **Preview** — Click any skill to see live preview and details
-3. **Copy** — Click "COPY SKILL" to copy the SKILL.md to clipboard
-4. **Download** — Click "DOWNLOAD .MD" to save the file locally
-5. **Save** — Create an account to like and bookmark skills
-
-### For Admins
-
-1. Sign up and set your role to `admin` in the Supabase dashboard
-2. Visit `/admin` to access the admin panel
-3. Create skills with title, description, markdown, and preview HTML
-4. Toggle "Featured" to showcase skills on the homepage
-
-### Using Skills with AI Tools
-
-**Cursor:** Add the SKILL.md content to your `.cursorrules` file or project instructions.
-
-**Claude:** Paste the SKILL.md at the start of your conversation as system context.
-
-**ChatGPT:** Use the SKILL.md as a custom instruction or paste it in your prompt.
 
 ---
 
@@ -291,12 +187,14 @@ Contributions are welcome. Please follow these steps:
 
 ## // License
 
-MIT License — feel free to use this project for personal or commercial purposes.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ---
 
 <div align="center">
 
-**[skillshelf.dev](https://skillshelf.dev)** · Built with `//` care
+**Built with `//` care**
+
+*Because your AI deserves better design instructions.*
 
 </div>
