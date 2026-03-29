@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { SkillTable } from "@/components/admin/SkillTable";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 import type { Skill } from "@/types/skill";
 
 export const metadata = {
@@ -15,16 +16,19 @@ export default async function AdminPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div>
-      <div className="mb-6">
-        <p className="text-xs font-semibold tracking-[0.2em] text-primary">
-          // ALL SKILLS
-        </p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {(skills ?? []).length} skills total
-        </p>
+    <>
+      <AdminHeader />
+      <div>
+        <div className="mb-6">
+          <p className="text-xs font-semibold tracking-[0.2em] text-primary">
+            // ALL SKILLS
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {(skills ?? []).length} skills total
+          </p>
+        </div>
+        <SkillTable skills={(skills as Skill[]) ?? []} />
       </div>
-      <SkillTable skills={(skills as Skill[]) ?? []} />
-    </div>
+    </>
   );
 }

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { SkillForm } from "@/components/admin/SkillForm";
+import { EditSkillForm } from "@/components/admin/EditSkillForm";
 import type { Skill } from "@/types/skill";
 
 interface EditSkillPageProps {
@@ -33,17 +33,5 @@ export default async function EditSkillPage({ params }: EditSkillPageProps) {
 
   if (!skill) notFound();
 
-  return (
-    <div>
-      <div className="mb-6">
-        <p className="text-xs font-semibold tracking-[0.2em] text-primary">
-          // EDIT
-        </p>
-        <h2 className="mt-2 font-display text-xl font-bold tracking-wide">
-          {(skill as Skill).title.toUpperCase()}
-        </h2>
-      </div>
-      <SkillForm skill={skill as Skill} />
-    </div>
-  );
+  return <EditSkillForm skill={skill as Skill} />;
 }

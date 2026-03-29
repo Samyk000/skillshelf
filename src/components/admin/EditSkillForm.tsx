@@ -3,10 +3,15 @@
 import { useState } from "react";
 import { SkillForm } from "@/components/admin/SkillForm";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import type { Skill } from "@/types/skill";
 
-export default function NewSkillPage() {
-  const [status, setStatus] = useState<"draft" | "published" | "archived">("draft");
-  const [featured, setFeatured] = useState(false);
+interface EditSkillFormProps {
+  skill: Skill;
+}
+
+export function EditSkillForm({ skill }: EditSkillFormProps) {
+  const [status, setStatus] = useState<"draft" | "published" | "archived">(skill.status);
+  const [featured, setFeatured] = useState(skill.featured);
 
   return (
     <>
@@ -36,6 +41,7 @@ export default function NewSkillPage() {
         </button>
       </AdminHeader>
       <SkillForm
+        skill={skill}
         status={status}
         featured={featured}
         onStatusChange={setStatus}

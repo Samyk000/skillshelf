@@ -9,6 +9,10 @@ import type { Skill } from "@/types/skill";
 
 interface SkillFormProps {
   skill?: Skill;
+  status: "draft" | "published" | "archived";
+  featured: boolean;
+  onStatusChange: (status: "draft" | "published" | "archived") => void;
+  onFeaturedChange: (featured: boolean) => void;
 }
 
 function generateSlug(title: string) {
@@ -21,7 +25,7 @@ function generateSlug(title: string) {
     .replace(/^-|-$/g, "");
 }
 
-export function SkillForm({ skill }: SkillFormProps) {
+export function SkillForm({ skill, status, featured, onStatusChange, onFeaturedChange }: SkillFormProps) {
   const router = useRouter();
   const isEditing = !!skill;
 
@@ -31,10 +35,8 @@ export function SkillForm({ skill }: SkillFormProps) {
     short_description: skill?.short_description ?? "",
     category: skill?.category ?? CATEGORIES[0],
     tags: skill?.tags ?? [],
-    status: skill?.status ?? "draft",
     skill_markdown: skill?.skill_markdown ?? "",
     preview_html: skill?.preview_html ?? "",
-    featured: skill?.featured ?? false,
   });
 
   const [saving, setSaving] = useState(false);
@@ -78,6 +80,8 @@ export function SkillForm({ skill }: SkillFormProps) {
 
     const payload = {
       ...form,
+      status,
+      featured,
       preview_html: form.preview_html || null,
       short_description: form.short_description || null,
       created_by: user.id,
@@ -193,46 +197,6 @@ export function SkillForm({ skill }: SkillFormProps) {
               {tag}
             </button>
           ))}
-        </div>
-      </div>
-
-      {/* Status + Featured */}
-      <div className="flex gap-8">
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-            STATUS
-          </label>
-          <select
-            value={form.status}
-            onChange={(e) =>
-              setForm((prev) => ({
-                ...prev,
-                status: e.target.value as "draft" | "published" | "archived",
-              }))
-            }
-            className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-          >
-            <option value="draft">DRAFT</option>
-            <option value="published">PUBLISHED</option>
-            <option value="archived">ARCHIVED</option>
-          </select>
-        </div>
-        <div className="flex items-end gap-2">
-          <input
-            type="checkbox"
-            id="featured"
-            checked={form.featured}
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, featured: e.target.checked }))
-            }
-            className="h-4 w-4 border-2 border-input accent-primary"
-          />
-          <label
-            htmlFor="featured"
-            className="text-xs font-semibold tracking-widest text-muted-foreground uppercase"
-          >
-            FEATURED
-          </label>
         </div>
       </div>
 
