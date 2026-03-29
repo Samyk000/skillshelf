@@ -6,6 +6,7 @@ import { CopyButton } from "@/components/skills/CopyButton";
 import { DownloadButton } from "@/components/skills/DownloadButton";
 import { LikeButton } from "@/components/skills/LikeButton";
 import { SaveButton } from "@/components/skills/SaveButton";
+import { ViewTracker } from "@/components/skills/ViewTracker";
 import { createClient } from "@/lib/supabase/server";
 import type { Skill } from "@/types/skill";
 
@@ -76,41 +77,25 @@ export default async function SkillDetailPage({
 
   let isLiked = false;
   let isSaved = false;
-  if (user) {
-    try {
-      const [likeResult, saveResult] = await Promise.all([
-        supabase
-          .from("skill_likes")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("skill_id", skill.id)
-          .maybeSingle(),
-        supabase
-          .from("skill_saves")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("skill_id", skill.id)
-          .maybeSingle(),
-      ]);
-      isLiked = !!likeResult.data;
-      isSaved = !!saveResult.data;
-    } catch {
-      // Like/save check failed, continue
-    }
-
-    try {
-      await supabase
-        .from("skill_views")
-        .insert({ skill_id: skill.id, user_id: user.id });
-    } catch {
-      // View recording failed, continue
-    }
-  } else {
-    try {
-      await supabase.from("skill_views").insert({ skill_id: skill.id });
-    } catch {
-      // View recording failed, continue
-    }
+  try {
+    const [likeResult, saveResult] = await Promise.all([
+      supabase
+        .from("skill_likes")
+        .select("id")
+        .eq("user_id", user?.id ?? "")
+        .eq("skill_id", skill.id)
+        .maybeSingle(),
+      supabase
+        .from("skill_saves")
+        .select("id")
+        .eq("user_id", user?.id ?? "")
+        .eq("skill_id", skill.id)
+        .maybeSingle(),
+    ]);
+    isLiked = !!likeResult.data;
+    isSaved = !!saveResult.data;
+  } catch {
+    // Like/save check failed, continue
   }
 
   let relatedSkills: Skill[] = [];
@@ -129,6 +114,8 @@ export default async function SkillDetailPage({
 
   return (
     <Container className="py-8">
+      <ViewTracker skillId={skill.id} />
+
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center gap-2 text-xs tracking-wider text-muted-foreground">
         <Link href="/" className="hover:text-primary">
