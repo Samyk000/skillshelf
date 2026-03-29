@@ -70,11 +70,7 @@ export function SaveButton({
     <button
       onClick={handleSave}
       disabled={isPending}
-      className={`flex items-center gap-2 border-2 px-4 py-2 text-sm font-semibold tracking-wider uppercase transition-colors ${
-        saved
-          ? "border-accent text-accent"
-          : "border-border text-muted-foreground hover:border-accent hover:text-accent"
-      }`}
+      className="flex items-center gap-1.5 text-sm font-semibold tracking-wider uppercase transition-colors"
     >
       <svg
         className="h-4 w-4"
@@ -88,7 +84,9 @@ export function SaveButton({
           d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
         />
       </svg>
-      {saved ? "SAVED" : "SAVE"}
+      <span className={saved ? "text-accent" : "text-muted-foreground"}>
+        {saved ? "SAVED" : "SAVE"}
+      </span>
     </button>
   );
 }

@@ -56,7 +56,7 @@ export function SkillPreview({ previewHtml, title, slug }: SkillPreviewProps) {
           </svg>
         </a>
       </div>
-      <div className="relative h-[400px] w-full bg-white">
+      <div className="relative h-[480px] w-full bg-white">
         {isVisible ? (
           <iframe
             srcDoc={previewHtml}

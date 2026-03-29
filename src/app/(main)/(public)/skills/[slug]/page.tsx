@@ -129,23 +129,8 @@ export default async function SkillDetailPage({
         <span className="text-primary">{skill.title.toUpperCase()}</span>
       </nav>
 
-      {/* Title Row: Category + Title + Description */}
-      <div className="mb-6">
-        <div className="mb-2 flex flex-wrap items-center gap-3">
-          <span className="inline-block border border-primary px-2 py-0.5 text-[10px] font-semibold tracking-[0.15em] text-primary">
-            {skill.category.toUpperCase()}
-          </span>
-          <h1 className="font-display text-2xl font-bold tracking-wide md:text-3xl">
-            {skill.title}
-          </h1>
-        </div>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          {skill.short_description}
-        </p>
-      </div>
-
-      {/* Main Content: Preview (left) + Actions (right) */}
-      <div className="mb-8 flex flex-col gap-4 lg:flex-row">
+      {/* Main Content: Preview (left) + Details (right) */}
+      <div className="mb-10 flex flex-col gap-6 lg:flex-row">
         {/* Preview - Left */}
         <div className="min-w-0 flex-1">
           {skill.preview_html ? (
@@ -155,7 +140,7 @@ export default async function SkillDetailPage({
               slug={skill.slug}
             />
           ) : (
-            <div className="flex h-[400px] items-center justify-center border-2 border-border bg-muted">
+            <div className="flex h-[500px] items-center justify-center rounded-lg border-2 border-border bg-muted">
               <span className="font-display text-lg font-bold tracking-wider text-muted-foreground">
                 // NO PREVIEW AVAILABLE
               </span>
@@ -163,73 +148,84 @@ export default async function SkillDetailPage({
           )}
         </div>
 
-        {/* Actions Sidebar - Right */}
-        <div className="flex shrink-0 flex-col gap-3 lg:w-[180px]">
-          {/* Views */}
-          <div className="flex items-center gap-2 border-2 border-border px-4 py-2.5 text-sm text-muted-foreground">
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-            <span className="tracking-wider">
-              {viewsCount} VIEWS
+        {/* Details Sidebar - Right */}
+        <div className="flex shrink-0 flex-col gap-5 lg:w-[260px]">
+          {/* Category + Title */}
+          <div>
+            <span className="mb-2 inline-block border border-primary px-2 py-0.5 text-[10px] font-semibold tracking-[0.15em] text-primary">
+              {skill.category.toUpperCase()}
             </span>
+            <h1 className="font-display text-xl font-bold tracking-wide">
+              {skill.title}
+            </h1>
+            {skill.short_description && (
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {skill.short_description}
+              </p>
+            )}
           </div>
 
-          {/* Save */}
-          <SaveButton
-            skillId={skill.id}
-            initialSaved={isSaved}
-            isAuthenticated={!!user}
-          />
+          {/* Stats Row: Views + Like + Save */}
+          <div className="grid grid-cols-3 border-y-2 border-border py-3">
+            {/* Views */}
+            <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <span className="tracking-wider">{viewsCount}</span>
+            </div>
 
-          {/* Copy */}
-          <CopyButton content={skill.skill_markdown} />
+            {/* Like */}
+            <div className="flex items-center justify-center border-x-2 border-border">
+              <LikeButton
+                skillId={skill.id}
+                initialLiked={isLiked}
+                initialCount={likesCount}
+                isAuthenticated={!!user}
+              />
+            </div>
 
-          {/* Download */}
-          <DownloadButton slug={skill.slug} content={skill.skill_markdown} />
+            {/* Save */}
+            <div className="flex items-center justify-center">
+              <SaveButton
+                skillId={skill.id}
+                initialSaved={isSaved}
+                isAuthenticated={!!user}
+              />
+            </div>
+          </div>
 
-          {/* Like */}
-          <LikeButton
-            skillId={skill.id}
-            initialLiked={isLiked}
-            initialCount={likesCount}
-            isAuthenticated={!!user}
-          />
+          {/* Actions: Copy + Download (stacked) */}
+          <div className="flex flex-col gap-3">
+            {/* Copy */}
+            <CopyButton content={skill.skill_markdown} />
 
-          {/* External Preview */}
-          {skill.preview_external_url && (
-            <a
-              href={skill.preview_external_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-2 border-border px-4 py-2.5 text-center text-sm font-semibold tracking-wider text-muted-foreground uppercase transition-colors hover:border-primary hover:text-primary"
-            >
-              EXTERNAL LINK
-            </a>
+            {/* Download */}
+            <DownloadButton slug={skill.slug} content={skill.skill_markdown} />
+          </div>
+
+          {/* Tags */}
+          {skill.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-2">
+              {skill.tags.map((tag: string) => (
+                <span
+                  key={tag}
+                  className="border border-border px-2 py-0.5 text-[10px] tracking-wider text-muted-foreground"
+                >
+                  {tag.toUpperCase()}
+                </span>
+              ))}
+            </div>
           )}
         </div>
       </div>
-
-      {/* Tags */}
-      {skill.tags.length > 0 && (
-        <div className="mb-8 flex flex-wrap gap-2">
-          {skill.tags.map((tag: string) => (
-            <span
-              key={tag}
-              className="border border-border px-2 py-0.5 text-[10px] tracking-wider text-muted-foreground"
-            >
-              {tag.toUpperCase()}
-            </span>
-          ))}
-        </div>
-      )}
 
       {/* Related Skills */}
       {relatedSkills.length > 0 && (
@@ -245,7 +241,7 @@ export default async function SkillDetailPage({
               <Link
                 key={related.id}
                 href={`/skills/${related.slug}`}
-                className="border-2 border-border bg-card p-5 transition-colors hover:border-primary"
+                className="rounded-lg border-2 border-border bg-card p-5 transition-colors hover:border-primary"
               >
                 <span className="mb-2 inline-block border border-primary px-2 py-0.5 text-[10px] font-semibold tracking-[0.15em] text-primary">
                   {related.category.toUpperCase()}
