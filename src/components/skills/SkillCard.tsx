@@ -20,8 +20,21 @@ export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
   const handleCopy = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigator.clipboard.writeText(skill.skill_markdown);
-    toast.success("Copied to clipboard!");
+    try {
+      navigator.clipboard.writeText(skill.skill_markdown);
+      toast.success("Copied to clipboard!");
+    } catch {
+      // Fallback for non-secure contexts
+      const textarea = document.createElement("textarea");
+      textarea.value = skill.skill_markdown;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      toast.success("Copied to clipboard!");
+    }
   };
 
   const handleDownload = (e: React.MouseEvent) => {
@@ -72,7 +85,7 @@ export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
             {isVisible ? (
               <iframe
                 srcDoc={skill.preview_html}
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                sandbox="allow-scripts allow-popups allow-same-origin"
                 title={`Preview: ${skill.title}`}
                 className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
                 loading="lazy"

@@ -58,10 +58,11 @@ export default function SignupPage() {
               </div>
             )}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              <label htmlFor="signup-email" className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                 EMAIL
               </label>
               <input
+                id="signup-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -71,17 +72,18 @@ export default function SignupPage() {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              <label htmlFor="signup-password" className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                 PASSWORD
               </label>
               <input
+                id="signup-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
                 className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-                placeholder="Min 6 characters"
+                placeholder="Min 8 characters"
               />
             </div>
             <button

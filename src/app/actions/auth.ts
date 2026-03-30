@@ -3,6 +3,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+// We rely entirely on Supabase's native Auth rate limits,
+// which are configured in the Supabase Dashboard.
+// In-memory Maps do not work well in modern serverless (Vercel) deployments.
+
 function validateEmail(email: string): string | null {
   if (!email || typeof email !== "string") {
     return "Email is required";
@@ -24,8 +28,8 @@ function validatePassword(password: string): string | null {
   if (!password || typeof password !== "string") {
     return "Password is required";
   }
-  if (password.length < 6) {
-    return "Password must be at least 6 characters";
+  if (password.length < 8) {
+    return "Password must be at least 8 characters";
   }
   if (password.length > 128) {
     return "Password is too long";
@@ -70,21 +74,25 @@ export async function signupUser(email: string, password: string) {
     return { error: passwordError };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!siteUrl && process.env.NODE_ENV === "production") {
+    console.error("Critical: NEXT_PUBLIC_SITE_URL missing in production");
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signUp({
     email: email.trim(),
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/api/auth/callback`,
+      emailRedirectTo: `${siteUrl ?? "http://localhost:3000"}/api/auth/callback`,
     },
   });
 
+  // Always return success to prevent user enumeration
+  // The actual error is logged server-side for debugging
   if (error) {
-    if (error.message.includes("already registered")) {
-      return { error: "An account with this email already exists" };
-    }
-    return { error: "Failed to create account. Please try again." };
+    console.error("Signup error:", error.message);
   }
 
   return { error: null, success: true };
@@ -96,14 +104,20 @@ export async function forgotPassword(email: string) {
     return { error: emailError };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!siteUrl && process.env.NODE_ENV === "production") {
+    console.error("Critical: NEXT_PUBLIC_SITE_URL missing in production");
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/api/auth/callback?next=/dashboard/settings`,
+    redirectTo: `${siteUrl ?? "http://localhost:3000"}/api/auth/callback?next=/dashboard/settings`,
   });
 
+  // Always return success to prevent user enumeration
   if (error) {
-    return { error: "Failed to send reset email. Please try again." };
+    console.error("Password reset error:", error.message);
   }
 
   return { error: null, success: true };

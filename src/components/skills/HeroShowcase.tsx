@@ -61,9 +61,20 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
       </div>
 
       <div
-        className="relative h-[500px] overflow-hidden rounded-lg border-2 border-border bg-card"
+        className="relative h-[500px] overflow-hidden rounded-lg border-2 border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        tabIndex={0}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
+        onFocus={() => setIsPaused(true)}
+        onBlur={() => setIsPaused(false)}
+        onKeyDown={(e) => {
+          if (skills.length <= 1) return;
+          if (e.key === "ArrowLeft") {
+            goToSlide((currentIndex - 1 + skills.length) % skills.length);
+          } else if (e.key === "ArrowRight") {
+            goToSlide((currentIndex + 1) % skills.length);
+          }
+        }}
       >
       {/* Slides */}
       {skills.map((skill, index) => (
@@ -91,7 +102,7 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
                 {loadedSlides.has(index) ? (
                   <iframe
                     srcDoc={skill.preview_html}
-                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                    sandbox="allow-scripts allow-popups allow-same-origin"
                     title={`Preview: ${skill.title}`}
                     className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
                     loading="lazy"

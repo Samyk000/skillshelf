@@ -1,24 +1,26 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { toggleSave } from "@/app/actions/user";
 
 interface SaveButtonProps {
   skillId: string;
+  skillSlug?: string;
   initialSaved: boolean;
   isAuthenticated: boolean;
 }
 
 export function SaveButton({
   skillId,
+  skillSlug,
   initialSaved,
   isAuthenticated,
 }: SaveButtonProps) {
   const router = useRouter();
   const [saved, setSaved] = useState(initialSaved);
-  const [isPending, startTransition] = useTransition();
+  const isBusy = useRef(false);
 
   const handleSave = async () => {
     if (!isAuthenticated) {
@@ -26,27 +28,31 @@ export function SaveButton({
       return;
     }
 
+    // Guard against rapid double-clicks (M10)
+    if (isBusy.current) return;
+    isBusy.current = true;
+
     const wasSaved = saved;
 
+    // Optimistic update
     setSaved(!wasSaved);
 
-    const result = await toggleSave(skillId);
+    const result = await toggleSave(skillId, skillSlug);
 
     if (result.error) {
+      // Roll back on failure
       setSaved(wasSaved);
       toast.error(result.error);
-      return;
     }
 
-    startTransition(() => {
-      router.refresh();
-    });
+    isBusy.current = false;
   };
 
   return (
     <button
       onClick={handleSave}
-      disabled={isPending}
+      aria-pressed={saved}
+      aria-label={saved ? "Unsave this skill" : "Save this skill"}
       className="flex items-center gap-1.5 text-sm font-semibold tracking-wider uppercase transition-colors"
     >
       <svg

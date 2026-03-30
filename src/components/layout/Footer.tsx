@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Container } from "./Container";
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export function Footer() {
   return (
     <footer className="border-t-2 border-border bg-muted">
@@ -19,7 +21,7 @@ export function Footer() {
 
           {/* Copyright */}
           <p className="text-xs tracking-wider text-muted-foreground">
-            &copy; {new Date().getFullYear()} SKILLSHELF. ALL RIGHTS RESERVED.
+            &copy; {CURRENT_YEAR} SKILLSHELF. ALL RIGHTS RESERVED.
           </p>
         </div>
       </Container>

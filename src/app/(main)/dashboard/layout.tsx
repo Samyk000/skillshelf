@@ -10,6 +10,13 @@ const dashboardLinks = [
   { href: "/dashboard/settings", label: "SETTINGS" },
 ];
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Dashboard | Skillshelf",
+  description: "Manage your saved and liked skills.",
+};
+
 export default async function DashboardLayout({
   children,
 }: {

@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { loginUser } from "@/app/actions/auth";
 import { Container } from "@/components/layout/Container";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,12 +21,16 @@ export default function LoginPage() {
 
     if (result.error) {
       setError(result.error);
-    } else {
-      toast.success("Logged in successfully!");
-      router.push("/dashboard");
-      router.refresh();
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+
+    toast.success("Logged in successfully!");
+
+    // Hard redirect — ensures the entire app re-initializes with new auth cookies.
+    // Soft navigation (router.push) is unreliable here because the client-side
+    // Supabase SDK may not detect the server-set cookies before rendering.
+    window.location.href = "/dashboard";
   };
 
   return (
@@ -48,10 +50,11 @@ export default function LoginPage() {
             </div>
           )}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+            <label htmlFor="email" className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
               EMAIL
             </label>
             <input
+              id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -61,10 +64,11 @@ export default function LoginPage() {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+            <label htmlFor="password" className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
               PASSWORD
             </label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

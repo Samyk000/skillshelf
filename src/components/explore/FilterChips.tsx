@@ -28,6 +28,7 @@ export function FilterChips() {
         <button
           key={category}
           onClick={() => handleFilter(category)}
+          aria-pressed={activeCategory === category}
           className={`border-2 px-3 py-1.5 text-xs font-semibold tracking-widest uppercase transition-colors ${
             activeCategory === category
               ? "border-primary bg-primary text-primary-foreground"

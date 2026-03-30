@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { Container } from "./Container";
 import { MobileMenu } from "./MobileMenu";
 import { UserMenu } from "./UserMenu";
+import { UserProvider } from "./UserProvider";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -17,7 +18,8 @@ export function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b-2 border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <UserProvider>
+      <header className="sticky top-0 z-50 border-b-2 border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <Container>
         <div className="flex h-14 items-center justify-between">
           {/* Logo */}
@@ -66,6 +68,7 @@ export function Header() {
               <button
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 className="border-2 border-border p-1.5 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
                 title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
               >
                 {theme === "dark" ? (
@@ -90,6 +93,7 @@ export function Header() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="border-2 border-border p-2 text-foreground transition-colors hover:border-primary hover:text-primary md:hidden"
             aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
           >
             <svg
               className="h-5 w-5"
@@ -110,6 +114,7 @@ export function Header() {
 
       {/* Mobile Menu */}
       <MobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
-    </header>
+      </header>
+    </UserProvider>
   );
 }

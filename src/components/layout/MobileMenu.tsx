@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import { createClient } from "@/lib/supabase/client";
+import { useUser } from "./UserProvider";
 
 interface MobileMenuProps {
   open: boolean;
@@ -12,60 +11,28 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ open, onClose }: MobileMenuProps) {
-  const router = useRouter();
-  const [user, setUser] = useState<{ email: string; role: string } | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useUser();
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const loadUser = async () => {
-      const supabase = createClient();
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
-
-      if (authUser) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", authUser.id)
-          .single();
-
-        setUser({
-          email: authUser.email ?? "",
-          role: profile?.role ?? "user",
-        });
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    };
-
-    if (open) {
-      loadUser();
-    }
-  }, [open]);
 
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    setUser(null);
+    const { signOut } = await import("@/app/actions/auth");
+    await signOut();
     onClose();
-    router.push("/");
-    router.refresh();
+    window.location.href = "/";
   };
 
   if (!open) return null;
 
   return (
-    <div className="border-t-2 border-border bg-background md:hidden">
+    <div
+      className="border-t-2 border-border bg-background md:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Mobile navigation"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
+    >
       <nav className="flex flex-col gap-1 p-4">
         {user?.role === "admin" && (
           <Link
@@ -80,24 +47,22 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
         <div className="mt-2 flex flex-col gap-2">
           {/* Theme Toggle & Social Icons */}
           <div className="flex items-center justify-center gap-2">
-            {mounted && (
-              <button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="border-2 border-border p-2 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-                title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              >
-                {theme === "dark" ? (
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <circle cx="12" cy="12" r="5" />
-                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-                  </svg>
-                ) : (
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-                  </svg>
-                )}
-              </button>
-            )}
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="border-2 border-border p-2 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {theme === "dark" ? (
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <circle cx="12" cy="12" r="5" />
+                  <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                </svg>
+              ) : (
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                </svg>
+              )}
+            </button>
             <a
               href="https://github.com/Samyk000/skillshelf"
               target="_blank"

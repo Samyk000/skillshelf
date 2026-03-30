@@ -59,13 +59,21 @@ export async function createSkill(data: SkillFormData) {
   });
 
   const { error } = await supabase.from("skills").insert({
-    ...data,
-    ...sanitized,
+    title: sanitized.title,
+    slug: sanitized.slug,
+    short_description: sanitized.short_description,
+    skill_markdown: sanitized.skill_markdown,
+    preview_html: sanitized.preview_html,
+    category: data.category,
+    tags: data.tags,
+    status: data.status,
+    featured: data.featured,
     created_by: user.id,
   });
 
   if (error) {
-    return { error: error.message };
+    console.error("Failed to create skill:", error);
+    return { error: "Failed to create skill. Please try again." };
   }
 
   revalidatePath("/admin");
@@ -94,13 +102,21 @@ export async function updateSkill(skillId: string, data: SkillFormData) {
   const { error } = await supabase
     .from("skills")
     .update({
-      ...data,
-      ...sanitized,
+      title: sanitized.title,
+      slug: sanitized.slug,
+      short_description: sanitized.short_description,
+      skill_markdown: sanitized.skill_markdown,
+      preview_html: sanitized.preview_html,
+      category: data.category,
+      tags: data.tags,
+      status: data.status,
+      featured: data.featured,
     })
     .eq("id", skillId);
 
   if (error) {
-    return { error: error.message };
+    console.error("Failed to update skill:", error);
+    return { error: "Failed to update skill. Please try again." };
   }
 
   revalidatePath("/admin");
@@ -118,7 +134,8 @@ export async function deleteSkill(skillId: string) {
   const { error } = await supabase.from("skills").delete().eq("id", skillId);
 
   if (error) {
-    return { error: error.message };
+    console.error("Failed to delete skill:", error);
+    return { error: "Failed to delete skill. Please try again." };
   }
 
   revalidatePath("/admin");
@@ -140,7 +157,8 @@ export async function toggleSkillStatus(skillId: string, currentStatus: string) 
     .eq("id", skillId);
 
   if (error) {
-    return { error: error.message };
+    console.error("Failed to toggle skill status:", error);
+    return { error: "Failed to update status. Please try again." };
   }
 
   revalidatePath("/admin");

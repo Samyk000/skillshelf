@@ -1,64 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
-
-interface UserState {
-  email: string;
-  role: string;
-}
+import { useUser } from "./UserProvider";
 
 export function UserMenu() {
-  const router = useRouter();
-  const [user, setUser] = useState<UserState | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const loadUser = async () => {
-      const supabase = createClient();
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
-
-      if (authUser) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", authUser.id)
-          .single();
-
-        setUser({
-          email: authUser.email ?? "",
-          role: profile?.role ?? "user",
-        });
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    };
-
-    loadUser();
-
-    const supabase = createClient();
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      loadUser();
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    setUser(null);
+    const { signOut } = await import("@/app/actions/auth");
+    await signOut();
     setMenuOpen(false);
-    router.push("/");
-    router.refresh();
+    window.location.href = "/";
   };
 
   if (loading) {
@@ -102,6 +56,8 @@ export function UserMenu() {
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="flex items-center gap-2 border-2 border-border px-3 py-2 text-sm font-semibold tracking-wider text-foreground uppercase transition-colors hover:border-primary hover:text-primary"
+          aria-expanded={menuOpen}
+          aria-haspopup="true"
         >
           <svg
             className="h-4 w-4"
@@ -123,8 +79,19 @@ export function UserMenu() {
             <div
               className="fixed inset-0 z-40"
               onClick={() => setMenuOpen(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setMenuOpen(false);
+              }}
+              role="presentation"
             />
-            <div className="absolute right-0 top-full z-50 mt-1 w-48 border-2 border-border bg-card">
+            <div
+              className="absolute right-0 top-full z-50 mt-1 w-48 border-2 border-border bg-card"
+              role="menu"
+              aria-label="User menu"
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setMenuOpen(false);
+              }}
+            >
               <Link
                 href="/dashboard"
                 onClick={() => setMenuOpen(false)}

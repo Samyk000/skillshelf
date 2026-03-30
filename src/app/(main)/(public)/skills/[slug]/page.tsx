@@ -186,6 +186,7 @@ export default async function SkillDetailPage({
             <div className="flex items-center justify-center border-x-2 border-border">
               <LikeButton
                 skillId={skill.id}
+                skillSlug={skill.slug}
                 initialLiked={isLiked}
                 initialCount={likesCount}
                 isAuthenticated={!!user}
@@ -196,6 +197,7 @@ export default async function SkillDetailPage({
             <div className="flex items-center justify-center">
               <SaveButton
                 skillId={skill.id}
+                skillSlug={skill.slug}
                 initialSaved={isSaved}
                 isAuthenticated={!!user}
               />

@@ -59,10 +59,11 @@ export default function ForgotPasswordPage() {
               </div>
             )}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              <label htmlFor="forgot-email" className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                 EMAIL
               </label>
               <input
+                id="forgot-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

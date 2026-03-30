@@ -16,7 +16,7 @@ async function getAuthenticatedUser() {
   return { error: null, supabase, user };
 }
 
-export async function toggleLike(skillId: string) {
+export async function toggleLike(skillId: string, skillSlug?: string) {
   const { error: authError, supabase, user } = await getAuthenticatedUser();
 
   if (authError || !supabase || !user) {
@@ -45,7 +45,9 @@ export async function toggleLike(skillId: string) {
       return { error: "Failed to unlike. Please try again." };
     }
 
-    revalidatePath(`/skills/[slug]`, "page");
+    if (skillSlug) {
+      revalidatePath(`/skills/${skillSlug}`, "page");
+    }
     return { error: null, liked: false };
   } else {
     const { error } = await supabase
@@ -56,12 +58,14 @@ export async function toggleLike(skillId: string) {
       return { error: "Failed to like. Please try again." };
     }
 
-    revalidatePath(`/skills/[slug]`, "page");
+    if (skillSlug) {
+      revalidatePath(`/skills/${skillSlug}`, "page");
+    }
     return { error: null, liked: true };
   }
 }
 
-export async function toggleSave(skillId: string) {
+export async function toggleSave(skillId: string, skillSlug?: string) {
   const { error: authError, supabase, user } = await getAuthenticatedUser();
 
   if (authError || !supabase || !user) {
@@ -91,6 +95,9 @@ export async function toggleSave(skillId: string) {
     }
 
     revalidatePath("/dashboard/saved");
+    if (skillSlug) {
+      revalidatePath(`/skills/${skillSlug}`, "page");
+    }
     return { error: null, saved: false };
   } else {
     const { error } = await supabase
@@ -102,6 +109,9 @@ export async function toggleSave(skillId: string) {
     }
 
     revalidatePath("/dashboard/saved");
+    if (skillSlug) {
+      revalidatePath(`/skills/${skillSlug}`, "page");
+    }
     return { error: null, saved: true };
   }
 }
@@ -113,15 +123,13 @@ export async function updateProfile(displayName: string) {
     return { error: "Please log in to update your profile" };
   }
 
-  const trimmed = displayName?.trim() ?? "";
-
-  if (trimmed.length > 100) {
-    return { error: "Display name is too long (max 100 characters)" };
-  }
+  // Sanitize: strip HTML characters, trim, enforce max length
+  const { sanitizeTextInput } = await import("@/lib/sanitize");
+  const sanitized = sanitizeTextInput(displayName ?? "").slice(0, 100);
 
   const { error } = await supabase
     .from("profiles")
-    .update({ display_name: trimmed || null })
+    .update({ display_name: sanitized || null })
     .eq("id", user.id);
 
   if (error) {

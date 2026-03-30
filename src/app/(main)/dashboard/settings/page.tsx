@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { updateProfile } from "@/app/actions/user";
 import { signOut } from "@/app/actions/auth";
 
 export default function SettingsPage() {
-  const router = useRouter();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
@@ -21,7 +19,7 @@ export default function SettingsPage() {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        router.push("/login");
+        window.location.href = "/login";
         return;
       }
 
@@ -37,7 +35,7 @@ export default function SettingsPage() {
       setLoading(false);
     };
     loadProfile();
-  }, [router]);
+  }, []);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,8 +53,7 @@ export default function SettingsPage() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/");
-    router.refresh();
+    window.location.href = "/";
   };
 
   if (loading) {
@@ -81,10 +78,14 @@ export default function SettingsPage() {
 
       <form onSubmit={handleSave} className="max-w-md space-y-6">
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+          <label
+            htmlFor="settings-email"
+            className="text-xs font-semibold tracking-widest text-muted-foreground uppercase"
+          >
             EMAIL
           </label>
           <input
+            id="settings-email"
             type="email"
             value={email}
             disabled
@@ -96,13 +97,18 @@ export default function SettingsPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+          <label
+            htmlFor="settings-display-name"
+            className="text-xs font-semibold tracking-widest text-muted-foreground uppercase"
+          >
             DISPLAY NAME
           </label>
           <input
+            id="settings-display-name"
             type="text"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
+            maxLength={100}
             className="border-2 border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
             placeholder="Your display name"
           />

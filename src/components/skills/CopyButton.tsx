@@ -20,7 +20,19 @@ export function CopyButton({ content }: CopyButtonProps) {
   }, []);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(content);
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch {
+      // Fallback for non-secure contexts
+      const textarea = document.createElement("textarea");
+      textarea.value = content;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
     setCopied(true);
     toast.success("Skill copied to clipboard!");
     timeoutRef.current = setTimeout(() => setCopied(false), 2000);

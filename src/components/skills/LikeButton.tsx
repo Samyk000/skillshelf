@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { toggleLike } from "@/app/actions/user";
 
 interface LikeButtonProps {
   skillId: string;
+  skillSlug?: string;
   initialLiked: boolean;
   initialCount: number;
   isAuthenticated: boolean;
@@ -14,6 +15,7 @@ interface LikeButtonProps {
 
 export function LikeButton({
   skillId,
+  skillSlug,
   initialLiked,
   initialCount,
   isAuthenticated,
@@ -21,7 +23,7 @@ export function LikeButton({
   const router = useRouter();
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
-  const [isPending, startTransition] = useTransition();
+  const isBusy = useRef(false);
 
   const handleLike = async () => {
     if (!isAuthenticated) {
@@ -29,30 +31,34 @@ export function LikeButton({
       return;
     }
 
+    // Guard against rapid double-clicks (M10)
+    if (isBusy.current) return;
+    isBusy.current = true;
+
     const wasLiked = liked;
     const prevCount = count;
 
+    // Optimistic update
     setLiked(!wasLiked);
     setCount((c) => (wasLiked ? c - 1 : c + 1));
 
-    const result = await toggleLike(skillId);
+    const result = await toggleLike(skillId, skillSlug);
 
     if (result.error) {
+      // Roll back on failure
       setLiked(wasLiked);
       setCount(prevCount);
       toast.error(result.error);
-      return;
     }
 
-    startTransition(() => {
-      router.refresh();
-    });
+    isBusy.current = false;
   };
 
   return (
     <button
       onClick={handleLike}
-      disabled={isPending}
+      aria-pressed={liked}
+      aria-label={liked ? "Unlike this skill" : "Like this skill"}
       className={`flex items-center gap-2 border-2 px-4 py-2 text-sm font-semibold tracking-wider uppercase transition-colors ${
         liked
           ? "border-primary text-primary"
