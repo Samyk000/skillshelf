@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Container } from "@/components/layout/Container";
 import { SearchBar } from "@/components/explore/SearchBar";
 import { FilterChips } from "@/components/explore/FilterChips";
+import { SkillGridSkeleton } from "@/components/skills/SkillGridSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SkillsList } from "./SkillsList";
 
@@ -10,26 +11,6 @@ export const metadata = {
   description: "Browse and search the full library of design skills.",
 };
 
-function SkillGridSkeleton() {
-  return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {[1, 2, 3, 4, 5, 6].map((i) => (
-        <div
-          key={i}
-          className="border-2 border-border bg-card overflow-hidden"
-        >
-          <Skeleton className="aspect-[4/3] w-full" />
-          <div className="p-4 space-y-3">
-            <Skeleton className="h-3 w-16" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-3 w-full" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function SkillsPage({
   searchParams,
 }: {
@@ -37,7 +18,6 @@ export default function SkillsPage({
 }) {
   return (
     <Container className="py-12">
-      {/* Header */}
       <div className="mb-8">
         <p className="text-xs font-semibold tracking-[0.2em] text-primary">
           // EXPLORE
@@ -50,7 +30,6 @@ export default function SkillsPage({
         </p>
       </div>
 
-      {/* Search + Filter */}
       <Suspense
         fallback={
           <div className="mb-8 flex flex-col gap-4">
@@ -69,8 +48,7 @@ export default function SkillsPage({
         </div>
       </Suspense>
 
-      {/* Skills Grid */}
-      <Suspense fallback={<SkillGridSkeleton />}>
+      <Suspense fallback={<SkillGridSkeleton count={6} />}>
         <SkillsList searchParams={searchParams} />
       </Suspense>
     </Container>

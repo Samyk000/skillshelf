@@ -16,11 +16,3 @@ export interface Skill {
   created_at: string;
   updated_at: string;
 }
-
-export interface SkillWithCounts extends Skill {
-  likes_count?: number;
-  saves_count?: number;
-  views_count?: number;
-  is_liked?: boolean;
-  is_saved?: boolean;
-}

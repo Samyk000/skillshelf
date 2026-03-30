@@ -37,79 +37,74 @@ export default async function SkillDetailPage({
   const { slug } = await params;
   const supabase = await createClient();
 
-  const { data: skill, error: skillError } = await supabase
-    .from("skills")
-    .select("*")
-    .eq("slug", slug)
-    .eq("status", "published")
-    .maybeSingle();
+  // Batch 1: Fetch skill + auth in parallel
+  const [skillResult, userResult] = await Promise.all([
+    supabase
+      .from("skills")
+      .select("*")
+      .eq("slug", slug)
+      .eq("status", "published")
+      .maybeSingle(),
+    supabase.auth.getUser().catch(() => ({ data: { user: null } })),
+  ]);
 
-  if (skillError || !skill) {
+  if (skillResult.error || !skillResult.data) {
     notFound();
   }
 
-  let user = null;
-  try {
-    const result = await supabase.auth.getUser();
-    user = result.data.user;
-  } catch {
-    // Auth check failed, continue as unauthenticated
-  }
+  const skill = skillResult.data;
+  const user = userResult.data.user;
 
+  // Batch 2: Fetch counts, like/save status, and related skills in parallel
   let likesCount = 0;
   let viewsCount = 0;
-  try {
-    const [likesResult, viewsResult] = await Promise.all([
-      supabase
-        .from("skill_likes")
-        .select("*", { count: "exact", head: true })
-        .eq("skill_id", skill.id),
-      supabase
-        .from("skill_views")
-        .select("*", { count: "exact", head: true })
-        .eq("skill_id", skill.id),
-    ]);
-    likesCount = likesResult.count ?? 0;
-    viewsCount = viewsResult.count ?? 0;
-  } catch {
-    // Count queries failed, use defaults
-  }
-
   let isLiked = false;
   let isSaved = false;
+  let relatedSkills: Skill[] = [];
+
   try {
-    const [likeResult, saveResult] = await Promise.all([
-      supabase
-        .from("skill_likes")
-        .select("id")
-        .eq("user_id", user?.id ?? "")
-        .eq("skill_id", skill.id)
-        .maybeSingle(),
-      supabase
-        .from("skill_saves")
-        .select("id")
-        .eq("user_id", user?.id ?? "")
-        .eq("skill_id", skill.id)
-        .maybeSingle(),
-    ]);
+    const [likesResult, viewsResult, likeResult, saveResult, relatedResult] =
+      await Promise.all([
+        supabase
+          .from("skill_likes")
+          .select("*", { count: "exact", head: true })
+          .eq("skill_id", skill.id),
+        supabase
+          .from("skill_views")
+          .select("*", { count: "exact", head: true })
+          .eq("skill_id", skill.id),
+        user
+          ? supabase
+              .from("skill_likes")
+              .select("id")
+              .eq("user_id", user.id)
+              .eq("skill_id", skill.id)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
+        user
+          ? supabase
+              .from("skill_saves")
+              .select("id")
+              .eq("user_id", user.id)
+              .eq("skill_id", skill.id)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
+        supabase
+          .from("skills")
+          .select("id, slug, title, short_description, category")
+          .eq("status", "published")
+          .eq("category", skill.category)
+          .neq("id", skill.id)
+          .limit(3),
+      ]);
+
+    likesCount = likesResult.count ?? 0;
+    viewsCount = viewsResult.count ?? 0;
     isLiked = !!likeResult.data;
     isSaved = !!saveResult.data;
+    relatedSkills = (relatedResult.data as Skill[]) ?? [];
   } catch {
-    // Like/save check failed, continue
-  }
-
-  let relatedSkills: Skill[] = [];
-  try {
-    const { data } = await supabase
-      .from("skills")
-      .select("id, slug, title, short_description, category")
-      .eq("status", "published")
-      .eq("category", skill.category)
-      .neq("id", skill.id)
-      .limit(3);
-    relatedSkills = (data as Skill[]) ?? [];
-  } catch {
-    // Related skills query failed, continue
+    // Queries failed, use defaults
   }
 
   return (
@@ -117,7 +112,7 @@ export default async function SkillDetailPage({
       <ViewTracker skillId={skill.id} />
 
       {/* Breadcrumb */}
-      <nav className="mb-6 flex items-center gap-2 text-xs tracking-wider text-muted-foreground">
+      <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-xs tracking-wider text-muted-foreground">
         <Link href="/" className="hover:text-primary">
           HOME
         </Link>

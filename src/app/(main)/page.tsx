@@ -4,6 +4,7 @@ import { Container } from "@/components/layout/Container";
 import { createClient } from "@/lib/supabase/server";
 import { SkillCard } from "@/components/skills/SkillCard";
 import { HeroShowcase } from "@/components/skills/HeroShowcase";
+import { SkillGridSkeleton } from "@/components/skills/SkillGridSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Skill } from "@/types/skill";
 
@@ -147,7 +148,6 @@ async function HomeContent() {
 function HomePageSkeleton() {
   return (
     <div className="flex flex-col">
-      {/* Hero Skeleton */}
       <section className="border-b-2 border-border py-12 md:py-16">
         <Container>
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
@@ -162,20 +162,13 @@ function HomePageSkeleton() {
         </Container>
       </section>
 
-      {/* Skills Grid Skeleton */}
       <section className="py-12">
         <Container>
           <div className="mb-8">
             <Skeleton className="h-4 w-20" />
             <Skeleton className="mt-2 h-8 w-32" />
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="border-2 border-border bg-card">
-                <Skeleton className="aspect-[4/3] w-full" />
-              </div>
-            ))}
-          </div>
+          <SkillGridSkeleton count={6} />
         </Container>
       </section>
     </div>
