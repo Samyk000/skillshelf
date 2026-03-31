@@ -4,7 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { deleteSkill, toggleSkillStatus } from "@/app/actions/admin";
+import {
+  deleteSkill,
+  toggleSkillStatus,
+  toggleFeatured,
+} from "@/app/actions/admin";
 import type { Skill } from "@/types/skill";
 
 interface SkillTableProps {
@@ -15,6 +19,9 @@ export function SkillTable({ skills }: SkillTableProps) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [togglingFeaturedId, setTogglingFeaturedId] = useState<string | null>(
+    null
+  );
 
   const handleTogglePublish = async (skill: Skill) => {
     setTogglingId(skill.id);
@@ -29,6 +36,21 @@ export function SkillTable({ skills }: SkillTableProps) {
       router.refresh();
     }
     setTogglingId(null);
+  };
+
+  const handleToggleFeatured = async (skill: Skill) => {
+    setTogglingFeaturedId(skill.id);
+    const result = await toggleFeatured(skill.id, skill.featured);
+
+    if (result.error) {
+      toast.error("Failed to update featured status");
+    } else {
+      toast.success(
+        `Skill ${result.newFeatured ? "featured" : "unfeatured"}`
+      );
+      router.refresh();
+    }
+    setTogglingFeaturedId(null);
   };
 
   const handleDelete = async (skill: Skill) => {
@@ -105,8 +127,21 @@ export function SkillTable({ skills }: SkillTableProps) {
                   {skill.status.toUpperCase()}
                 </span>
               </td>
-              <td className="px-4 py-3 text-muted-foreground">
-                {skill.featured ? "YES" : "NO"}
+              <td className="px-4 py-3">
+                <button
+                  onClick={() => handleToggleFeatured(skill)}
+                  disabled={togglingFeaturedId === skill.id}
+                  aria-label={
+                    skill.featured ? "Unfeature skill" : "Feature skill"
+                  }
+                  className="border border-border px-2 py-1 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase hover:border-primary hover:text-primary disabled:opacity-50"
+                >
+                  {togglingFeaturedId === skill.id
+                    ? "UPDATING..."
+                    : skill.featured
+                      ? "UNFEATURE"
+                      : "FEATURE"}
+                </button>
               </td>
               <td className="px-4 py-3">
                 <div className="flex gap-2">

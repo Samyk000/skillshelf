@@ -2,20 +2,36 @@ import { Suspense } from "react";
 import { Container } from "@/components/layout/Container";
 import { SearchBar } from "@/components/explore/SearchBar";
 import { FilterChips } from "@/components/explore/FilterChips";
+import { SortDropdown } from "@/components/explore/SortDropdown";
 import { SkillGridSkeleton } from "@/components/skills/SkillGridSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SkillsList } from "./SkillsList";
+import { createClient } from "@/lib/supabase/server";
+import { CATEGORIES } from "@/lib/constants";
 
 export const metadata = {
   title: "Explore Skills",
   description: "Browse and search the full library of design skills.",
 };
 
-export default function SkillsPage({
+export default async function SkillsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; category?: string }>;
+  searchParams: Promise<{ q?: string; category?: string; sort?: string }>;
 }) {
+  const supabase = await createClient();
+
+  // Fetch category counts
+  const { data: countRows } = await supabase
+    .from("skills")
+    .select("category")
+    .eq("status", "published");
+
+  const categoryCounts: Record<string, number> = {};
+  for (const cat of CATEGORIES) {
+    categoryCounts[cat] = countRows?.filter((s) => s.category === cat).length ?? 0;
+  }
+
   return (
     <Container className="py-12">
       <div className="mb-8">
@@ -26,7 +42,7 @@ export default function SkillsPage({
           ALL SKILLS
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Browse the full collection. Filter by category or search by keyword.
+          Browse the full collection. Filter by category or sort by popularity.
         </p>
       </div>
 
@@ -43,8 +59,11 @@ export default function SkillsPage({
         }
       >
         <div className="mb-8 flex flex-col gap-4">
-          <SearchBar />
-          <FilterChips />
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <SearchBar />
+            <SortDropdown />
+          </div>
+          <FilterChips categoryCounts={categoryCounts} />
         </div>
       </Suspense>
 

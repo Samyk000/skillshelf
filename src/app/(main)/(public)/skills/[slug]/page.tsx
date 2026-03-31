@@ -208,19 +208,6 @@ export default async function SkillDetailPage({
             <DownloadButton slug={skill.slug} content={skill.skill_markdown} />
           </div>
 
-          {/* Tags */}
-          {skill.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-2">
-              {skill.tags.map((tag: string) => (
-                <span
-                  key={tag}
-                  className="border border-border px-2 py-0.5 text-[10px] tracking-wider text-muted-foreground"
-                >
-                  {tag.toUpperCase()}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 

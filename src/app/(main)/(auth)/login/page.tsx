@@ -30,7 +30,7 @@ export default function LoginPage() {
     // Hard redirect — ensures the entire app re-initializes with new auth cookies.
     // Soft navigation (router.push) is unreliable here because the client-side
     // Supabase SDK may not detect the server-set cookies before rendering.
-    window.location.href = "/dashboard";
+    window.location.href = "/";
   };
 
   return (

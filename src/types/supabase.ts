@@ -40,7 +40,6 @@ export interface Database {
           short_description: string;
           long_description: string | null;
           category: string;
-          tags: string[];
           status: "draft" | "published" | "archived";
           skill_markdown: string;
           preview_html: string | null;
@@ -58,7 +57,6 @@ export interface Database {
           short_description: string;
           long_description?: string | null;
           category: string;
-          tags?: string[];
           status?: "draft" | "published" | "archived";
           skill_markdown: string;
           preview_html?: string | null;
@@ -76,7 +74,6 @@ export interface Database {
           short_description?: string;
           long_description?: string | null;
           category?: string;
-          tags?: string[];
           status?: "draft" | "published" | "archived";
           skill_markdown?: string;
           preview_html?: string | null;

@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizeSearchQuery } from "@/lib/sanitize";
 import { SkillCard } from "@/components/skills/SkillCard";
-import { SkillGridSkeleton } from "@/components/skills/SkillGridSkeleton";
 import type { Skill } from "@/types/skill";
 
 const BATCH_SIZE = 6;
@@ -14,6 +13,7 @@ interface SkillsListClientProps {
   initialHasMore: boolean;
   searchQuery?: string;
   category?: string;
+  sort?: string;
 }
 
 export function SkillsListClient({
@@ -21,76 +21,90 @@ export function SkillsListClient({
   initialHasMore,
   searchQuery,
   category,
+  sort,
 }: SkillsListClientProps) {
   const [skills, setSkills] = useState<Skill[]>(initialSkills);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  const loadingRef = useRef(false);
 
   const loadMore = useCallback(async () => {
-    if (loadingRef.current || !hasMore) return;
-    loadingRef.current = true;
+    if (loading || !hasMore) return;
     setLoading(true);
 
     const supabase = createClient();
-    const from = skills.length;
-    const to = from + BATCH_SIZE - 1;
+    const offset = skills.length;
+    const categoryFilter = category
+      ? sanitizeSearchQuery(category) || null
+      : null;
 
-    let query = supabase
-      .from("skills")
-      .select(
-        "id, slug, title, short_description, category, tags, preview_html, preview_external_url, cover_image_url, featured, created_at, updated_at"
-      )
-      .eq("status", "published")
-      .order("created_at", { ascending: false })
-      .range(from, to);
-
-    if (searchQuery) {
-      const sanitized = sanitizeSearchQuery(searchQuery);
-      if (sanitized.length > 0) {
-        query = query.or(
-          `title.ilike.%${sanitized}%,short_description.ilike.%${sanitized}%,tags.cs.{${sanitized}}`
-        );
-      }
-    }
-
-    if (category) {
-      const sanitizedCategory = sanitizeSearchQuery(category);
-      if (sanitizedCategory.length > 0) {
-        query = query.eq("category", sanitizedCategory);
-      }
-    }
-
-    const { data, error } = await query;
-
-    if (!error && data && data.length > 0) {
-      setSkills((prev) => [...prev, ...(data as Skill[])]);
-      setHasMore(data.length === BATCH_SIZE);
-    } else {
-      setHasMore(false);
-    }
-
-    loadingRef.current = false;
-    setLoading(false);
-  }, [hasMore, searchQuery, category, skills.length]);
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel || !hasMore || loading) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          loadMore();
+    if (sort === "views") {
+      const { data, error } = await supabase.rpc(
+        "get_skills_sorted_by_views",
+        {
+          p_limit: BATCH_SIZE,
+          p_offset: offset,
+          p_category: categoryFilter,
         }
-      },
-      { rootMargin: "300px" }
-    );
+      );
+      if (!error && data && data.length > 0) {
+        setSkills((prev) => [...prev, ...(data as Skill[])]);
+        setHasMore(data.length === BATCH_SIZE);
+      } else {
+        setHasMore(false);
+      }
+    } else if (sort === "likes") {
+      const { data, error } = await supabase.rpc(
+        "get_skills_sorted_by_likes",
+        {
+          p_limit: BATCH_SIZE,
+          p_offset: offset,
+          p_category: categoryFilter,
+        }
+      );
+      if (!error && data && data.length > 0) {
+        setSkills((prev) => [...prev, ...(data as Skill[])]);
+        setHasMore(data.length === BATCH_SIZE);
+      } else {
+        setHasMore(false);
+      }
+    } else {
+      let query = supabase
+        .from("skills")
+        .select(
+          "id, slug, title, short_description, category, preview_html, preview_external_url, cover_image_url, featured, created_at, updated_at"
+        )
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+        .range(offset, offset + BATCH_SIZE - 1);
 
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasMore, loading, loadMore]);
+      if (searchQuery) {
+        const sanitized = sanitizeSearchQuery(searchQuery);
+        if (sanitized.length > 0) {
+          query = query.or(
+            `title.ilike.%${sanitized}%,short_description.ilike.%${sanitized}%`
+          );
+        }
+      }
+
+      if (category) {
+        const sanitizedCategory = sanitizeSearchQuery(category);
+        if (sanitizedCategory.length > 0) {
+          query = query.eq("category", sanitizedCategory);
+        }
+      }
+
+      const { data, error } = await query;
+
+      if (!error && data && data.length > 0) {
+        setSkills((prev) => [...prev, ...(data as Skill[])]);
+        setHasMore(data.length === BATCH_SIZE);
+      } else {
+        setHasMore(false);
+      }
+    }
+
+    setLoading(false);
+  }, [loading, hasMore, sort, searchQuery, category, skills.length]);
 
   return (
     <div>
@@ -111,11 +125,40 @@ export function SkillsListClient({
         </div>
       )}
 
-      {hasMore && <div ref={sentinelRef} className="h-1" aria-hidden="true" />}
-
-      {loading && (
-        <div className="mt-6">
-          <SkillGridSkeleton count={BATCH_SIZE} />
+      {hasMore && (
+        <div className="mt-8 text-center">
+          <button
+            onClick={loadMore}
+            disabled={loading}
+            className="inline-flex items-center gap-2 border-2 border-primary px-8 py-3 text-xs font-bold tracking-widest text-primary uppercase transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-50"
+          >
+            {loading ? (
+              <>
+                <svg
+                  className="h-4 w-4 animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+                LOADING...
+              </>
+            ) : (
+              "LOAD MORE"
+            )}
+          </button>
         </div>
       )}
     </div>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { CATEGORIES, TAGS } from "@/lib/constants";
+import { CATEGORIES } from "@/lib/constants";
 import { createSkill, updateSkill } from "@/app/actions/admin";
 import type { Skill } from "@/types/skill";
 
@@ -25,7 +25,7 @@ function generateSlug(title: string) {
     .replace(/^-|-$/g, "");
 }
 
-export function SkillForm({ skill, status, featured, onStatusChange, onFeaturedChange }: SkillFormProps) {
+export function SkillForm({ skill, status, featured }: SkillFormProps) {
   const router = useRouter();
   const isEditing = !!skill;
 
@@ -34,7 +34,6 @@ export function SkillForm({ skill, status, featured, onStatusChange, onFeaturedC
     slug: skill?.slug ?? "",
     short_description: skill?.short_description ?? "",
     category: skill?.category ?? CATEGORIES[0],
-    tags: skill?.tags ?? [],
     skill_markdown: skill?.skill_markdown ?? "",
     preview_html: skill?.preview_html ?? "",
   });
@@ -46,15 +45,6 @@ export function SkillForm({ skill, status, featured, onStatusChange, onFeaturedC
       ...prev,
       title,
       slug: isEditing ? prev.slug : generateSlug(title),
-    }));
-  };
-
-  const toggleTag = (tag: string) => {
-    setForm((prev) => ({
-      ...prev,
-      tags: prev.tags.includes(tag)
-        ? prev.tags.filter((t) => t !== tag)
-        : [...prev.tags, tag],
     }));
   };
 
@@ -158,29 +148,6 @@ export function SkillForm({ skill, status, featured, onStatusChange, onFeaturedC
               </option>
             ))}
           </select>
-        </div>
-      </div>
-
-      {/* Tags */}
-      <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-          TAGS
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {TAGS.map((tag) => (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => toggleTag(tag)}
-              className={`border-2 px-3 py-1 text-[10px] font-semibold tracking-wider uppercase transition-colors ${
-                form.tags.includes(tag)
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border text-muted-foreground hover:border-primary hover:text-primary"
-              }`}
-            >
-              {tag}
-            </button>
-          ))}
         </div>
       </div>
 

@@ -32,7 +32,6 @@ export interface SkillFormData {
   slug: string;
   short_description: string | null;
   category: string;
-  tags: string[];
   status: "draft" | "published" | "archived";
   skill_markdown: string;
   preview_html: string | null;
@@ -65,7 +64,6 @@ export async function createSkill(data: SkillFormData) {
     skill_markdown: sanitized.skill_markdown,
     preview_html: sanitized.preview_html,
     category: data.category,
-    tags: data.tags,
     status: data.status,
     featured: data.featured,
     created_by: user.id,
@@ -108,7 +106,6 @@ export async function updateSkill(skillId: string, data: SkillFormData) {
       skill_markdown: sanitized.skill_markdown,
       preview_html: sanitized.preview_html,
       category: data.category,
-      tags: data.tags,
       status: data.status,
       featured: data.featured,
     })
@@ -163,4 +160,27 @@ export async function toggleSkillStatus(skillId: string, currentStatus: string) 
 
   revalidatePath("/admin");
   return { error: null, newStatus };
+}
+
+export async function toggleFeatured(skillId: string, currentFeatured: boolean) {
+  const { error: authError, supabase } = await requireAdmin();
+
+  if (authError || !supabase) {
+    return { error: authError ?? "Not authorized" };
+  }
+
+  const newFeatured = !currentFeatured;
+
+  const { error } = await supabase
+    .from("skills")
+    .update({ featured: newFeatured })
+    .eq("id", skillId);
+
+  if (error) {
+    console.error("Failed to toggle featured:", error);
+    return { error: "Failed to update featured status. Please try again." };
+  }
+
+  revalidatePath("/admin");
+  return { error: null, newFeatured };
 }
