@@ -43,6 +43,18 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql STABLE;
 
+-- RPC: Get category counts for published skills
+CREATE OR REPLACE FUNCTION get_category_counts()
+RETURNS TABLE(category TEXT, count BIGINT) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT s.category, COUNT(*)
+  FROM skills s
+  WHERE s.status = 'published'
+  GROUP BY s.category;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
 -- Indexes for optimal RPC performance
 CREATE INDEX IF NOT EXISTS idx_skill_views_skill_id ON skill_views(skill_id);
 CREATE INDEX IF NOT EXISTS idx_skill_likes_skill_id ON skill_likes(skill_id);

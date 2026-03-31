@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { memo, useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { downloadMarkdown } from "@/lib/download";
@@ -14,7 +14,7 @@ interface SkillCardProps {
   viewCount?: number;
 }
 
-export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
+export const SkillCard = memo(function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [fetching, setFetching] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -220,7 +220,7 @@ export function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
       </div>
     </div>
   );
-}
+});
 
 function SkillCardSkeleton() {
   return (

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { memo, useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 interface CopyButtonProps {
   content: string;
 }
 
-export function CopyButton({ content }: CopyButtonProps) {
+export const CopyButton = memo(function CopyButton({ content }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -46,4 +46,4 @@ export function CopyButton({ content }: CopyButtonProps) {
       {copied ? "COPIED!" : "COPY SKILL"}
     </button>
   );
-}
+});

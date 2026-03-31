@@ -94,10 +94,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, [loadUser]);
 
   // Refresh when the page becomes visible again (handles cross-tab auth changes)
+  // Debounced to prevent excessive queries on rapid tab switches
   useEffect(() => {
+    let lastFetch = 0;
+    const COOLDOWN_MS = 5000;
+
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        loadUser();
+        const now = Date.now();
+        if (now - lastFetch > COOLDOWN_MS) {
+          lastFetch = now;
+          loadUser();
+        }
       }
     };
 

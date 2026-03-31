@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { downloadMarkdown } from "@/lib/download";
 import { toast } from "sonner";
 
@@ -8,7 +9,7 @@ interface DownloadButtonProps {
   content: string;
 }
 
-export function DownloadButton({ slug, content }: DownloadButtonProps) {
+export const DownloadButton = memo(function DownloadButton({ slug, content }: DownloadButtonProps) {
   const handleDownload = () => {
     downloadMarkdown(slug, content);
     toast.success("Skill downloaded!");
@@ -22,4 +23,4 @@ export function DownloadButton({ slug, content }: DownloadButtonProps) {
       DOWNLOAD .MD
     </button>
   );
-}
+});

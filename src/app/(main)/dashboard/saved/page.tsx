@@ -4,6 +4,8 @@ import Link from "next/link";
 import { SkillGrid } from "@/components/skills/SkillGrid";
 import type { Skill } from "@/types/skill";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Saved Skills",
 };

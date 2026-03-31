@@ -3,6 +3,8 @@ import { SkillTable } from "@/components/admin/SkillTable";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import type { Skill } from "@/types/skill";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Admin - Skills",
 };
@@ -12,7 +14,7 @@ export default async function AdminPage() {
 
   const { data: skills } = await supabase
     .from("skills")
-    .select("*")
+    .select("id, slug, title, category, status, featured, created_at, updated_at")
     .order("created_at", { ascending: false });
 
   return (

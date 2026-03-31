@@ -21,15 +21,23 @@ export default async function SkillsPage({
 }) {
   const supabase = await createClient();
 
-  // Fetch category counts
-  const { data: countRows } = await supabase
-    .from("skills")
-    .select("category")
-    .eq("status", "published");
-
+  // Fetch category counts via RPC (single query, no full-table transfer)
   const categoryCounts: Record<string, number> = {};
   for (const cat of CATEGORIES) {
-    categoryCounts[cat] = countRows?.filter((s) => s.category === cat).length ?? 0;
+    categoryCounts[cat] = 0;
+  }
+
+  try {
+    const { data: counts } = await supabase.rpc("get_category_counts");
+    if (counts) {
+      for (const row of counts) {
+        if (row.category in categoryCounts) {
+          categoryCounts[row.category] = Number(row.count);
+        }
+      }
+    }
+  } catch {
+    // RPC not available yet, use defaults (all zeros)
   }
 
   return (

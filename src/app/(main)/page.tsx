@@ -1,12 +1,17 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import { Container } from "@/components/layout/Container";
 import { createClient } from "@/lib/supabase/server";
 import { SkillCard } from "@/components/skills/SkillCard";
-import { HeroShowcase } from "@/components/skills/HeroShowcase";
 import { SkillGridSkeleton } from "@/components/skills/SkillGridSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Skill } from "@/types/skill";
+
+const HeroShowcase = dynamic(
+  () => import("@/components/skills/HeroShowcase").then((mod) => ({ default: mod.HeroShowcase })),
+  { loading: () => <Skeleton className="h-[500px] w-full rounded-lg" /> }
+);
 
 /**
  * Revalidate this page every 60 seconds.
@@ -18,17 +23,20 @@ export const revalidate = 60;
 async function HomeContent() {
   const supabase = await createClient();
 
+  const columns =
+    "id, slug, title, short_description, category, cover_image_url, preview_html, preview_external_url, featured, created_at, updated_at";
+
   const [{ data: showcaseData }, { data: allSkillsData }] = await Promise.all([
     supabase
       .from("skills")
-      .select("*")
+      .select(columns)
       .eq("status", "published")
       .eq("featured", true)
       .order("updated_at", { ascending: false })
       .limit(5),
     supabase
       .from("skills")
-      .select("*")
+      .select(columns)
       .eq("status", "published")
       .order("updated_at", { ascending: false })
       .limit(6),

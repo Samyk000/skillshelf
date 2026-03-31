@@ -1,27 +1,40 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Container } from "@/components/layout/Container";
-import { SkillPreview } from "@/components/skills/SkillPreview";
 import { CopyButton } from "@/components/skills/CopyButton";
 import { DownloadButton } from "@/components/skills/DownloadButton";
 import { LikeButton } from "@/components/skills/LikeButton";
 import { SaveButton } from "@/components/skills/SaveButton";
 import { ViewTracker } from "@/components/skills/ViewTracker";
 import { createClient } from "@/lib/supabase/server";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Skill } from "@/types/skill";
+
+const SkillPreview = dynamic(
+  () => import("@/components/skills/SkillPreview").then((mod) => ({ default: mod.SkillPreview })),
+  { loading: () => <Skeleton className="h-[500px] w-full" /> }
+);
 
 interface SkillDetailPageProps {
   params: Promise<{ slug: string }>;
 }
 
+const getSkill = cache(async (slug: string) => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("skills")
+    .select("*")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .maybeSingle();
+  return data;
+});
+
 export async function generateMetadata({ params }: SkillDetailPageProps) {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data: skill } = await supabase
-    .from("skills")
-    .select("title, short_description")
-    .eq("slug", slug)
-    .maybeSingle();
+  const skill = await getSkill(slug);
 
   if (!skill) return { title: "Skill Not Found" };
 
@@ -35,24 +48,24 @@ export default async function SkillDetailPage({
   params,
 }: SkillDetailPageProps) {
   const { slug } = await params;
-  const supabase = await createClient();
 
-  // Batch 1: Fetch skill + auth in parallel
-  const [skillResult, userResult] = await Promise.all([
-    supabase
-      .from("skills")
-      .select("*")
-      .eq("slug", slug)
-      .eq("status", "published")
-      .maybeSingle(),
-    supabase.auth.getUser().catch(() => ({ data: { user: null } })),
+  // Batch 1: Fetch skill + auth in parallel (skill uses cache for dedup with generateMetadata)
+  const [skill, userResult] = await Promise.all([
+    getSkill(slug),
+    (async () => {
+      try {
+        const supabase = await createClient();
+        return await supabase.auth.getUser();
+      } catch {
+        return { data: { user: null } };
+      }
+    })(),
   ]);
 
-  if (skillResult.error || !skillResult.data) {
+  if (!skill) {
     notFound();
   }
 
-  const skill = skillResult.data;
   const user = userResult.data.user;
 
   // Batch 2: Fetch counts, like/save status, and related skills in parallel
@@ -63,6 +76,7 @@ export default async function SkillDetailPage({
   let relatedSkills: Skill[] = [];
 
   try {
+    const supabase = await createClient();
     const [likesResult, viewsResult, likeResult, saveResult, relatedResult] =
       await Promise.all([
         supabase

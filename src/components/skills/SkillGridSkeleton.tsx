@@ -1,10 +1,11 @@
+import { memo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface SkillGridSkeletonProps {
   count?: number;
 }
 
-export function SkillGridSkeleton({ count = 6 }: SkillGridSkeletonProps) {
+export const SkillGridSkeleton = memo(function SkillGridSkeleton({ count = 6 }: SkillGridSkeletonProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: count }, (_, i) => (
@@ -22,4 +23,4 @@ export function SkillGridSkeleton({ count = 6 }: SkillGridSkeletonProps) {
       ))}
     </div>
   );
-}
+});

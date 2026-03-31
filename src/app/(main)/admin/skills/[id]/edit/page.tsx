@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { EditSkillForm } from "@/components/admin/EditSkillForm";
@@ -7,14 +8,19 @@ interface EditSkillPageProps {
   params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata({ params }: EditSkillPageProps) {
-  const { id } = await params;
+const getSkillById = cache(async (id: string) => {
   const supabase = await createClient();
-  const { data: skill } = await supabase
+  const { data } = await supabase
     .from("skills")
-    .select("title")
+    .select("*")
     .eq("id", id)
     .single();
+  return data;
+});
+
+export async function generateMetadata({ params }: EditSkillPageProps) {
+  const { id } = await params;
+  const skill = await getSkillById(id);
 
   return {
     title: skill ? `Edit: ${skill.title}` : "Skill Not Found",
@@ -23,13 +29,7 @@ export async function generateMetadata({ params }: EditSkillPageProps) {
 
 export default async function EditSkillPage({ params }: EditSkillPageProps) {
   const { id } = await params;
-  const supabase = await createClient();
-
-  const { data: skill } = await supabase
-    .from("skills")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const skill = await getSkillById(id);
 
   if (!skill) notFound();
 

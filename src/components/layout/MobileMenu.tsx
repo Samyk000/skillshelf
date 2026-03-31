@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useUser } from "./UserProvider";

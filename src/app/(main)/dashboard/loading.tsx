@@ -7,8 +7,8 @@ export default function DashboardLoading() {
         <div className="h-4 w-24 bg-muted" />
         <div className="mt-2 h-8 w-48 bg-muted" />
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {[...Array(2)].map((_, i) => (
           <div key={i} className="h-32 animate-pulse border-2 border-border bg-muted" />
         ))}
       </div>

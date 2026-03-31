@@ -75,6 +75,7 @@ export async function createSkill(data: SkillFormData) {
   }
 
   revalidatePath("/admin");
+  revalidatePath("/skills");
   return { error: null };
 }
 
@@ -118,6 +119,7 @@ export async function updateSkill(skillId: string, data: SkillFormData) {
 
   revalidatePath("/admin");
   revalidatePath(`/admin/skills/${skillId}/edit`);
+  revalidatePath("/skills");
   return { error: null };
 }
 
@@ -136,6 +138,7 @@ export async function deleteSkill(skillId: string) {
   }
 
   revalidatePath("/admin");
+  revalidatePath("/skills");
   return { error: null };
 }
 
@@ -182,5 +185,6 @@ export async function toggleFeatured(skillId: string, currentFeatured: boolean) 
   }
 
   revalidatePath("/admin");
+  revalidatePath("/");
   return { error: null, newFeatured };
 }
