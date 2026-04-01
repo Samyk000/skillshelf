@@ -27,19 +27,20 @@ export function FilterChips({ categoryCounts }: FilterChipsProps) {
   };
 
   return (
-    <div role="group" aria-label="Filter by category" className="flex flex-wrap gap-2">
+    <div role="group" aria-label="Filter by category" className="grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
       {CATEGORIES.map((category) => (
         <button
           key={category}
           onClick={() => handleFilter(category)}
           aria-pressed={activeCategory === category}
-          className={`border-2 px-3 py-1.5 text-[10px] font-semibold tracking-wider uppercase transition-colors ${
+          className={`border px-2 py-1.5 text-[9px] font-semibold tracking-wider uppercase transition-colors sm:border-2 sm:px-3 sm:py-1.5 sm:text-[10px] ${
             activeCategory === category
               ? "border-primary bg-primary text-primary-foreground"
               : "border-border text-muted-foreground hover:border-primary hover:text-primary"
           }`}
         >
-          {category.toUpperCase()} ({categoryCounts[category] ?? 0})
+          <span className="sm:hidden">{category}</span>
+          <span className="hidden sm:inline">{category.toUpperCase()} ({categoryCounts[category] ?? 0})</span>
         </button>
       ))}
     </div>

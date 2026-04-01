@@ -40,37 +40,42 @@ export default async function SkillsPage({
   }
 
   return (
-    <Container className="py-12">
-      <h1 className="font-display text-3xl font-bold tracking-wide md:text-4xl">
-        EXPLORE
+    <Container className="pt-6 pb-12 sm:pt-8">
+      <h1 className="font-display text-2xl font-bold tracking-wide sm:text-3xl md:text-4xl">
+        SKILLS
       </h1>
 
       <Suspense
         fallback={
-          <div className="mt-8 flex flex-col gap-6">
-            <div className="flex gap-3">
-              <Skeleton className="h-12 flex-1" />
-              <Skeleton className="h-12 w-72" />
+          <div className="mt-4 flex flex-col gap-4 sm:mt-6 sm:gap-5">
+            <div className="flex gap-2 sm:gap-3">
+              <Skeleton className="h-10 flex-1 sm:h-12" />
+              <Skeleton className="h-10 w-36 sm:h-12 sm:w-72" />
             </div>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="h-8 w-20" />
+            <div className="flex gap-1.5 sm:gap-2">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Skeleton key={i} className="h-7 w-16 sm:h-8 sm:w-20" />
               ))}
             </div>
           </div>
         }
       >
-        <div className="mt-8 flex flex-col gap-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="mt-4 flex flex-col gap-4 sm:mt-6 sm:gap-5">
+          {/* Search bar + Sort tabs on same line */}
+          <div className="flex items-center gap-2 sm:gap-4">
             <SearchBar />
             <SortTabs />
           </div>
+
+          {/* Category chips */}
           <FilterChips categoryCounts={categoryCounts} />
         </div>
       </Suspense>
 
       <Suspense fallback={<SkillGridSkeleton count={6} />}>
-        <SkillsList searchParams={searchParams} />
+        <div className="mt-5 sm:mt-6">
+          <SkillsList searchParams={searchParams} />
+        </div>
       </Suspense>
     </Container>
   );

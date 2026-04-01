@@ -41,7 +41,7 @@ export function SearchBar() {
         onChange={(e) => handleSearch(e.target.value)}
         placeholder="SEARCH SKILLS..."
         aria-label="Search skills"
-        className="w-full border-2 border-input bg-background px-4 py-3 text-sm tracking-wider text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+        className="w-full border-2 border-border bg-background px-4 py-2.5 text-xs tracking-wider text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none sm:text-sm"
       />
       {isPending && (
         <div className="absolute right-3 top-1/2 -translate-y-1/2">

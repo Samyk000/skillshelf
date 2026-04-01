@@ -4,8 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 const SORT_OPTIONS = [
   { value: "recent", label: "RECENT" },
-  { value: "views", label: "MOST VIEWED" },
-  { value: "likes", label: "MOST LIKED" },
+  { value: "views", label: "VIEWED" },
+  { value: "likes", label: "LIKED" },
 ];
 
 export function SortTabs() {
@@ -27,18 +27,20 @@ export function SortTabs() {
     <div
       role="tablist"
       aria-label="Sort skills by"
-      className="flex shrink-0 gap-1"
+      className="flex shrink-0 gap-0"
     >
-      {SORT_OPTIONS.map((option) => (
+      {SORT_OPTIONS.map((option, index) => (
         <button
           key={option.value}
           role="tab"
           aria-selected={currentSort === option.value}
           onClick={() => handleClick(option.value)}
-          className={`border-2 px-3 py-2.5 text-[10px] font-bold tracking-wider uppercase transition-colors sm:px-4 ${
+          className={`border-y-2 border-r-2 px-3 py-2.5 text-[9px] font-bold tracking-wider uppercase transition-colors first:rounded-l last:rounded-r last:border-r-2 sm:px-4 sm:text-[10px] ${
+            index === 0 ? "border-l-2" : ""
+          } ${
             currentSort === option.value
               ? "border-primary bg-primary text-primary-foreground"
-              : "border-border text-muted-foreground hover:border-primary hover:text-primary"
+              : "border-border bg-muted/50 text-muted-foreground hover:border-primary hover:text-primary"
           }`}
         >
           {option.label}
