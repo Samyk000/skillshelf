@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizeSearchQuery } from "@/lib/sanitize";
 import { SkillCard } from "@/components/skills/SkillCard";
@@ -23,6 +23,7 @@ export function SkillsListClient({
   category,
   sort,
 }: SkillsListClientProps) {
+  const supabase = useMemo(() => createClient(), []);
   const [skills, setSkills] = useState<Skill[]>(initialSkills);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
@@ -31,7 +32,6 @@ export function SkillsListClient({
     if (loading || !hasMore) return;
     setLoading(true);
 
-    const supabase = createClient();
     const offset = skills.length;
     const categoryFilter = category
       ? sanitizeSearchQuery(category) || null

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   deleteSkill,
@@ -16,7 +15,6 @@ interface SkillTableProps {
 }
 
 export function SkillTable({ skills }: SkillTableProps) {
-  const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [togglingFeaturedId, setTogglingFeaturedId] = useState<string | null>(
@@ -33,7 +31,6 @@ export function SkillTable({ skills }: SkillTableProps) {
       toast.success(
         `Skill ${result.newStatus === "published" ? "published" : "unpublished"}`
       );
-      router.refresh();
     }
     setTogglingId(null);
   };
@@ -48,7 +45,6 @@ export function SkillTable({ skills }: SkillTableProps) {
       toast.success(
         `Skill ${result.newFeatured ? "featured" : "unfeatured"}`
       );
-      router.refresh();
     }
     setTogglingFeaturedId(null);
   };
@@ -63,7 +59,6 @@ export function SkillTable({ skills }: SkillTableProps) {
       toast.error("Failed to delete skill");
     } else {
       toast.success("Skill deleted");
-      router.refresh();
     }
     setDeletingId(null);
   };

@@ -1,5 +1,13 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV === "development";
+
+// In development, React uses eval() for debugging (reconstructing callstacks).
+// In production, React never uses eval() — unsafe-eval is not needed.
+const scriptSrc = isDev
+  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:"
+  : "script-src 'self' 'unsafe-inline' https:";
+
 const securityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -16,12 +24,14 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:",
-      "style-src 'self' 'unsafe-inline' https: http:",
-      "font-src 'self' data: https: http:",
-      "img-src 'self' data: https: blob: http:",
-      "frame-src 'self' blob: https: http:",
-      "connect-src 'self' https: http: ws: wss:",
+      // Preview HTML renders in sandboxed iframes (no allow-same-origin).
+      // The sandbox provides primary isolation; CSP adds defense-in-depth.
+      scriptSrc,
+      "style-src 'self' 'unsafe-inline' https:",
+      "font-src 'self' data: https:",
+      "img-src 'self' data: https: blob:",
+      "frame-src 'self' blob: https:",
+      "connect-src 'self' https: ws: wss:",
     ].join("; "),
   },
 ];

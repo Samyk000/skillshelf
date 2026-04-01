@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState, useRef, useEffect } from "react";
+import { memo, useMemo, useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { downloadMarkdown } from "@/lib/download";
@@ -15,6 +15,7 @@ interface SkillCardProps {
 }
 
 export const SkillCard = memo(function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
+  const supabase = useMemo(() => createClient(), []);
   const [isVisible, setIsVisible] = useState(false);
   const [fetching, setFetching] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -25,7 +26,6 @@ export const SkillCard = memo(function SkillCard({ skill, likeCount, viewCount }
 
     // Fetch it on-demand
     setFetching(true);
-    const supabase = createClient();
     const { data, error } = await supabase
       .from("skills")
       .select("skill_markdown")

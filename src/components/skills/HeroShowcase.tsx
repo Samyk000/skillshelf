@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Skill } from "@/types/skill";
@@ -10,11 +10,26 @@ interface HeroShowcaseProps {
 }
 
 export function HeroShowcase({ skills }: HeroShowcaseProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [loadedSlides, setLoadedSlides] = useState<Set<number>>(
     () => new Set([0])
   );
+
+  // Pause rotation when carousel is not in viewport
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   const addLoadedSlide = useCallback((index: number) => {
     setLoadedSlides((prev) => {
@@ -46,7 +61,7 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
   );
 
   useEffect(() => {
-    if (isPaused || skills.length <= 1) return;
+    if (isPaused || skills.length <= 1 || !isVisible) return;
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) => {
@@ -57,7 +72,7 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [isPaused, skills.length, addLoadedSlide]);
+  }, [isPaused, skills.length, addLoadedSlide, isVisible]);
 
   if (skills.length === 0) {
     return (
@@ -84,6 +99,7 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
       </div>
 
       <div
+        ref={containerRef}
         className="relative h-[500px] overflow-hidden rounded-lg border-2 border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         tabIndex={0}
         onMouseEnter={() => setIsPaused(true)}

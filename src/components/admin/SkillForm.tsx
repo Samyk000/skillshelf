@@ -78,7 +78,6 @@ export function SkillForm({ skill, status, featured }: SkillFormProps) {
     } else {
       toast.success(`Skill ${isEditing ? "updated" : "created"}!`);
       router.push("/admin");
-      router.refresh();
     }
     setSaving(false);
   };

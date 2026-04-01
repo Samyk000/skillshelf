@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://skillshelf.com";
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
@@ -7,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/dashboard/", "/admin/"],
     },
-    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL}/sitemap.xml`,
+    sitemap: `${baseUrl}/sitemap.xml`,
   };
 }

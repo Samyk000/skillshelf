@@ -58,3 +58,32 @@ $$ LANGUAGE plpgsql STABLE;
 -- Indexes for optimal RPC performance
 CREATE INDEX IF NOT EXISTS idx_skill_views_skill_id ON skill_views(skill_id);
 CREATE INDEX IF NOT EXISTS idx_skill_likes_skill_id ON skill_likes(skill_id);
+CREATE INDEX IF NOT EXISTS idx_skill_saves_skill_id ON skill_saves(skill_id);
+
+-- RPC: Get user's liked skills (single query instead of two sequential queries)
+CREATE OR REPLACE FUNCTION get_user_liked_skills(p_user_id UUID)
+RETURNS SETOF skills AS $$
+BEGIN
+  RETURN QUERY
+  SELECT s.*
+  FROM skills s
+  INNER JOIN skill_likes sl ON sl.skill_id = s.id
+  WHERE sl.user_id = p_user_id
+    AND s.status = 'published'
+  ORDER BY sl.created_at DESC;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
+-- RPC: Get user's saved skills (single query instead of two sequential queries)
+CREATE OR REPLACE FUNCTION get_user_saved_skills(p_user_id UUID)
+RETURNS SETOF skills AS $$
+BEGIN
+  RETURN QUERY
+  SELECT s.*
+  FROM skills s
+  INNER JOIN skill_saves ss ON ss.skill_id = s.id
+  WHERE ss.user_id = p_user_id
+    AND s.status = 'published'
+  ORDER BY ss.created_at DESC;
+END;
+$$ LANGUAGE plpgsql STABLE;

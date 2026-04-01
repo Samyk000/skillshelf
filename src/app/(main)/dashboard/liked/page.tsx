@@ -20,25 +20,9 @@ export default async function LikedSkillsPage() {
     redirect("/login");
   }
 
-  const { data: likes } = await supabase
-    .from("skill_likes")
-    .select("skill_id")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-  const skillIds = likes?.map((l) => l.skill_id) ?? [];
-
-  let skills: Skill[] = [];
-  if (skillIds.length > 0) {
-    const { data } = await supabase
-      .from("skills")
-      .select(
-        "id, slug, title, short_description, category, preview_html, preview_external_url, cover_image_url, featured, created_at, updated_at"
-      )
-      .in("id", skillIds)
-      .eq("status", "published");
-    skills = (data as Skill[]) ?? [];
-  }
+  const { data: skills } = await supabase.rpc("get_user_liked_skills", {
+    p_user_id: user.id,
+  });
 
   return (
     <div>
@@ -50,7 +34,7 @@ export default async function LikedSkillsPage() {
           LIKED SKILLS
         </h2>
       </div>
-      {skills.length === 0 ? (
+      {!skills || skills.length === 0 ? (
         <div className="border-2 border-border bg-card p-12 text-center">
           <p className="text-muted-foreground">
             You have not liked any skills yet.
@@ -63,7 +47,7 @@ export default async function LikedSkillsPage() {
           </Link>
         </div>
       ) : (
-        <SkillGrid skills={skills} />
+        <SkillGrid skills={skills as Skill[]} />
       )}
     </div>
   );
