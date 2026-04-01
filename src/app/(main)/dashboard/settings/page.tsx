@@ -2,29 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useUser } from "@/components/layout/UserProvider";
 import { toast } from "sonner";
 import { updateProfile } from "@/app/actions/user";
 import { signOut } from "@/app/actions/auth";
 
 export default function SettingsPage() {
+  const { user } = useUser();
   const [displayName, setDisplayName] = useState("");
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    if (!user) return;
+
     const loadProfile = async () => {
       const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        window.location.href = "/login";
-        return;
-      }
-
-      setEmail(user.email ?? "");
-
       const { data: profile } = await supabase
         .from("profiles")
         .select("display_name")
@@ -35,7 +28,7 @@ export default function SettingsPage() {
       setLoading(false);
     };
     loadProfile();
-  }, []);
+  }, [user]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,7 +80,7 @@ export default function SettingsPage() {
           <input
             id="settings-email"
             type="email"
-            value={email}
+            value={user?.email ?? ""}
             disabled
             className="border-2 border-input bg-muted px-3 py-2 text-sm text-muted-foreground"
           />

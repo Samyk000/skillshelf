@@ -114,7 +114,7 @@ export const SkillCard = memo(function SkillCard({ skill, likeCount, viewCount }
             {isVisible ? (
               <iframe
                 srcDoc={skill.preview_html}
-                sandbox="allow-scripts allow-popups allow-same-origin"
+                sandbox="allow-scripts allow-popups"
                 title={`Preview: ${skill.title}`}
                 className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
                 loading="lazy"

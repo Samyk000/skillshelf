@@ -25,7 +25,9 @@ const getSkill = cache(async (slug: string) => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("skills")
-    .select("*")
+    .select(
+      "id, slug, title, short_description, long_description, category, status, skill_markdown, preview_html, preview_external_url, cover_image_url, featured, created_by, created_at, updated_at"
+    )
     .eq("slug", slug)
     .eq("status", "published")
     .maybeSingle();

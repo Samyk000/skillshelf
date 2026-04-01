@@ -10,7 +10,9 @@ export default function StandaloneError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Standalone route error:", error);
+    if (process.env.NODE_ENV !== "production") {
+      console.error("Standalone route error:", error);
+    }
   }, [error]);
 
   return (

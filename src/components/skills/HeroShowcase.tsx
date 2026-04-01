@@ -12,15 +12,38 @@ interface HeroShowcaseProps {
 export function HeroShowcase({ skills }: HeroShowcaseProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  // Track which slides have been viewed so their iframes stay rendered
   const [loadedSlides, setLoadedSlides] = useState<Set<number>>(
     () => new Set([0])
   );
 
-  const goToSlide = useCallback((index: number) => {
-    setCurrentIndex(index);
-    setLoadedSlides((prev) => new Set(prev).add(index));
-  }, []);
+  const addLoadedSlide = useCallback((index: number) => {
+    setLoadedSlides((prev) => {
+      const next = new Set(prev);
+      next.add(index);
+      // Keep only the current slide and 2 adjacent slides to limit memory
+      // This ensures recent slides stay loaded while old ones are released
+      if (next.size > 3) {
+        for (const i of next) {
+          if (
+            i !== index &&
+            Math.abs(((i - index + skills.length) % skills.length)) > 1
+          ) {
+            next.delete(i);
+            break;
+          }
+        }
+      }
+      return next;
+    });
+  }, [skills.length]);
+
+  const goToSlide = useCallback(
+    (index: number) => {
+      setCurrentIndex(index);
+      addLoadedSlide(index);
+    },
+    [addLoadedSlide]
+  );
 
   useEffect(() => {
     if (isPaused || skills.length <= 1) return;
@@ -28,13 +51,13 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => {
         const next = (prev + 1) % skills.length;
-        setLoadedSlides((prevSet) => new Set(prevSet).add(next));
+        addLoadedSlide(next);
         return next;
       });
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [isPaused, skills.length]);
+  }, [isPaused, skills.length, addLoadedSlide]);
 
   if (skills.length === 0) {
     return (
@@ -102,7 +125,7 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
                 {loadedSlides.has(index) ? (
                   <iframe
                     srcDoc={skill.preview_html}
-                    sandbox="allow-scripts allow-popups allow-same-origin"
+                    sandbox="allow-scripts allow-popups"
                     title={`Preview: ${skill.title}`}
                     className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
                     loading="lazy"

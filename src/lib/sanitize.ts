@@ -1,21 +1,19 @@
 /**
- * Sanitize preview HTML before storing/rendering in sandboxed iframes.
+ * Pass through preview HTML unchanged — security is provided by the iframe
+ * sandbox (`allow-scripts allow-popups`), not by string sanitization.
  *
- * Defence-in-depth: the iframes use `sandbox="allow-scripts allow-popups"`
- * (no allow-same-origin) so scripts cannot reach the parent. We still strip
- * the most dangerous patterns as a belt-and-suspenders measure.
+ * Security model: iframes use `sandbox="allow-scripts allow-popups"` without
+ * `allow-same-origin`. This ensures scripts execute in an opaque null origin
+ * and cannot access the parent window, DOM, cookies, or localStorage.
+ *
+ * External CDN scripts (Tailwind, Vue, etc.) load from different origins and
+ * work fine without `allow-same-origin`. Inline scripts execute within the
+ * iframe's isolated context.
+ *
+ * Only authenticated admins can upload preview HTML (enforced in admin.ts).
+ * Complex prototypes (Tailwind CDN, interactive elements) require full HTML.
  */
-// We no longer strip <script> tags because proper HTML previews often require
-// external libraries (e.g. Tailwind CDN, Vue, or interactive elements).
-// SECURITY: The iframe sandbox `allow-scripts` WITHOUT `allow-same-origin`
-// ensures that these scripts execute in a generic 'null' origin and absolutely
-// cannot access the parent window, DOM, cookies, or localStorage. This makes
-// inline scripts completely safe.
-// We do not sanitize preview HTML because it is exclusively uploaded by authenticated
-// admins (checked in admin.ts). Admins need to be able to upload complex, 
-// fully-functioning prototypes (e.g. from Stitch) which may contain inline scripts,
-// CDNs, and interactive Tailwind logic. Over-sanitization will break these prototypes.
-export function sanitizePreviewHtml(html: string): string {
+export function passthroughPreviewHtml(html: string): string {
   if (!html || typeof html !== "string") return "";
   return html;
 }
@@ -49,15 +47,14 @@ export function sanitizeSkillInput(data: {
 } {
   return {
     ...data,
-    title: sanitizeTextInput(data.title ?? "").slice(0, 200),
-    slug: (data.slug ?? "").trim().toLowerCase().slice(0, 100),
+    title: sanitizeTextInput(data.title ?? "").slice(0, 20),
+    slug: (data.slug ?? "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 100),
     short_description: data.short_description
-      ? sanitizeTextInput(data.short_description).slice(0, 500)
+      ? sanitizeTextInput(data.short_description).slice(0, 50)
       : null,
-    skill_markdown: (data.skill_markdown ?? "").trim(),
-    // Sanitize preview HTML (strip scripts + dangerous handlers)
+    skill_markdown: (data.skill_markdown ?? "").trim().slice(0, 6000),
     preview_html: data.preview_html
-      ? sanitizePreviewHtml(data.preview_html.trim())
+      ? passthroughPreviewHtml(data.preview_html.trim())
       : null,
   };
 }

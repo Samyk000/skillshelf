@@ -13,7 +13,9 @@ export default function MainError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Main route error:", error);
+    if (process.env.NODE_ENV !== "production") {
+      console.error("Main route error:", error);
+    }
   }, [error]);
 
   return (

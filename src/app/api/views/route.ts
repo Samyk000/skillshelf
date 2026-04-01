@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
           "created_at",
           new Date(Date.now() - RATE_LIMIT_HOURS * 60 * 60 * 1000).toISOString()
         )
-        .limit(10);
+        .limit(3);
 
       // Check if we already have too many anonymous views (basic rate limit)
       if (recentAnonymousView && recentAnonymousView.length >= 3) {

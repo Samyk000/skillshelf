@@ -60,7 +60,7 @@ export function SkillPreview({ previewHtml, title, slug }: SkillPreviewProps) {
         {isVisible ? (
           <iframe
             srcDoc={previewHtml}
-            sandbox="allow-scripts allow-popups allow-same-origin"
+            sandbox="allow-scripts allow-popups"
             title={`Preview: ${title}`}
             className="absolute inset-0 h-full w-full border-0"
           />
