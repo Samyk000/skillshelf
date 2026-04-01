@@ -103,21 +103,21 @@ body {
    ======================================== */
 .light,
 [data-theme="light"] {
-  --background: #FFFFFF;
-  --foreground: #0A0A0A;
-  --card: #F5F5F5;
-  --card-foreground: #0A0A0A;
-  --popover: #F5F5F5;
-  --popover-foreground: #0A0A0A;
-  --muted: #F0F0F0;
-  --muted-foreground: #666666;
-  --border: #E0E0E0;
-  --input: #E0E0E0;
-  --ring: #39FF14;
-  --primary: #2ACC0D;
+  --background: #FAFAFA;
+  --foreground: #111111;
+  --card: #F0F0F0;
+  --card-foreground: #111111;
+  --popover: #FFFFFF;
+  --popover-foreground: #111111;
+  --muted: #E8E8E8;
+  --muted-foreground: #4A4A4A;
+  --border: #D0D0D0;
+  --input: #C8C8C8;
+  --ring: #2ACC0D;
+  --primary: #1A9E00;
   --primary-foreground: #FFFFFF;
-  --accent: #CCB000;
-  --accent-foreground: #0A0A0A;
+  --accent: #9A8400;
+  --accent-foreground: #111111;
   --destructive: #CC2828;
   --destructive-foreground: #FFFFFF;
 }
