@@ -100,6 +100,9 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
 
       <div
         ref={containerRef}
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Featured skills showcase"
         className="relative h-[500px] overflow-hidden rounded-lg border-2 border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         tabIndex={0}
         onMouseEnter={() => setIsPaused(true)}

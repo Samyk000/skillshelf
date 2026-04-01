@@ -40,6 +40,7 @@ export function SearchBar() {
         value={query}
         onChange={(e) => handleSearch(e.target.value)}
         placeholder="SEARCH SKILLS..."
+        aria-label="Search skills"
         className="w-full border-2 border-input bg-background px-4 py-3 text-sm tracking-wider text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
       />
       {isPending && (

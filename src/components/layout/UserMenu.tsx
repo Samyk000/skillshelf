@@ -94,6 +94,7 @@ export function UserMenu() {
             >
               <Link
                 href="/dashboard"
+                role="menuitem"
                 onClick={() => setMenuOpen(false)}
                 className="block border-b border-border px-4 py-3 text-xs font-semibold tracking-widest text-muted-foreground uppercase transition-colors hover:bg-muted hover:text-primary"
               >
@@ -101,6 +102,7 @@ export function UserMenu() {
               </Link>
               <Link
                 href="/dashboard/settings"
+                role="menuitem"
                 onClick={() => setMenuOpen(false)}
                 className="block border-b border-border px-4 py-3 text-xs font-semibold tracking-widest text-muted-foreground uppercase transition-colors hover:bg-muted hover:text-primary"
               >
@@ -108,6 +110,7 @@ export function UserMenu() {
               </Link>
               <button
                 onClick={handleSignOut}
+                role="menuitem"
                 className="block w-full px-4 py-3 text-left text-xs font-semibold tracking-widest text-destructive uppercase transition-colors hover:bg-muted"
               >
                 SIGN OUT

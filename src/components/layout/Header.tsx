@@ -20,6 +20,12 @@ export function Header() {
   return (
     <UserProvider>
       <header className="sticky top-0 z-50 border-b-2 border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-primary-foreground"
+      >
+        Skip to content
+      </a>
       <Container>
         <div className="flex h-14 items-center justify-between">
           {/* Logo */}

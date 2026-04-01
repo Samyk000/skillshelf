@@ -36,6 +36,9 @@ export default async function SavedSkillsPage() {
       </div>
       {!skills || skills.length === 0 ? (
         <div className="border-2 border-border bg-card p-12 text-center">
+          <svg className="mx-auto mb-4 h-10 w-10 text-muted-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+          </svg>
           <p className="text-muted-foreground">
             You have not saved any skills yet.
           </p>

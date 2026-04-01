@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { Container } from "@/components/layout/Container";
 import { SearchBar } from "@/components/explore/SearchBar";
 import { FilterChips } from "@/components/explore/FilterChips";
-import { SortDropdown } from "@/components/explore/SortDropdown";
+import { SortTabs } from "@/components/explore/SortTabs";
 import { SkillGridSkeleton } from "@/components/skills/SkillGridSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SkillsList } from "./SkillsList";
@@ -21,7 +21,6 @@ export default async function SkillsPage({
 }) {
   const supabase = await createClient();
 
-  // Fetch category counts via RPC (single query, no full-table transfer)
   const categoryCounts: Record<string, number> = {};
   for (const cat of CATEGORIES) {
     categoryCounts[cat] = 0;
@@ -37,27 +36,22 @@ export default async function SkillsPage({
       }
     }
   } catch {
-    // RPC not available yet, use defaults (all zeros)
+    // RPC not available yet, use defaults
   }
 
   return (
     <Container className="py-12">
-      <div className="mb-8">
-        <p className="text-xs font-semibold tracking-[0.2em] text-primary">
-          // EXPLORE
-        </p>
-        <h1 className="mt-2 font-display text-3xl font-bold tracking-wide md:text-4xl">
-          ALL SKILLS
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Browse the full collection. Filter by category or sort by popularity.
-        </p>
-      </div>
+      <h1 className="font-display text-3xl font-bold tracking-wide md:text-4xl">
+        EXPLORE
+      </h1>
 
       <Suspense
         fallback={
-          <div className="mb-8 flex flex-col gap-4">
-            <Skeleton className="h-12 w-full" />
+          <div className="mt-8 flex flex-col gap-6">
+            <div className="flex gap-3">
+              <Skeleton className="h-12 flex-1" />
+              <Skeleton className="h-12 w-72" />
+            </div>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Skeleton key={i} className="h-8 w-20" />
@@ -66,10 +60,10 @@ export default async function SkillsPage({
           </div>
         }
       >
-        <div className="mb-8 flex flex-col gap-4">
-          <div className="flex flex-col gap-4 sm:flex-row">
+        <div className="mt-8 flex flex-col gap-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <SearchBar />
-            <SortDropdown />
+            <SortTabs />
           </div>
           <FilterChips categoryCounts={categoryCounts} />
         </div>

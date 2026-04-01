@@ -14,17 +14,19 @@ interface SkillCardProps {
   viewCount?: number;
 }
 
-export const SkillCard = memo(function SkillCard({ skill, likeCount, viewCount }: SkillCardProps) {
+export const SkillCard = memo(function SkillCard({
+  skill,
+  likeCount,
+  viewCount,
+}: SkillCardProps) {
   const supabase = useMemo(() => createClient(), []);
   const [isVisible, setIsVisible] = useState(false);
   const [fetching, setFetching] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const fetchSkillMarkdown = async (): Promise<string | null> => {
-    // If we already have it, return it
     if (skill.skill_markdown) return skill.skill_markdown;
 
-    // Fetch it on-demand
     setFetching(true);
     const { data, error } = await supabase
       .from("skills")
@@ -132,85 +134,94 @@ export const SkillCard = memo(function SkillCard({ skill, likeCount, viewCount }
         )}
       </Link>
 
-      <div className="absolute inset-x-0 bottom-0 translate-y-full border-t-2 border-transparent bg-card px-3 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:border-border group-hover:py-2.5">
-        <div className="flex items-center justify-between">
+      {/* Hover Overlay — 2-row layout */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-full border-t-2 border-transparent bg-card/90 backdrop-blur-sm transition-all duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:border-border">
+        {/* Row 1: Category + View/Like counts */}
+        <div className="flex items-center justify-between px-3 pt-2">
           <Link
             href={`/skills/${skill.slug}`}
-            className="flex min-w-0 items-center gap-2"
+            className="shrink-0 border border-primary px-2 py-0.5 text-[9px] font-semibold tracking-[0.1em] text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
           >
-            <span className="shrink-0 border border-primary px-1.5 py-0.5 text-[9px] font-semibold tracking-[0.1em] text-primary">
-              {skill.category.toUpperCase()}
+            {skill.category.toUpperCase()}
+          </Link>
+
+          <div className="flex shrink-0 items-center gap-3">
+            <span className="flex items-center gap-1 text-[10px] tracking-wider text-foreground" aria-label={`${viewCount ?? 0} views`}>
+              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              {viewCount ?? 0}
             </span>
+            <span className="flex items-center gap-1 text-[10px] tracking-wider text-foreground" aria-label={`${likeCount ?? 0} likes`}>
+              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+              </svg>
+              {likeCount ?? 0}
+            </span>
+          </div>
+        </div>
+
+        {/* Row 2: Title + Action icons */}
+        <div className="flex items-center justify-between px-3 pt-1.5 pb-2.5">
+          <Link
+            href={`/skills/${skill.slug}`}
+            className="min-w-0 flex-1"
+          >
             <h3 className="truncate text-xs font-bold tracking-wider text-foreground transition-colors group-hover:text-primary">
               {skill.title}
             </h3>
           </Link>
 
-          <div className="flex shrink-0 items-center gap-2">
-            {viewCount !== undefined && viewCount > 0 && (
-              <span className="flex items-center gap-1 text-[10px] tracking-wider text-muted-foreground">
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-                {viewCount}
-              </span>
-            )}
-
-            {likeCount !== undefined && likeCount > 0 && (
-              <span className="flex items-center gap-1 text-[10px] tracking-wider text-muted-foreground">
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-                </svg>
-                {likeCount}
-              </span>
-            )}
-
+          <div className="flex shrink-0 items-center gap-2.5">
+            {/* Open in new tab */}
             <a
               href={`/preview/${skill.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               aria-label="Open preview in new tab"
-              className="border border-border p-1 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              className="text-muted-foreground transition-colors hover:text-primary"
             >
-              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
               </svg>
             </a>
 
+            {/* Copy */}
             <button
               onClick={handleCopy}
               disabled={fetching}
               aria-label="Copy SKILL.md"
-              className="border border-border p-1 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
+              className="text-muted-foreground transition-colors hover:text-primary disabled:opacity-50"
             >
               {fetching ? (
-                <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
               ) : (
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <rect x="9" y="9" width="13" height="13" rx="0" />
                   <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
                 </svg>
               )}
             </button>
 
+            {/* Download */}
             <button
               onClick={handleDownload}
               disabled={fetching}
               aria-label="Download .md file"
-              className="border border-border p-1 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
+              className="text-muted-foreground transition-colors hover:text-primary disabled:opacity-50"
             >
               {fetching ? (
-                <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
               ) : (
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
                 </svg>
               )}

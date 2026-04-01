@@ -45,6 +45,25 @@ async function HomeContent() {
   const showcaseSkills = (showcaseData as Skill[]) ?? [];
   const allSkills = (allSkillsData as Skill[]) ?? [];
 
+  // Fetch view/like counts for all displayed skills
+  const allSkillIds = [...new Set([...showcaseSkills, ...allSkills].map(s => s.id))];
+  const viewCountMap: Record<string, number> = {};
+  const likeCountMap: Record<string, number> = {};
+
+  if (allSkillIds.length > 0) {
+    const [viewsResult, likesResult] = await Promise.all([
+      supabase.from("skill_views").select("skill_id").in("skill_id", allSkillIds),
+      supabase.from("skill_likes").select("skill_id").in("skill_id", allSkillIds),
+    ]);
+
+    for (const row of viewsResult.data ?? []) {
+      viewCountMap[row.skill_id] = (viewCountMap[row.skill_id] ?? 0) + 1;
+    }
+    for (const row of likesResult.data ?? []) {
+      likeCountMap[row.skill_id] = (likeCountMap[row.skill_id] ?? 0) + 1;
+    }
+  }
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -104,7 +123,12 @@ async function HomeContent() {
             <>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {allSkills.map((skill) => (
-                  <SkillCard key={skill.id} skill={skill} />
+                  <SkillCard
+                    key={skill.id}
+                    skill={skill}
+                    viewCount={viewCountMap[skill.id] ?? 0}
+                    likeCount={likeCountMap[skill.id] ?? 0}
+                  />
                 ))}
               </div>
               <div className="mt-10 text-center">

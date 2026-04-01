@@ -36,6 +36,9 @@ export default async function LikedSkillsPage() {
       </div>
       {!skills || skills.length === 0 ? (
         <div className="border-2 border-border bg-card p-12 text-center">
+          <svg className="mx-auto mb-4 h-10 w-10 text-muted-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+          </svg>
           <p className="text-muted-foreground">
             You have not liked any skills yet.
           </p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizeSearchQuery } from "@/lib/sanitize";
 import { SkillCard } from "@/components/skills/SkillCard";
@@ -11,6 +11,8 @@ const BATCH_SIZE = 6;
 interface SkillsListClientProps {
   initialSkills: Skill[];
   initialHasMore: boolean;
+  initialViewCounts: Record<string, number>;
+  initialLikeCounts: Record<string, number>;
   searchQuery?: string;
   category?: string;
   sort?: string;
@@ -19,6 +21,8 @@ interface SkillsListClientProps {
 export function SkillsListClient({
   initialSkills,
   initialHasMore,
+  initialViewCounts,
+  initialLikeCounts,
   searchQuery,
   category,
   sort,
@@ -27,6 +31,34 @@ export function SkillsListClient({
   const [skills, setSkills] = useState<Skill[]>(initialSkills);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
+  const [viewCounts, setViewCounts] = useState<Record<string, number>>(initialViewCounts);
+  const [likeCounts, setLikeCounts] = useState<Record<string, number>>(initialLikeCounts);
+
+  const fetchCounts = useCallback(async (skillIds: string[]) => {
+    if (skillIds.length === 0) return;
+
+    const [viewsResult, likesResult] = await Promise.all([
+      supabase.from("skill_views").select("skill_id").in("skill_id", skillIds),
+      supabase.from("skill_likes").select("skill_id").in("skill_id", skillIds),
+    ]);
+
+    const newViewCounts: Record<string, number> = {};
+    const newLikeCounts: Record<string, number> = {};
+
+    for (const row of viewsResult.data ?? []) {
+      newViewCounts[row.skill_id] = (newViewCounts[row.skill_id] ?? 0) + 1;
+    }
+    for (const row of likesResult.data ?? []) {
+      newLikeCounts[row.skill_id] = (newLikeCounts[row.skill_id] ?? 0) + 1;
+    }
+
+    setViewCounts((prev) => ({ ...prev, ...newViewCounts }));
+    setLikeCounts((prev) => ({ ...prev, ...newLikeCounts }));
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchCounts(initialSkills.map(s => s.id));
+  }, [initialSkills, fetchCounts]);
 
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
@@ -36,6 +68,8 @@ export function SkillsListClient({
     const categoryFilter = category
       ? sanitizeSearchQuery(category) || null
       : null;
+
+    let newSkills: Skill[] = [];
 
     if (sort === "views") {
       const { data, error } = await supabase.rpc(
@@ -47,7 +81,7 @@ export function SkillsListClient({
         }
       );
       if (!error && data && data.length > 0) {
-        setSkills((prev) => [...prev, ...(data as Skill[])]);
+        newSkills = data as Skill[];
         setHasMore(data.length === BATCH_SIZE);
       } else {
         setHasMore(false);
@@ -62,7 +96,7 @@ export function SkillsListClient({
         }
       );
       if (!error && data && data.length > 0) {
-        setSkills((prev) => [...prev, ...(data as Skill[])]);
+        newSkills = data as Skill[];
         setHasMore(data.length === BATCH_SIZE);
       } else {
         setHasMore(false);
@@ -96,22 +130,32 @@ export function SkillsListClient({
       const { data, error } = await query;
 
       if (!error && data && data.length > 0) {
-        setSkills((prev) => [...prev, ...(data as Skill[])]);
+        newSkills = data as Skill[];
         setHasMore(data.length === BATCH_SIZE);
       } else {
         setHasMore(false);
       }
     }
 
+    if (newSkills.length > 0) {
+      setSkills((prev) => [...prev, ...newSkills]);
+      fetchCounts(newSkills.map(s => s.id));
+    }
+
     setLoading(false);
-  }, [loading, hasMore, sort, searchQuery, category, skills.length]);
+  }, [loading, hasMore, sort, searchQuery, category, skills.length, supabase, fetchCounts]);
 
   return (
     <div>
       {skills.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {skills.map((skill) => (
-            <SkillCard key={skill.id} skill={skill} />
+            <SkillCard
+              key={skill.id}
+              skill={skill}
+              viewCount={viewCounts[skill.id] ?? 0}
+              likeCount={likeCounts[skill.id] ?? 0}
+            />
           ))}
         </div>
       ) : (

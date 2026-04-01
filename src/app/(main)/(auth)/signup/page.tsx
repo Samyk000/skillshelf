@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { signupUser } from "@/app/actions/auth";
 import { Container } from "@/components/layout/Container";
 
@@ -23,6 +24,7 @@ export default function SignupPage() {
       setError(result.error);
     } else {
       setSuccess(true);
+      toast.success("Check your email for a confirmation link!");
     }
     setLoading(false);
   };

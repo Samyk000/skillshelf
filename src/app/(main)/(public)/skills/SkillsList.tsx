@@ -20,7 +20,6 @@ export async function SkillsList({ searchParams }: SkillsListProps) {
     : null;
 
   if (sort === "views") {
-    // Sort by view count using RPC
     const [skillsResult, countResult] = await Promise.all([
       supabase.rpc("get_skills_sorted_by_views", {
         p_limit: INITIAL_BATCH_SIZE,
@@ -36,7 +35,6 @@ export async function SkillsList({ searchParams }: SkillsListProps) {
     skills = (skillsResult.data as Skill[]) ?? [];
     totalCount = countResult.count ?? 0;
   } else if (sort === "likes") {
-    // Sort by like count using RPC
     const [skillsResult, countResult] = await Promise.all([
       supabase.rpc("get_skills_sorted_by_likes", {
         p_limit: INITIAL_BATCH_SIZE,
@@ -52,7 +50,6 @@ export async function SkillsList({ searchParams }: SkillsListProps) {
     skills = (skillsResult.data as Skill[]) ?? [];
     totalCount = countResult.count ?? 0;
   } else {
-    // Recent (default) — direct query with optional search and category
     let query = supabase
       .from("skills")
       .select(
@@ -94,11 +91,32 @@ export async function SkillsList({ searchParams }: SkillsListProps) {
 
   const hasMore = INITIAL_BATCH_SIZE < totalCount;
 
+  // Fetch view/like counts
+  const skillIds = skills.map(s => s.id);
+  const viewCounts: Record<string, number> = {};
+  const likeCounts: Record<string, number> = {};
+
+  if (skillIds.length > 0) {
+    const [viewsResult, likesResult] = await Promise.all([
+      supabase.from("skill_views").select("skill_id").in("skill_id", skillIds),
+      supabase.from("skill_likes").select("skill_id").in("skill_id", skillIds),
+    ]);
+
+    for (const row of viewsResult.data ?? []) {
+      viewCounts[row.skill_id] = (viewCounts[row.skill_id] ?? 0) + 1;
+    }
+    for (const row of likesResult.data ?? []) {
+      likeCounts[row.skill_id] = (likeCounts[row.skill_id] ?? 0) + 1;
+    }
+  }
+
   return (
     <SkillsListClient
       key={`${q ?? ""}-${category ?? ""}-${sort ?? "recent"}`}
       initialSkills={skills}
       initialHasMore={hasMore}
+      initialViewCounts={viewCounts}
+      initialLikeCounts={likeCounts}
       searchQuery={q}
       category={category}
       sort={sort}
