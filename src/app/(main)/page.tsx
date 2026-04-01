@@ -71,21 +71,21 @@ async function HomeContent() {
         <Container>
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
             {/* Left: Copy */}
-            <div className="flex flex-col items-start gap-6">
+            <div className="flex flex-col items-start gap-5">
               <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.2em] text-primary">
                 <span className="inline-block animate-spin-slow text-lg leading-none">
                   //
                 </span>
-                FREE DESIGN SKILL LIBRARY
+                SKILL.MD LIBRARY
               </p>
               <h1 className="max-w-4xl font-display text-3xl font-bold leading-tight tracking-tight md:text-5xl">
-                YOUR AI CODES.{" "}
-                <span className="text-primary">YOUR DESIGN.</span>
+                THE UI YOU IMAGINE.{" "}
+                <span className="text-primary">THE CODE YOUR AI WRITES.</span>
               </h1>
               <p className="max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                Stop shipping ugly. Get SKILL.md files that turn your AI-generated
-                code into premium, pixel-perfect UI. No more basic mess — just clean,
-                intentional design that actually looks good.
+                You know what looks good. Your AI doesn&apos;t. Give it a SKILL.md — a
+                design blueprint with exact tokens, patterns, and rules. One copy.
+                Pixel-perfect output.
               </p>
               <div className="flex items-center gap-4 text-[11px] tracking-wider text-muted-foreground">
                 {[
