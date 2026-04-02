@@ -14,6 +14,8 @@ export const metadata = {
   description: "Browse and search the full library of design skills.",
 };
 
+export const revalidate = 60;
+
 export default async function SkillsPage({
   searchParams,
 }: {

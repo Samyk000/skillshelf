@@ -36,6 +36,8 @@ const getSkill = cache(async (slug: string) => {
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://skillshelf-liart.vercel.app";
 
+export const revalidate = 60;
+
 export async function generateMetadata({ params }: SkillDetailPageProps) {
   const { slug } = await params;
   const skill = await getSkill(slug);
