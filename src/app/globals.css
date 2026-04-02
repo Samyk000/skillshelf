@@ -7,8 +7,8 @@
    ======================================== */
 
 :root {
-  /* Primary - Neon Green */
-  --primary: #39FF14;
+  /* Primary - Neon Green (adjusted for WCAG AA contrast) */
+  --primary: #4CFF3D;
   --primary-foreground: #0A0A0A;
 
   /* Accent - Electric Yellow */
@@ -23,27 +23,27 @@
   --popover: #1E1E1E;
   --popover-foreground: #FFFFFF;
   --muted: #141414;
-  --muted-foreground: #9CA3AF;
+  --muted-foreground: #A1A1AA;
   --border: #2A2A2A;
   --input: #2A2A2A;
-  --ring: #39FF14;
+  --ring: #4CFF3D;
 
   /* Semantic */
   --destructive: #FF3131;
   --destructive-foreground: #FFFFFF;
-  --success: #39FF14;
+  --success: #4CFF3D;
   --warning: #FFD600;
   --info: #00D4FF;
 
   /* Sidebar */
   --sidebar-background: #141414;
   --sidebar-foreground: #FFFFFF;
-  --sidebar-primary: #39FF14;
+  --sidebar-primary: #4CFF3D;
   --sidebar-primary-foreground: #0A0A0A;
   --sidebar-accent: #1E1E1E;
   --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: #2A2A2A;
-  --sidebar-ring: #39FF14;
+  --sidebar-ring: #4CFF3D;
 
   /* Radius - 0px for brutalist */
   --radius: 0px;
@@ -110,14 +110,14 @@ body {
   --popover: #FFFFFF;
   --popover-foreground: #111111;
   --muted: #E8E8E8;
-  --muted-foreground: #4A4A4A;
+  --muted-foreground: #3D3D3D;
   --border: #D0D0D0;
   --input: #C8C8C8;
-  --ring: #2ACC0D;
-  --primary: #1A9E00;
+  --ring: #15803D;
+  --primary: #15803D;
   --primary-foreground: #FFFFFF;
-  --accent: #9A8400;
-  --accent-foreground: #111111;
+  --accent: #854D0E;
+  --accent-foreground: #FFFFFF;
   --destructive: #CC2828;
   --destructive-foreground: #FFFFFF;
 }
