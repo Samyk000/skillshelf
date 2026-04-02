@@ -107,19 +107,25 @@ export const SkillCard = memo(function SkillCard({
             <img
               src={skill.cover_image_url}
               alt={skill.title}
+              width={400}
+              height={300}
               className="h-full w-full object-cover"
               loading="lazy"
             />
           </div>
         ) : skill.preview_html ? (
-          <div className="aspect-[4/3] w-full overflow-hidden bg-white">
+          <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
             {isVisible ? (
               <iframe
                 srcDoc={skill.preview_html}
                 sandbox="allow-scripts allow-popups"
                 title={`Preview: ${skill.title}`}
-                className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0"
+                className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0 opacity-0 transition-opacity duration-300"
                 loading="lazy"
+                onLoad={(e) => {
+                  e.currentTarget.classList.remove("opacity-0");
+                  e.currentTarget.classList.add("opacity-100");
+                }}
               />
             ) : (
               <SkillCardSkeleton />

@@ -8,7 +8,7 @@ function Skeleton({
     <div
       role="status"
       aria-label="Loading"
-      className={cn("animate-pulse bg-muted", className)}
+      className={cn("animate-shimmer", className)}
       {...props}
     >
       <span className="sr-only">Loading…</span>

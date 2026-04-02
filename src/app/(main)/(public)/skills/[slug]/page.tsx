@@ -34,6 +34,8 @@ const getSkill = cache(async (slug: string) => {
   return data;
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://skillshelf-liart.vercel.app";
+
 export async function generateMetadata({ params }: SkillDetailPageProps) {
   const { slug } = await params;
   const skill = await getSkill(slug);
@@ -43,6 +45,9 @@ export async function generateMetadata({ params }: SkillDetailPageProps) {
   return {
     title: skill.title,
     description: skill.short_description,
+    alternates: {
+      canonical: `${baseUrl}/skills/${skill.slug}`,
+    },
   };
 }
 

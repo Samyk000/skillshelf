@@ -16,21 +16,31 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://skillshelf-liart.vercel.app";
+
 export const metadata: Metadata = {
   title: {
-    default: "Skillshelf — Free Design Skill Library",
+    default: "Skillshelf — Design Skill Library",
     template: "%s | Skillshelf",
   },
   description:
-    "A curated library of free design skills. Browse, preview, copy, and download SKILL.md files for your AI tools.",
+    "A curated library of design skills. Browse, preview, copy, and download SKILL.md files for your AI tools.",
   keywords: ["design skills", "AI tools", "SKILL.md", "design system", "cursor", "claude", "chatgpt"],
   icons: {
     icon: "/favicon.svg",
   },
   openGraph: {
-    title: "Skillshelf — Free Design Skill Library",
+    title: "Skillshelf — Design Skill Library",
     description: "Browse, preview, and copy design skills for your AI tools.",
     type: "website",
+    url: baseUrl,
+  },
+  alternates: {
+    canonical: baseUrl,
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

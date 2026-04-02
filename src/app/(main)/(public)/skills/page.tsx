@@ -48,13 +48,13 @@ export default async function SkillsPage({
       <Suspense
         fallback={
           <div className="mt-4 flex flex-col gap-4 sm:mt-6 sm:gap-5">
-            <div className="flex gap-2 sm:gap-3">
-              <Skeleton className="h-10 flex-1 sm:h-12" />
-              <Skeleton className="h-10 w-36 sm:h-12 sm:w-72" />
+            <div className="flex gap-2 sm:gap-4">
+              <Skeleton className="h-10 flex-1 sm:h-11" />
+              <Skeleton className="h-10 w-36 sm:h-11 sm:w-48" />
             </div>
-            <div className="flex gap-1.5 sm:gap-2">
+            <div className="grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Skeleton key={i} className="h-7 w-16 sm:h-8 sm:w-20" />
+                <Skeleton key={i} className="h-8 sm:h-9 sm:w-24" />
               ))}
             </div>
           </div>
@@ -72,7 +72,7 @@ export default async function SkillsPage({
         </div>
       </Suspense>
 
-      <Suspense fallback={<SkillGridSkeleton count={6} />}>
+      <Suspense fallback={<div className="mt-5 sm:mt-6"><SkillGridSkeleton count={6} /></div>}>
         <div className="mt-5 sm:mt-6">
           <SkillsList searchParams={searchParams} />
         </div>

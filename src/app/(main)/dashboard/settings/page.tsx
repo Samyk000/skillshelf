@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useUser } from "@/components/layout/UserProvider";
 import { toast } from "sonner";
@@ -8,13 +9,20 @@ import { updateProfile } from "@/app/actions/user";
 import { signOut } from "@/app/actions/auth";
 
 export default function SettingsPage() {
-  const { user } = useUser();
+  const { user, loading: userLoading } = useUser();
+  const router = useRouter();
   const [displayName, setDisplayName] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (userLoading) return;
+
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
 
     const loadProfile = async () => {
       const supabase = createClient();
@@ -25,10 +33,19 @@ export default function SettingsPage() {
         .single();
 
       setDisplayName(profile?.display_name ?? "");
-      setLoading(false);
+      setProfileLoaded(true);
     };
     loadProfile();
-  }, [user]);
+
+    // Safety timeout — if profile doesn't load in 5s, show the form anyway
+    timeoutRef.current = setTimeout(() => {
+      setProfileLoaded(true);
+    }, 5000);
+
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [user, userLoading, router]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +66,7 @@ export default function SettingsPage() {
     window.location.href = "/";
   };
 
-  if (loading) {
+  if (!profileLoaded) {
     return (
       <div className="animate-pulse space-y-4">
         <div className="h-10 w-full bg-muted" />

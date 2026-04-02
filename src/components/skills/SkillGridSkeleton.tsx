@@ -11,14 +11,9 @@ export const SkillGridSkeleton = memo(function SkillGridSkeleton({ count = 6 }: 
       {Array.from({ length: count }, (_, i) => (
         <div
           key={i}
-          className="overflow-hidden border-2 border-border bg-card"
+          className="overflow-hidden rounded-lg border-2 border-border bg-card"
         >
           <Skeleton className="aspect-[4/3] w-full" />
-          <div className="space-y-3 p-4">
-            <Skeleton className="h-3 w-16" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-3 w-full" />
-          </div>
         </div>
       ))}
     </div>

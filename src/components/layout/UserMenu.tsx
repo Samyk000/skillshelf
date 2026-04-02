@@ -15,17 +15,19 @@ export function UserMenu() {
     window.location.href = "/";
   };
 
+  // Loading state — show placeholder with fixed dimensions to prevent layout shift
   if (loading) {
     return (
-      <div className="flex items-center gap-4">
-        <div className="h-8 w-20 animate-pulse border-2 border-border" />
+      <div className="hidden items-center gap-3 md:flex">
+        <div className="h-8 w-20 border-2 border-border bg-muted" />
+        <div className="h-8 w-20 border-2 border-border bg-muted" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="hidden items-center gap-4 md:flex">
+      <div className="hidden items-center gap-3 md:flex">
         <Link
           href="/login"
           className="border-2 border-border px-4 py-2 text-sm font-semibold tracking-widest text-foreground uppercase transition-colors hover:border-primary hover:text-primary"
@@ -43,7 +45,7 @@ export function UserMenu() {
   }
 
   return (
-    <div className="hidden items-center gap-4 md:flex">
+    <div className="hidden items-center gap-3 md:flex">
       {user.role === "admin" && (
         <Link
           href="/admin"

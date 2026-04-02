@@ -56,13 +56,17 @@ export function SkillPreview({ previewHtml, title, slug }: SkillPreviewProps) {
           </svg>
         </a>
       </div>
-      <div className="relative h-[480px] w-full bg-white">
+      <div className="relative h-[480px] w-full bg-muted">
         {isVisible ? (
           <iframe
             srcDoc={previewHtml}
             sandbox="allow-scripts allow-popups"
             title={`Preview: ${title}`}
-            className="absolute inset-0 h-full w-full border-0"
+            className="absolute inset-0 h-full w-full border-0 opacity-0 transition-opacity duration-300"
+            onLoad={(e) => {
+              e.currentTarget.classList.remove("opacity-0");
+              e.currentTarget.classList.add("opacity-100");
+            }}
           />
         ) : (
           <PreviewSkeleton />

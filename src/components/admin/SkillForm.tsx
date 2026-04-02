@@ -87,10 +87,11 @@ export function SkillForm({ skill, status, featured }: SkillFormProps) {
       {/* Title + Slug */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+          <label htmlFor="skill-title" className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
             TITLE *
           </label>
           <input
+            id="skill-title"
             type="text"
             value={form.title}
             onChange={(e) => handleTitleChange(e.target.value)}
@@ -100,10 +101,11 @@ export function SkillForm({ skill, status, featured }: SkillFormProps) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+          <label htmlFor="skill-slug" className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
             SLUG *
           </label>
           <input
+            id="skill-slug"
             type="text"
             value={form.slug}
             onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
@@ -117,10 +119,11 @@ export function SkillForm({ skill, status, featured }: SkillFormProps) {
       {/* Description + Category */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+          <label htmlFor="skill-description" className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
             DESCRIPTION
           </label>
           <input
+            id="skill-description"
             type="text"
             value={form.short_description}
             onChange={(e) =>
@@ -131,10 +134,11 @@ export function SkillForm({ skill, status, featured }: SkillFormProps) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+          <label htmlFor="skill-category" className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
             CATEGORY *
           </label>
           <select
+            id="skill-category"
             value={form.category}
             onChange={(e) =>
               setForm((prev) => ({ ...prev, category: e.target.value }))
@@ -153,10 +157,11 @@ export function SkillForm({ skill, status, featured }: SkillFormProps) {
       {/* Skill Markdown + Preview HTML */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+          <label htmlFor="skill-markdown" className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
             SKILL MARKDOWN *
           </label>
           <textarea
+            id="skill-markdown"
             value={form.skill_markdown}
             onChange={(e) =>
               setForm((prev) => ({ ...prev, skill_markdown: e.target.value }))
@@ -168,10 +173,11 @@ export function SkillForm({ skill, status, featured }: SkillFormProps) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+          <label htmlFor="skill-preview-html" className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
             PREVIEW HTML
           </label>
           <textarea
+            id="skill-preview-html"
             value={form.preview_html}
             onChange={(e) =>
               setForm((prev) => ({ ...prev, preview_html: e.target.value }))
