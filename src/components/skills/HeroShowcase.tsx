@@ -91,10 +91,13 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
 
   return (
     <div className="relative">
-      {/* Featured Badge - Outside the box at top left */}
+      {/* Top Badge - Outside the box at top left */}
       <div className="absolute -left-3 -top-4 z-30">
-        <span className="inline-block rounded-full bg-primary px-4 py-1.5 text-[10px] font-bold tracking-[0.15em] text-primary-foreground uppercase shadow-md">
-          Featured
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-[10px] font-bold tracking-[0.15em] text-primary-foreground uppercase shadow-md">
+          <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+          </svg>
+          TOP
         </span>
       </div>
 
@@ -190,12 +193,12 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
       {/* Navigation Dots */}
       {skills.length > 1 && (
         <div className="absolute bottom-4 right-5 z-30 flex items-center gap-2.5">
-          {skills.map((_, index) => (
+          {skills.map((skill, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              aria-label={`Go to slide ${index + 1}`}
-              className={`h-2.5 w-2.5 border transition-all duration-300 ${
+              aria-label={`Go to ${skill.title}`}
+              className={`h-4 w-4 border-2 transition-all duration-300 ${
                 index === currentIndex
                   ? "border-primary bg-primary"
                   : "border-white/50 bg-transparent hover:border-white"

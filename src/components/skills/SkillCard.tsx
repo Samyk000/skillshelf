@@ -186,7 +186,7 @@ export const SkillCard = memo(function SkillCard({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              aria-label="Open preview in new tab"
+              aria-label={`Open ${skill.title} preview in new tab`}
               className="text-muted-foreground transition-colors hover:text-primary"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

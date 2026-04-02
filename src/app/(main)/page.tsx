@@ -156,11 +156,11 @@ async function HomeContent() {
       {/* Stay Tuned */}
       <section className="border-t-2 border-border py-16">
         <Container>
-          <div className="border-2 border-primary bg-card p-10 text-center md:p-14">
+          <div className="border-2 border-primary bg-background p-10 text-center md:p-14">
             <p className="mb-2 text-xs font-semibold tracking-[0.2em] text-primary">
               // PRICING
             </p>
-            <h2 className="mb-4 font-display text-3xl font-bold tracking-wide md:text-4xl">
+            <h2 className="mb-4 font-display text-3xl font-bold tracking-wide text-foreground md:text-4xl">
               STAY TUNED
             </h2>
             <p className="mx-auto max-w-lg text-sm leading-relaxed text-muted-foreground">
