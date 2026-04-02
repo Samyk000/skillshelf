@@ -51,6 +51,9 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/forgot-password") &&
     !request.nextUrl.pathname.startsWith("/skills") &&
     !request.nextUrl.pathname.startsWith("/preview") &&
+    !request.nextUrl.pathname.startsWith("/robots.txt") &&
+    !request.nextUrl.pathname.startsWith("/sitemap.xml") &&
+    !request.nextUrl.pathname.startsWith("/favicon") &&
     request.nextUrl.pathname !== "/" &&
     !isPublicApi
   ) {
