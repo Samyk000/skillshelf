@@ -76,7 +76,7 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
 
   if (skills.length === 0) {
     return (
-      <div className="flex h-[500px] items-center justify-center rounded-lg border-2 border-border bg-card">
+      <div className="flex h-[500px] items-center justify-center rounded-2xl border-2 border-border bg-card">
         <div className="text-center">
           <p className="font-display text-lg font-bold tracking-wider text-muted-foreground">
             // NO SHOWCASE YET
@@ -106,7 +106,7 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
         role="region"
         aria-roledescription="carousel"
         aria-label="Featured skills showcase"
-        className="relative h-[500px] overflow-hidden rounded-lg border-2 border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="relative h-[500px] overflow-hidden rounded-2xl border-2 border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         tabIndex={0}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}

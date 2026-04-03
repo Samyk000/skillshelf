@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { ChevronDown } from "lucide-react";
 
 const SORT_OPTIONS = [
-  { value: "recent", label: "RECENT" },
-  { value: "views", label: "VIEWED" },
-  { value: "likes", label: "LIKED" },
+  { value: "recent", label: "Recent" },
+  { value: "views", label: "Popular" },
+  { value: "likes", label: "Most Liked" },
 ];
 
 export function SortTabs() {
@@ -13,39 +14,32 @@ export function SortTabs() {
   const searchParams = useSearchParams();
   const currentSort = searchParams.get("sort") ?? "recent";
 
-  const handleClick = (value: string) => {
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
     const params = new URLSearchParams(searchParams.toString());
     if (value === "recent") {
       params.delete("sort");
     } else {
       params.set("sort", value);
     }
-    router.push(`/skills?${params.toString()}`);
+    router.push(`/?${params.toString()}`, { scroll: false });
   };
 
   return (
-    <div
-      role="tablist"
-      aria-label="Sort skills by"
-      className="flex shrink-0 gap-0"
-    >
-      {SORT_OPTIONS.map((option, index) => (
-        <button
-          key={option.value}
-          role="tab"
-          aria-selected={currentSort === option.value}
-          onClick={() => handleClick(option.value)}
-          className={`border-y-2 border-r-2 px-3 py-2.5 text-[9px] font-bold tracking-wider uppercase transition-colors first:rounded-l last:rounded-r last:border-r-2 sm:px-4 sm:text-[10px] ${
-            index === 0 ? "border-l-2" : ""
-          } ${
-            currentSort === option.value
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-border bg-muted/50 text-muted-foreground hover:border-primary hover:text-primary"
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
+    <div className="relative shrink-0 w-full">
+      <select
+        aria-label="Sort skills by"
+        value={currentSort}
+        onChange={handleChange}
+        className="w-full h-9 appearance-none rounded-none border border-border/50 bg-muted/30 pl-3.5 pr-8 text-xs font-semibold tracking-wide text-foreground hover:bg-muted/50 focus:border-primary focus:bg-background focus:outline-none cursor-pointer focus:ring-1 focus:ring-primary"
+      >
+        {SORT_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
     </div>
   );
 }

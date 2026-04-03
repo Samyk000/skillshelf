@@ -3,9 +3,13 @@ import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { Container } from "@/components/layout/Container";
 import { createClient } from "@/lib/supabase/server";
-import { SkillCard } from "@/components/skills/SkillCard";
 import { SkillGridSkeleton } from "@/components/skills/SkillGridSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FilterChips } from "@/components/explore/FilterChips";
+import { SearchBar } from "@/components/explore/SearchBar";
+import { SortTabs } from "@/components/explore/SortTabs";
+import { SkillsList } from "@/components/skills/SkillsList";
+import { CATEGORIES } from "@/lib/constants";
 import type { Skill } from "@/types/skill";
 
 const HeroShowcase = dynamic(
@@ -20,48 +24,40 @@ const HeroShowcase = dynamic(
  */
 export const revalidate = 60;
 
-async function HomeContent() {
+type SearchParams = Promise<{ q?: string; category?: string; sort?: string }>;
+
+async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
   const supabase = await createClient();
 
   const columns =
     "id, slug, title, short_description, category, cover_image_url, preview_html, preview_external_url, featured, created_at, updated_at";
 
-  const [{ data: showcaseData }, { data: allSkillsData }] = await Promise.all([
-    supabase
-      .from("skills")
-      .select(columns)
-      .eq("status", "published")
-      .eq("featured", true)
-      .order("updated_at", { ascending: false })
-      .limit(5),
-    supabase
-      .from("skills")
-      .select(columns)
-      .eq("status", "published")
-      .order("updated_at", { ascending: false })
-      .limit(6),
-  ]);
+  const { data: showcaseData } = await supabase
+    .from("skills")
+    .select(columns)
+    .eq("status", "published")
+    .eq("featured", true)
+    .order("updated_at", { ascending: false })
+    .limit(5);
 
   const showcaseSkills = (showcaseData as Skill[]) ?? [];
-  const allSkills = (allSkillsData as Skill[]) ?? [];
 
-  // Fetch view/like counts for all displayed skills
-  const allSkillIds = [...new Set([...showcaseSkills, ...allSkills].map(s => s.id))];
-  const viewCountMap: Record<string, number> = {};
-  const likeCountMap: Record<string, number> = {};
+  const categoryCounts: Record<string, number> = {};
+  for (const cat of CATEGORIES) {
+    categoryCounts[cat] = 0;
+  }
 
-  if (allSkillIds.length > 0) {
-    const [viewsResult, likesResult] = await Promise.all([
-      supabase.from("skill_views").select("skill_id").in("skill_id", allSkillIds),
-      supabase.from("skill_likes").select("skill_id").in("skill_id", allSkillIds),
-    ]);
-
-    for (const row of viewsResult.data ?? []) {
-      viewCountMap[row.skill_id] = (viewCountMap[row.skill_id] ?? 0) + 1;
+  try {
+    const { data: counts } = await supabase.rpc("get_category_counts");
+    if (counts) {
+      for (const row of counts) {
+        if (row.category in categoryCounts) {
+          categoryCounts[row.category] = Number(row.count);
+        }
+      }
     }
-    for (const row of likesResult.data ?? []) {
-      likeCountMap[row.skill_id] = (likeCountMap[row.skill_id] ?? 0) + 1;
-    }
+  } catch {
+    // RPC not available yet, use defaults
   }
 
   return (
@@ -109,65 +105,29 @@ async function HomeContent() {
       </section>
 
       {/* Skills */}
-      <section className="py-12">
+      <section className="pt-6 pb-12">
         <Container>
-          <div className="mb-8">
-            <p className="text-xs font-semibold tracking-[0.2em] text-primary">
-              // LIBRARY
-            </p>
-            <h2 className="mt-2 font-display text-2xl font-bold tracking-wide md:text-3xl">
-              SKILLS
-            </h2>
-          </div>
-          {allSkills.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {allSkills.map((skill) => (
-                  <SkillCard
-                    key={skill.id}
-                    skill={skill}
-                    viewCount={viewCountMap[skill.id] ?? 0}
-                    likeCount={likeCountMap[skill.id] ?? 0}
-                  />
-                ))}
-              </div>
-              <div className="mt-10 text-center">
-                <Link
-                  href="/skills"
-                  className="inline-block border-2 border-primary bg-primary px-10 py-3 text-sm font-bold tracking-widest text-primary-foreground uppercase transition-colors hover:bg-transparent hover:text-primary"
-                >
-                  EXPLORE ALL
-                </Link>
-              </div>
-            </>
-          ) : (
-            <div className="border-2 border-border bg-card p-12 text-center">
-              <p className="mb-2 text-xs font-semibold tracking-[0.2em] text-primary">
-                // NO SKILLS YET
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Skills will appear here once they are published.
-              </p>
+          {/* New UI for categories, search, and sort */}
+          <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            {/* Left side: Categories (FilterChips) */}
+            <div className="w-full overflow-x-auto pb-2 lg:w-auto lg:pb-0">
+              <FilterChips categoryCounts={categoryCounts} />
             </div>
-          )}
-        </Container>
-      </section>
 
-      {/* Stay Tuned */}
-      <section className="border-t-2 border-border py-16">
-        <Container>
-          <div className="border-2 border-primary bg-background p-10 text-center md:p-14">
-            <p className="mb-2 text-xs font-semibold tracking-[0.2em] text-primary">
-              // PRICING
-            </p>
-            <h2 className="mb-4 font-display text-3xl font-bold tracking-wide text-foreground md:text-4xl">
-              STAY TUNED
-            </h2>
-            <p className="mx-auto max-w-lg text-sm leading-relaxed text-muted-foreground">
-              Enjoy free until it&apos;s paid. Once premium, many more skills will be
-              uploaded.
-            </p>
+            {/* Right side: Search Bar & Sort */}
+            <div className="flex w-full shrink-0 flex-row items-center justify-between gap-2 sm:gap-4 lg:w-auto lg:justify-end">
+              <div className="flex-1 min-w-0">
+                <SearchBar />
+              </div>
+              <div className="h-6 w-px bg-border/50 shrink-0" />
+              <div className="shrink-0 w-28 sm:w-auto">
+                <SortTabs />
+              </div>
+            </div>
           </div>
+          <Suspense fallback={<SkillGridSkeleton count={12} />}>
+            <SkillsList searchParams={searchParams} />
+          </Suspense>
         </Container>
       </section>
     </div>
@@ -194,23 +154,23 @@ function HomePageSkeleton() {
         </Container>
       </section>
 
-      <section className="py-12">
+      <section className="pt-6 pb-12">
         <Container>
-          <div className="mb-8">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="mt-2 h-8 w-32" />
+          <div className="mb-8 flex justify-between gap-4">
+            <Skeleton className="h-10 w-full max-w-md" />
+            <Skeleton className="h-10 w-64" />
           </div>
-          <SkillGridSkeleton count={6} />
+          <SkillGridSkeleton count={10} />
         </Container>
       </section>
     </div>
   );
 }
 
-export default function HomePage() {
+export default function HomePage(props: { searchParams: SearchParams }) {
   return (
     <Suspense fallback={<HomePageSkeleton />}>
-      <HomeContent />
+      <HomeContent searchParams={props.searchParams} />
     </Suspense>
   );
 }

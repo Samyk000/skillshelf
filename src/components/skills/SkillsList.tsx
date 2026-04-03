@@ -3,7 +3,7 @@ import { sanitizeSearchQuery } from "@/lib/sanitize";
 import { SkillsListClient } from "@/components/skills/SkillsListClient";
 import type { Skill } from "@/types/skill";
 
-const INITIAL_BATCH_SIZE = 6;
+const INITIAL_BATCH_SIZE = 12;
 
 interface SkillsListProps {
   searchParams: Promise<{ q?: string; category?: string; sort?: string }>;
@@ -20,32 +20,42 @@ export async function SkillsList({ searchParams }: SkillsListProps) {
     : null;
 
   if (sort === "views") {
+    let countQuery = supabase
+      .from("skills")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "published");
+
+    if (categoryFilter) {
+      countQuery = countQuery.eq("category", categoryFilter);
+    }
+
     const [skillsResult, countResult] = await Promise.all([
       supabase.rpc("get_skills_sorted_by_views", {
         p_limit: INITIAL_BATCH_SIZE,
         p_offset: 0,
         p_category: categoryFilter,
       }),
-      supabase
-        .from("skills")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "published")
-        .eq("category", categoryFilter ?? ""),
+      countQuery,
     ]);
     skills = (skillsResult.data as Skill[]) ?? [];
     totalCount = countResult.count ?? 0;
   } else if (sort === "likes") {
+    let countQuery = supabase
+      .from("skills")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "published");
+
+    if (categoryFilter) {
+      countQuery = countQuery.eq("category", categoryFilter);
+    }
+
     const [skillsResult, countResult] = await Promise.all([
       supabase.rpc("get_skills_sorted_by_likes", {
         p_limit: INITIAL_BATCH_SIZE,
         p_offset: 0,
         p_category: categoryFilter,
       }),
-      supabase
-        .from("skills")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "published")
-        .eq("category", categoryFilter ?? ""),
+      countQuery,
     ]);
     skills = (skillsResult.data as Skill[]) ?? [];
     totalCount = countResult.count ?? 0;

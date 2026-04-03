@@ -45,8 +45,8 @@
   --sidebar-border: #2A2A2A;
   --sidebar-ring: #4CFF3D;
 
-  /* Radius - 0px for brutalist */
-  --radius: 0px;
+  /* Radius */
+  --radius: 0.5rem;
 
   /* Font Families */
   --font-display: 'Space Grotesk', sans-serif;
@@ -81,13 +81,10 @@
   --color-warning: var(--warning);
   --color-info: var(--info);
   --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius));
-  --radius-lg: calc(var(--radius));
-  --radius-xl: calc(var(--radius));
-}
-
-* {
-  border-radius: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
 }
 
 body {

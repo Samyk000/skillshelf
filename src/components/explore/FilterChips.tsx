@@ -17,30 +17,33 @@ export function FilterChips({ categoryCounts }: FilterChipsProps) {
   const handleFilter = (category: string) => {
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
-      if (category === activeCategory) {
+      if (category === activeCategory || category === "") {
         params.delete("category");
       } else {
         params.set("category", category);
       }
-      router.push(`/skills?${params.toString()}`);
+      router.push(`/?${params.toString()}`, { scroll: false });
     });
   };
 
   return (
-    <div role="group" aria-label="Filter by category" className="grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
+    <div
+      role="group"
+      aria-label="Filter by category"
+      className="flex items-center gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+    >
       {CATEGORIES.map((category) => (
         <button
           key={category}
           onClick={() => handleFilter(category)}
           aria-pressed={activeCategory === category}
-          className={`border px-2 py-1.5 text-[9px] font-semibold tracking-wider uppercase transition-colors sm:border-2 sm:px-3 sm:py-1.5 sm:text-[10px] ${
+          className={`shrink-0 inline-flex items-center justify-center whitespace-nowrap rounded-none border px-3 h-7 text-[10px] sm:px-4 sm:h-9 sm:text-xs font-semibold tracking-wide transition-all ${
             activeCategory === category
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-border text-muted-foreground hover:border-primary hover:text-primary"
+              ? "border-primary bg-primary/20 text-primary"
+              : "border-border/50 text-muted-foreground hover:bg-secondary/50 hover:text-foreground hover:border-border"
           }`}
         >
-          <span className="sm:hidden">{category}</span>
-          <span className="hidden sm:inline">{category.toUpperCase()} ({categoryCounts[category] ?? 0})</span>
+          {category}
         </button>
       ))}
     </div>

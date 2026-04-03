@@ -8,6 +8,7 @@ import { DownloadButton } from "@/components/skills/DownloadButton";
 import { LikeButton } from "@/components/skills/LikeButton";
 import { SaveButton } from "@/components/skills/SaveButton";
 import { ViewTracker } from "@/components/skills/ViewTracker";
+import { BackButton } from "@/components/skills/BackButton";
 import { createClient } from "@/lib/supabase/server";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Skill } from "@/types/skill";
@@ -134,18 +135,8 @@ export default async function SkillDetailPage({
     <Container className="py-8">
       <ViewTracker skillId={skill.id} />
 
-      {/* Breadcrumb */}
-      <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-xs tracking-wider text-muted-foreground">
-        <Link href="/" className="hover:text-primary">
-          HOME
-        </Link>
-        <span>/</span>
-        <Link href="/skills" className="hover:text-primary">
-          SKILLS
-        </Link>
-        <span>/</span>
-        <span className="text-primary">{skill.title.toUpperCase()}</span>
-      </nav>
+      {/* Back Button */}
+      <BackButton />
 
       {/* Main Content: Preview (left) + Details (right) */}
       <div className="mb-10 flex flex-col gap-6 lg:flex-row">

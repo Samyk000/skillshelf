@@ -99,7 +99,7 @@ export const SkillCard = memo(function SkillCard({
   return (
     <div
       ref={cardRef}
-      className="group relative flex flex-col overflow-hidden rounded-lg border-2 border-border bg-card transition-colors hover:border-primary"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border-2 border-border bg-card transition-colors hover:border-primary"
     >
       <Link href={`/skills/${skill.slug}`} className="flex flex-1 flex-col">
         {skill.cover_image_url ? (

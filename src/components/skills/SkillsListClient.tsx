@@ -6,7 +6,7 @@ import { sanitizeSearchQuery } from "@/lib/sanitize";
 import { SkillCard } from "@/components/skills/SkillCard";
 import type { Skill } from "@/types/skill";
 
-const BATCH_SIZE = 6;
+const BATCH_SIZE = 8;
 
 interface SkillsListClientProps {
   initialSkills: Skill[];
@@ -148,7 +148,7 @@ export function SkillsListClient({
   return (
     <div>
       {skills.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {skills.map((skill) => (
             <SkillCard
               key={skill.id}
