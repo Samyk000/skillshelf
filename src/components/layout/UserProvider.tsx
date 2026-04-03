@@ -20,12 +20,20 @@ interface UserContextType {
   user: UserState | null;
   loading: boolean;
   refresh: () => Promise<void>;
+  isAuthModalOpen: boolean;
+  authModalView: "login" | "signup" | "forgot-password";
+  openAuthModal: (view?: "login" | "signup" | "forgot-password") => void;
+  closeAuthModal: () => void;
 }
 
 const UserContext = createContext<UserContextType>({
   user: null,
   loading: true,
   refresh: async () => {},
+  isAuthModalOpen: false,
+  authModalView: "login",
+  openAuthModal: () => {},
+  closeAuthModal: () => {},
 });
 
 export function useUser() {
@@ -35,7 +43,18 @@ export function useUser() {
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserState | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalView, setAuthModalView] = useState<"login" | "signup" | "forgot-password">("login");
   const isLoadingRef = useRef(false);
+
+  const openAuthModal = useCallback((view: "login" | "signup" | "forgot-password" = "login") => {
+    setAuthModalView(view);
+    setIsAuthModalOpen(true);
+  }, []);
+
+  const closeAuthModal = useCallback(() => {
+    setIsAuthModalOpen(false);
+  }, []);
 
   const loadUser = useCallback(async () => {
     // Prevent concurrent loads (handles rapid-fire calls from onAuthStateChange + visibilitychange)
@@ -115,7 +134,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, [loadUser]);
 
   return (
-    <UserContext.Provider value={{ user, loading, refresh: loadUser }}>
+    <UserContext.Provider 
+      value={{ 
+        user, 
+        loading, 
+        refresh: loadUser,
+        isAuthModalOpen,
+        authModalView,
+        openAuthModal,
+        closeAuthModal
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

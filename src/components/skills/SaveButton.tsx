@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { toggleSave } from "@/app/actions/user";
+import { useUser } from "@/components/layout/UserProvider";
 
 interface SaveButtonProps {
   skillId: string;
@@ -19,12 +20,13 @@ export function SaveButton({
   isAuthenticated,
 }: SaveButtonProps) {
   const router = useRouter();
+  const { openAuthModal } = useUser();
   const [saved, setSaved] = useState(initialSaved);
   const isBusy = useRef(false);
 
   const handleSave = async () => {
     if (!isAuthenticated) {
-      router.push("/login");
+      openAuthModal("login");
       return;
     }
 

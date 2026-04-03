@@ -99,7 +99,8 @@ export const SkillCard = memo(function SkillCard({
   }, []);
 
   useEffect(() => {
-    if (isVisible && !previewHtml && !skill.cover_image_url) {
+    // Only fetch if visible, no preview HTML in state, NO preview HTML in props, and no cover image
+    if (isVisible && !previewHtml && !skill.preview_html && !skill.cover_image_url) {
       const fetchPreview = async () => {
         setIsLoadingPreview(true);
         const { data, error } = await supabase
@@ -115,7 +116,7 @@ export const SkillCard = memo(function SkillCard({
       };
       fetchPreview();
     }
-  }, [isVisible, previewHtml, skill.id, skill.cover_image_url, supabase]);
+  }, [isVisible, previewHtml, skill.id, skill.preview_html, skill.cover_image_url, supabase]);
 
   return (
     <div
@@ -125,7 +126,7 @@ export const SkillCard = memo(function SkillCard({
     >
       <Link href={`/skills/${skill.slug}`} className="flex flex-1 flex-col">
         {skill.cover_image_url ? (
-          <div className="aspect-[4/3] w-full overflow-hidden">
+          <div className="aspect-[4/3] w-full">
             <img
               src={skill.cover_image_url}
               alt={skill.title}
@@ -136,7 +137,7 @@ export const SkillCard = memo(function SkillCard({
             />
           </div>
         ) : (previewHtml || isLoadingPreview) ? (
-          <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
+          <div className="aspect-[4/3] w-full bg-muted">
             {previewHtml ? (
               <iframe
                 srcDoc={previewHtml}
@@ -271,7 +272,7 @@ function SkillCardSkeleton() {
       </div>
       <Skeleton className="h-4 w-3/4" />
       <Skeleton className="h-3 w-1/2" />
-      <Skeleton className="mt-2 h-24 w-full" />
+      <Skeleton className="mt-2 h-24 w-full rounded-none" />
       <Skeleton className="h-3 w-2/3" />
     </div>
   );

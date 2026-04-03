@@ -7,6 +7,7 @@ import { Container } from "./Container";
 import { MobileMenu } from "./MobileMenu";
 import { UserMenu } from "./UserMenu";
 import { UserProvider } from "./UserProvider";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 const HOW_TO_USE_STEPS = [
   {
@@ -245,6 +246,7 @@ export function Header() {
           </div>
         </div>
       )}
+      <AuthModal />
     </UserProvider>
   );
 }

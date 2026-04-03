@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { toggleLike } from "@/app/actions/user";
+import { useUser } from "@/components/layout/UserProvider";
 
 interface LikeButtonProps {
   skillId: string;
@@ -21,13 +22,14 @@ export function LikeButton({
   isAuthenticated,
 }: LikeButtonProps) {
   const router = useRouter();
+  const { openAuthModal } = useUser();
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
   const isBusy = useRef(false);
 
   const handleLike = async () => {
     if (!isAuthenticated) {
-      router.push("/login");
+      openAuthModal("login");
       return;
     }
 

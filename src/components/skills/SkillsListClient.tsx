@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizeSearchQuery } from "@/lib/sanitize";
 import { SkillCard } from "@/components/skills/SkillCard";
+import { SkillGridSkeleton } from "@/components/skills/SkillGridSkeleton";
 import type { Skill } from "@/types/skill";
 
 const BATCH_SIZE = 8;
@@ -28,12 +30,60 @@ export function SkillsListClient({
   sort,
 }: SkillsListClientProps) {
   const supabase = useMemo(() => createClient(), []);
+  const searchParamsHook = useSearchParams();
+  const currentClientQuery = searchParamsHook.get("q") ?? "";
+
   const [skills, setSkills] = useState<Skill[]>(initialSkills);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(initialSkills.length);
   const [viewCounts, setViewCounts] = useState<Record<string, number>>(initialViewCounts);
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>(initialLikeCounts);
+
+  // Keep a copy of the default, unfiltered skills for instant recall
+  const defaultCache = useRef<{
+    skills: Skill[];
+    hasMore: boolean;
+    viewCounts: Record<string, number>;
+    likeCounts: Record<string, number>;
+  } | null>(null);
+
+  useEffect(() => {
+    // If there's no search query or category, this is our default state
+    if (!searchQuery && !category && (!sort || sort === "recent")) {
+      defaultCache.current = {
+        skills: initialSkills,
+        hasMore: initialHasMore,
+        viewCounts: initialViewCounts,
+        likeCounts: initialLikeCounts,
+      };
+    }
+    
+    // Sync state when props change. This replaces the full remount behavior.
+    setSkills(initialSkills);
+    setHasMore(initialHasMore);
+    setOffset(initialSkills.length);
+    setViewCounts(initialViewCounts);
+    setLikeCounts(initialLikeCounts);
+  }, [initialSkills, initialHasMore, initialViewCounts, initialLikeCounts, searchQuery, category, sort]);
+
+  // If client query from URL doesn't match the server prop searchQuery,
+  // we are in the middle of a Next.js transition fetching new data.
+  const isPendingSearch = currentClientQuery !== (searchQuery ?? "");
+
+  // Instant recall: if clearing search, instantly show cache if available
+  const displaySkills = (isPendingSearch && !currentClientQuery && defaultCache.current)
+    ? defaultCache.current.skills
+    : skills;
+  const displayViewCounts = (isPendingSearch && !currentClientQuery && defaultCache.current)
+    ? defaultCache.current.viewCounts
+    : viewCounts;
+  const displayLikeCounts = (isPendingSearch && !currentClientQuery && defaultCache.current)
+    ? defaultCache.current.likeCounts
+    : likeCounts;
+  const displayHasMore = (isPendingSearch && !currentClientQuery && defaultCache.current)
+    ? defaultCache.current.hasMore
+    : hasMore;
 
   const fetchCounts = useCallback(async (skillIds: string[]) => {
     if (skillIds.length === 0) return;
@@ -142,16 +192,24 @@ export function SkillsListClient({
     setLoading(false);
   }, [loading, hasMore, offset, sort, searchQuery, category, supabase, fetchCounts]);
 
+  if (isPendingSearch && currentClientQuery) {
+    return (
+      <div>
+        <SkillGridSkeleton count={8} />
+      </div>
+    );
+  }
+
   return (
     <div>
-      {skills.length > 0 ? (
+      {displaySkills.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {skills.map((skill) => (
+          {displaySkills.map((skill) => (
             <SkillCard
               key={skill.id}
               skill={skill}
-              viewCount={viewCounts[skill.id] ?? 0}
-              likeCount={likeCounts[skill.id] ?? 0}
+              viewCount={displayViewCounts[skill.id] ?? 0}
+              likeCount={displayLikeCounts[skill.id] ?? 0}
             />
           ))}
         </div>
@@ -166,7 +224,7 @@ export function SkillsListClient({
         </div>
       )}
 
-      {hasMore && (
+      {displayHasMore && !isPendingSearch && (
         <div className="mt-8 text-center">
           <button
             onClick={loadMore}

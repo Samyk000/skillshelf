@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useUser } from "./UserProvider";
 
 export function UserMenu() {
-  const { user, loading } = useUser();
+  const { user, loading, openAuthModal } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
@@ -28,18 +28,18 @@ export function UserMenu() {
   if (!user) {
     return (
       <div className="hidden items-center gap-3 md:flex">
-        <Link
-          href="/login"
+        <button
+          onClick={() => openAuthModal("login")}
           className="border-2 border-border px-4 py-2 text-sm font-semibold tracking-widest text-foreground uppercase transition-colors hover:border-primary hover:text-primary"
         >
           LOGIN
-        </Link>
-        <Link
-          href="/signup"
+        </button>
+        <button
+          onClick={() => openAuthModal("signup")}
           className="border-2 border-primary bg-primary px-4 py-2 text-sm font-semibold tracking-widest text-primary-foreground uppercase transition-colors hover:bg-transparent hover:text-primary"
         >
           SIGN UP
-        </Link>
+        </button>
       </div>
     );
   }

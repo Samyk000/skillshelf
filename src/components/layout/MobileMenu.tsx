@@ -10,7 +10,7 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ open, onClose }: MobileMenuProps) {
-  const { user, loading } = useUser();
+  const { user, loading, openAuthModal } = useUser();
   const { theme, setTheme } = useTheme();
 
   const handleSignOut = async () => {
@@ -111,20 +111,24 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
             </>
           ) : (
             <>
-              <Link
-                href="/login"
-                onClick={onClose}
-                className="border-2 border-border px-4 py-3 text-center text-sm font-semibold tracking-widest text-foreground uppercase transition-colors hover:border-primary hover:text-primary"
+              <button
+                onClick={() => {
+                  onClose();
+                  openAuthModal("login");
+                }}
+                className="w-full border-2 border-border px-4 py-3 text-center text-sm font-semibold tracking-widest text-foreground uppercase transition-colors hover:border-primary hover:text-primary"
               >
                 LOGIN
-              </Link>
-              <Link
-                href="/signup"
-                onClick={onClose}
-                className="border-2 border-primary bg-primary px-4 py-3 text-center text-sm font-semibold tracking-widest text-primary-foreground uppercase transition-colors hover:bg-transparent hover:text-primary"
+              </button>
+              <button
+                onClick={() => {
+                  onClose();
+                  openAuthModal("signup");
+                }}
+                className="w-full border-2 border-primary bg-primary px-4 py-3 text-center text-sm font-semibold tracking-widest text-primary-foreground uppercase transition-colors hover:bg-transparent hover:text-primary"
               >
                 SIGN UP
-              </Link>
+              </button>
             </>
           )}
         </div>
