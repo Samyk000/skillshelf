@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
+import { startTransition } from "react";
 import { CATEGORIES } from "@/lib/constants";
 
 interface FilterChipsProps {
@@ -11,13 +11,12 @@ interface FilterChipsProps {
 export function FilterChips({ categoryCounts }: FilterChipsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
   const activeCategory = searchParams.get("category") ?? "";
 
   const handleFilter = (category: string) => {
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
-      if (category === activeCategory || category === "") {
+      if (category === activeCategory) {
         params.delete("category");
       } else {
         params.set("category", category);
@@ -44,6 +43,11 @@ export function FilterChips({ categoryCounts }: FilterChipsProps) {
           }`}
         >
           {category}
+          {categoryCounts[category] > 0 && (
+            <span className="ml-1.5 opacity-60 tabular-nums">
+              ({categoryCounts[category]})
+            </span>
+          )}
         </button>
       ))}
     </div>

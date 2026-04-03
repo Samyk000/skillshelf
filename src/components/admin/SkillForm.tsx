@@ -11,8 +11,6 @@ interface SkillFormProps {
   skill?: Skill;
   status: "draft" | "published" | "archived";
   featured: boolean;
-  onStatusChange: (status: "draft" | "published" | "archived") => void;
-  onFeaturedChange: (featured: boolean) => void;
 }
 
 function generateSlug(title: string) {

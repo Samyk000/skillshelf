@@ -29,13 +29,21 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Do not run code between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
+  // Define public routes that should bypass getUser() to allow ISR caching
+  const publicRoutes = [
+    "/",
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/favicon",
+  ];
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const isPublicPage =
+    publicRoutes.includes(request.nextUrl.pathname) ||
+    request.nextUrl.pathname.startsWith("/skills") ||
+    request.nextUrl.pathname.startsWith("/preview");
 
   // Public API routes that don't require authentication
   const publicApiRoutes = ["/api/views"];
@@ -43,18 +51,17 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route)
   );
 
+  // Only call getUser() if it's NOT a public page or if it's a public API that needs it
+  let user = null;
+  if (!isPublicPage || isPublicApi) {
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    user = authUser;
+  }
+
   // Protected routes: redirect to /login if not authenticated
   if (
     !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/signup") &&
-    !request.nextUrl.pathname.startsWith("/forgot-password") &&
-    !request.nextUrl.pathname.startsWith("/skills") &&
-    !request.nextUrl.pathname.startsWith("/preview") &&
-    !request.nextUrl.pathname.startsWith("/robots.txt") &&
-    !request.nextUrl.pathname.startsWith("/sitemap.xml") &&
-    !request.nextUrl.pathname.startsWith("/favicon") &&
-    request.nextUrl.pathname !== "/" &&
+    !isPublicPage &&
     !isPublicApi
   ) {
     const url = request.nextUrl.clone();
@@ -62,16 +69,21 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from auth pages
+  // Redirect authenticated users away from auth pages ONLY if we checked for them
+  // Note: we might need to check user for /login, /signup etc. to redirect away
   if (
-    user &&
+    isPublicPage &&
     (request.nextUrl.pathname.startsWith("/login") ||
       request.nextUrl.pathname.startsWith("/signup") ||
       request.nextUrl.pathname.startsWith("/forgot-password"))
   ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
+    // Re-check user for auth pages specifically to handle redirection
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (authUser) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as is.

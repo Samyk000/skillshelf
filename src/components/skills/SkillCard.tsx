@@ -21,7 +21,9 @@ export const SkillCard = memo(function SkillCard({
 }: SkillCardProps) {
   const supabase = useMemo(() => createClient(), []);
   const [isVisible, setIsVisible] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState<string | null>(skill.preview_html || null);
   const [fetching, setFetching] = useState(false);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const fetchSkillMarkdown = async (): Promise<string | null> => {
@@ -96,10 +98,30 @@ export const SkillCard = memo(function SkillCard({
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (isVisible && !previewHtml && !skill.cover_image_url) {
+      const fetchPreview = async () => {
+        setIsLoadingPreview(true);
+        const { data, error } = await supabase
+          .from("skills")
+          .select("preview_html")
+          .eq("id", skill.id)
+          .single();
+        
+        if (!error && data) {
+          setPreviewHtml(data.preview_html);
+        }
+        setIsLoadingPreview(false);
+      };
+      fetchPreview();
+    }
+  }, [isVisible, previewHtml, skill.id, skill.cover_image_url, supabase]);
+
   return (
     <div
       ref={cardRef}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border-2 border-border bg-card transition-colors hover:border-primary"
+      tabIndex={0}
+      className="group relative flex flex-col overflow-hidden rounded-2xl border-2 border-border bg-card transition-colors hover:border-primary focus-within:border-primary outline-none"
     >
       <Link href={`/skills/${skill.slug}`} className="flex flex-1 flex-col">
         {skill.cover_image_url ? (
@@ -113,11 +135,11 @@ export const SkillCard = memo(function SkillCard({
               loading="lazy"
             />
           </div>
-        ) : skill.preview_html ? (
+        ) : (previewHtml || isLoadingPreview) ? (
           <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
-            {isVisible ? (
+            {previewHtml ? (
               <iframe
-                srcDoc={skill.preview_html}
+                srcDoc={previewHtml}
                 sandbox="allow-scripts allow-popups"
                 title={`Preview: ${skill.title}`}
                 className="pointer-events-none h-[200%] w-[200%] origin-top-left scale-50 border-0 opacity-0 transition-opacity duration-300"
@@ -141,7 +163,7 @@ export const SkillCard = memo(function SkillCard({
       </Link>
 
       {/* Hover Overlay — 2-row layout */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-full border-t-2 border-transparent bg-card/90 backdrop-blur-sm transition-all duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:border-border">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-full border-t-2 border-transparent bg-card/90 backdrop-blur-sm transition-all duration-300 ease-out group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:border-border group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:border-border">
         {/* Row 1: Category + View/Like counts */}
         <div className="flex items-center justify-between px-3 pt-2">
           <Link

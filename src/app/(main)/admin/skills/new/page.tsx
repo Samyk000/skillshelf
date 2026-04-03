@@ -38,8 +38,6 @@ export default function NewSkillPage() {
       <SkillForm
         status={status}
         featured={featured}
-        onStatusChange={setStatus}
-        onFeaturedChange={setFeatured}
       />
     </>
   );

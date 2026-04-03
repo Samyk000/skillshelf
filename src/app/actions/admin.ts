@@ -71,6 +71,9 @@ export async function createSkill(data: SkillFormData) {
 
   if (error) {
     console.error("Failed to create skill:", error);
+    if (error.code === "23505") {
+      return { error: "A skill with this slug already exists" };
+    }
     return { error: "Failed to create skill. Please try again." };
   }
 
@@ -88,6 +91,17 @@ export async function updateSkill(skillId: string, data: SkillFormData) {
 
   if (!/^[a-z0-9-]+$/.test(data.slug)) {
     return { error: "Slug must only contain lowercase letters, numbers, and hyphens" };
+  }
+
+  const { data: existingSlug } = await supabase
+    .from("skills")
+    .select("id")
+    .eq("slug", data.slug)
+    .neq("id", skillId)
+    .maybeSingle();
+
+  if (existingSlug) {
+    return { error: "A skill with this slug already exists" };
   }
 
   const sanitized = sanitizeSkillInput({
@@ -114,6 +128,9 @@ export async function updateSkill(skillId: string, data: SkillFormData) {
 
   if (error) {
     console.error("Failed to update skill:", error);
+    if (error.code === "23505") {
+      return { error: "A skill with this slug already exists" };
+    }
     return { error: "Failed to update skill. Please try again." };
   }
 

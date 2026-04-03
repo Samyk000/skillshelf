@@ -63,7 +63,7 @@ export async function SkillsList({ searchParams }: SkillsListProps) {
     let query = supabase
       .from("skills")
       .select(
-        "id, slug, title, short_description, category, preview_html, preview_external_url, cover_image_url, featured, created_at, updated_at",
+        "id, slug, title, short_description, category, preview_external_url, cover_image_url, featured, created_at, updated_at",
         { count: "exact" }
       )
       .eq("status", "published")

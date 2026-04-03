@@ -5,9 +5,17 @@ import { useRouter } from "next/navigation";
 export function BackButton() {
   const router = useRouter();
 
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
     <button
-      onClick={() => router.back()}
+      onClick={handleBack}
       className="mb-6 flex items-center gap-2 text-xs font-semibold tracking-wider text-muted-foreground hover:text-primary transition-colors"
       aria-label="Go back"
     >

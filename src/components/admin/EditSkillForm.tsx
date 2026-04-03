@@ -44,8 +44,6 @@ export function EditSkillForm({ skill }: EditSkillFormProps) {
         skill={skill}
         status={status}
         featured={featured}
-        onStatusChange={setStatus}
-        onFeaturedChange={setFeatured}
       />
     </>
   );

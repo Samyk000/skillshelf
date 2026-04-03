@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizeSearchQuery } from "@/lib/sanitize";
 import { SkillCard } from "@/components/skills/SkillCard";
@@ -31,6 +31,7 @@ export function SkillsListClient({
   const [skills, setSkills] = useState<Skill[]>(initialSkills);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
+  const [offset, setOffset] = useState(initialSkills.length);
   const [viewCounts, setViewCounts] = useState<Record<string, number>>(initialViewCounts);
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>(initialLikeCounts);
 
@@ -56,15 +57,10 @@ export function SkillsListClient({
     setLikeCounts((prev) => ({ ...prev, ...newLikeCounts }));
   }, [supabase]);
 
-  useEffect(() => {
-    fetchCounts(initialSkills.map(s => s.id));
-  }, [initialSkills, fetchCounts]);
-
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
     setLoading(true);
 
-    const offset = skills.length;
     const categoryFilter = category
       ? sanitizeSearchQuery(category) || null
       : null;
@@ -139,11 +135,12 @@ export function SkillsListClient({
 
     if (newSkills.length > 0) {
       setSkills((prev) => [...prev, ...newSkills]);
+      setOffset((prev) => prev + newSkills.length);
       fetchCounts(newSkills.map(s => s.id));
     }
 
     setLoading(false);
-  }, [loading, hasMore, sort, searchQuery, category, skills.length, supabase, fetchCounts]);
+  }, [loading, hasMore, offset, sort, searchQuery, category, supabase, fetchCounts]);
 
   return (
     <div>
