@@ -49,3 +49,4 @@ agents.md
 claude.md
 all_agents.txt
 *.md
+!README.md
