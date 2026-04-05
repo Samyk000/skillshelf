@@ -42,3 +42,10 @@ next-env.d.ts
 
 # supabase
 supabase/.temp/
+
+# agent-related and md files
+md/
+agents.md
+claude.md
+all_agents.txt
+*.md
