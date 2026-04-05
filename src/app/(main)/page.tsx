@@ -125,7 +125,7 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
               </div>
             </div>
           </div>
-          <Suspense fallback={<SkillGridSkeleton count={12} />}>
+          <Suspense fallback={<SkillGridSkeleton count={9} />}>
             <SkillsList searchParams={searchParams} />
           </Suspense>
         </Container>
@@ -160,7 +160,7 @@ function HomePageSkeleton() {
             <Skeleton className="h-10 w-full max-w-md" />
             <Skeleton className="h-10 w-64" />
           </div>
-          <SkillGridSkeleton count={10} />
+          <SkillGridSkeleton count={9} />
         </Container>
       </section>
     </div>

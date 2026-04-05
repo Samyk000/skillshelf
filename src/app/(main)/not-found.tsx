@@ -3,7 +3,7 @@ import { Container } from "@/components/layout/Container";
 
 export default function NotFound() {
   return (
-    <Container className="flex flex-col items-center justify-center py-32">
+    <Container className="flex flex-col items-center justify-center py-32 flex-1">
       <p className="mb-2 text-xs font-semibold tracking-[0.2em] text-primary">
         // 404
       </p>

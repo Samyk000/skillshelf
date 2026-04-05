@@ -6,7 +6,10 @@ export function BackButton() {
   const router = useRouter();
 
   const handleBack = () => {
-    if (window.history.length > 2) {
+    // Robust check: If we have history AND the referrer is from our own site
+    const hasInternalHistory = window.history.length > 2 && document.referrer.includes(window.location.host);
+    
+    if (hasInternalHistory) {
       router.back();
     } else {
       router.push("/");

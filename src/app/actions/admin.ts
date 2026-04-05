@@ -36,6 +36,7 @@ export interface SkillFormData {
   skill_markdown: string;
   preview_html: string | null;
   featured: boolean;
+  cover_image_url: string | null;
 }
 
 export async function createSkill(data: SkillFormData) {
@@ -66,6 +67,7 @@ export async function createSkill(data: SkillFormData) {
     category: data.category,
     status: data.status,
     featured: data.featured,
+    cover_image_url: data.cover_image_url || null,
     created_by: user.id,
   });
 
@@ -123,6 +125,7 @@ export async function updateSkill(skillId: string, data: SkillFormData) {
       category: data.category,
       status: data.status,
       featured: data.featured,
+      cover_image_url: data.cover_image_url || null,
     })
     .eq("id", skillId);
 

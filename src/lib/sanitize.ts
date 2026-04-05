@@ -47,12 +47,12 @@ export function sanitizeSkillInput(data: {
 } {
   return {
     ...data,
-    title: sanitizeTextInput(data.title ?? "").slice(0, 20),
+    title: sanitizeTextInput(data.title ?? "").slice(0, 100),
     slug: (data.slug ?? "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 100),
     short_description: data.short_description
-      ? sanitizeTextInput(data.short_description).slice(0, 50)
+      ? sanitizeTextInput(data.short_description).slice(0, 250)
       : null,
-    skill_markdown: (data.skill_markdown ?? "").trim().slice(0, 6000),
+    skill_markdown: (data.skill_markdown ?? "").trim(),
     preview_html: data.preview_html
       ? passthroughPreviewHtml(data.preview_html.trim())
       : null,

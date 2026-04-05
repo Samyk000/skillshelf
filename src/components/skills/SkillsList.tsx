@@ -3,7 +3,7 @@ import { sanitizeSearchQuery } from "@/lib/sanitize";
 import { SkillsListClient } from "@/components/skills/SkillsListClient";
 import type { Skill } from "@/types/skill";
 
-const INITIAL_BATCH_SIZE = 12;
+const INITIAL_BATCH_SIZE = 9;
 
 interface SkillsListProps {
   searchParams: Promise<{ q?: string; category?: string; sort?: string }>;

@@ -17,15 +17,12 @@ export function AdminHeader({ children }: AdminHeaderProps) {
     <div className="mb-8 flex items-center justify-between">
       <div>
         <p className="text-xs font-semibold tracking-[0.2em] text-primary">
-          // {isNewSkillPage ? "CREATE" : isEditPage ? "EDIT" : "ADMIN"}
-        </p>
-        <h2 className="mt-2 font-display text-2xl font-bold tracking-wide">
-          {isNewSkillPage
-            ? "NEW SKILL"
+          // {isNewSkillPage
+            ? "CREATE NEW SKILL"
             : isEditPage
               ? "EDIT SKILL"
-              : "CONTENT MANAGEMENT"}
-        </h2>
+              : "ADMIN"}
+        </p>
       </div>
       {isSkillFormPage && children ? (
         <div className="flex items-center gap-4">

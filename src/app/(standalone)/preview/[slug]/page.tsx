@@ -35,7 +35,8 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
   return (
     <iframe
       srcDoc={skill.preview_html}
-      sandbox="allow-scripts allow-popups"
+      /* Standard standalone sandbox: Allow everything needed for a full-page experience */
+      sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
       title={`Preview: ${skill.title}`}
       className="absolute inset-0 h-full w-full border-0"
     />
