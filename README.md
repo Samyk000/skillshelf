@@ -81,6 +81,29 @@ npm run dev
 
 ---
 
+## // Visual Interface
+
+<div align="center">
+  <p><strong>The Workbench Hero</strong></p>
+  <img src="public/HeroSection.png" alt="Hero Section" width="100%" style="border-radius: 12px; margin-bottom: 20px;" />
+  
+  <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+    <div style="flex: 1;">
+      <p><strong>Design Library</strong></p>
+      <img src="public/SkillList1.png" alt="Skill List 1" width="100%" style="border-radius: 8px;" />
+    </div>
+    <div style="flex: 1;">
+      <p><strong>Categories & Filters</strong></p>
+      <img src="public/SkillList2.png" alt="Skill List 2" width="100%" style="border-radius: 8px;" />
+    </div>
+  </div>
+
+  <p><strong>Detailed Skill View (Dark Mode)</strong></p>
+  <img src="public/DetailedPageDark.png" alt="Detailed View" width="100%" style="border-radius: 12px;" />
+</div>
+
+---
+
 ## // How To Use the Skills
 
 1. **Browse** — Find a design style that matches your vision
