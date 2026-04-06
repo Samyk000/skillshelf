@@ -36,16 +36,16 @@ export function FilterChips({ categoryCounts }: FilterChipsProps) {
           key={category}
           onClick={() => handleFilter(category)}
           aria-pressed={activeCategory === category}
-          className={`shrink-0 inline-flex items-center justify-center whitespace-nowrap rounded-none border px-3 h-7 text-[10px] sm:px-4 sm:h-9 sm:text-xs font-semibold tracking-wide transition-all ${
+          className={`shrink-0 inline-flex items-center justify-center whitespace-nowrap px-3 py-1.5 rounded-lg border text-[10px] sm:text-[11px] font-medium tracking-widest uppercase transition-all duration-200 ${
             activeCategory === category
-              ? "border-primary bg-primary/20 text-primary"
-              : "border-border/50 text-muted-foreground hover:bg-secondary/50 hover:text-foreground hover:border-border"
+              ? "border-primary text-primary"
+              : "border-black/5 dark:border-white/5 text-black/60 dark:text-white/60 hover:text-black dark:hover:text-white hover:border-black/10 dark:hover:border-white/10"
           }`}
         >
           {category}
           {categoryCounts[category] > 0 && (
-            <span className="ml-1.5 opacity-60 tabular-nums">
-              ({categoryCounts[category]})
+            <span className="ml-1.5 font-mono text-[9px] text-black dark:text-white opacity-100 tabular-nums">
+              {categoryCounts[category]}
             </span>
           )}
         </button>

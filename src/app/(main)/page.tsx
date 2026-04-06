@@ -14,14 +14,14 @@ import type { Skill } from "@/types/skill";
 
 const HeroShowcase = dynamic(
   () => import("@/components/skills/HeroShowcase").then((mod) => ({ default: mod.HeroShowcase })),
-  { loading: () => <Skeleton className="h-[500px] w-full rounded-lg" /> }
+  { loading: () => (
+    <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#080808]">
+      <div className="h-full w-full animate-shimmer opacity-30" />
+      <div className="absolute inset-x-0 bottom-0 h-14 border-t border-white/10 bg-black/50" />
+    </div>
+  ) }
 );
 
-/**
- * Revalidate this page every 60 seconds.
- * Repeat visitors get edge-cached responses; new/updated skills
- * appear within a minute.
- */
 export const revalidate = 60;
 
 type SearchParams = Promise<{ q?: string; category?: string; sort?: string }>;
@@ -39,6 +39,11 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
     .eq("featured", true)
     .order("updated_at", { ascending: false })
     .limit(5);
+
+  const { count: totalSkills } = await supabase
+    .from("skills")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "published");
 
   const showcaseSkills = (showcaseData as Skill[]) ?? [];
 
@@ -63,51 +68,66 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="border-b-2 border-border py-12 md:py-16">
-        <Container>
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
+      <section className="reveal relative overflow-hidden border-b border-border pt-12 pb-14 md:pt-16 md:pb-20">
+        {/* Background Decorations */}
+        <div className="bg-grid absolute inset-0 opacity-[0.4]" />
+        <div className="bg-grid-mask absolute inset-0" />
+        <div className="bg-orb bg-orb-blue absolute -top-24 -left-24 h-96 w-96 opacity-[0.08]" />
+        <div className="bg-orb bg-orb-violet absolute top-1/2 -right-48 h-[500px] w-[500px] -translate-y-1/2 opacity-[0.06]" />
+
+        <Container className="relative z-10">
+          <div className="grid grid-cols-1 gap-16 lg:grid-cols-12 lg:items-center">
             {/* Left: Copy */}
-            <div className="flex flex-col items-start gap-5">
-              <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.2em] text-primary">
-                <span className="inline-block animate-spin-slow text-lg leading-none">
-                  //
+            <div className="flex flex-col items-start gap-8 lg:col-span-6">
+              <div className="inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
                 </span>
-                SKILL.MD LIBRARY
-              </p>
-              <h1 className="max-w-4xl font-display text-3xl font-bold leading-tight tracking-tight md:text-5xl">
-                THE UI YOU IMAGINE.{" "}
-                <span className="text-primary">THE CODE YOUR AI WRITES.</span>
-              </h1>
-              <p className="max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                You know what looks good. Your AI doesn&apos;t. Give it a SKILL.md — a
-                design blueprint with exact tokens, patterns, and rules. One copy.
-                Pixel-perfect output.
-              </p>
-              <div className="flex items-center gap-4 text-[11px] tracking-wider text-muted-foreground">
-                {[
-                  { step: "01", title: "BROWSE" },
-                  { step: "02", title: "PREVIEW" },
-                  { step: "03", title: "COPY & USE" },
-                ].map((item, index) => (
-                  <div key={item.step} className="flex items-center gap-2">
-                    <span className="font-bold text-primary">{item.step}</span>
-                    <span className="font-semibold">{item.title}</span>
-                    {index < 2 && <span className="text-border">/</span>}
-                  </div>
-                ))}
+                <span className="text-[10px] font-bold tracking-[0.2em] text-primary uppercase font-mono">
+                  The Visual Genome for AI
+                </span>
+              </div>
+              
+              <div className="space-y-6">
+                <h1 className="max-w-3xl font-display text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl">
+                  Your AI doesn&apos;t know Design. <br />
+                  <span className="text-primary">
+                    Now it does.
+                  </span>
+                </h1>
+                <p className="max-w-xl text-xl leading-relaxed text-muted-foreground/80">
+                  Bridge the gap between generic AI code and premium UI. Skillshelf provides the
+                  proven blueprints your AI needs to build pixel-perfect interfaces with exact design DNA.
+                </p>
+
+                <div className="flex items-center gap-16 pt-2">
+                  {[
+                    { label: "Genomic Skills", value: (totalSkills ?? 37).toString() },
+                    { label: "Output Accuracy", value: "99%" },
+                  ].map((stat) => (
+                    <div key={stat.label} className="space-y-1">
+                      <p className="text-2xl font-bold tracking-tight text-foreground">{stat.value}</p>
+                      <p className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Right: Showcase */}
-            <HeroShowcase skills={showcaseSkills} />
+            <div className="lg:col-span-6 relative lg:ml-auto w-full max-w-2xl">
+              <div className="bg-shape bg-shape-rect absolute -top-8 -right-8 h-32 w-32 animate-rotate-slow opacity-10" />
+              <div className="bg-shape bg-shape-circle absolute -bottom-12 -left-12 h-48 w-48 animate-float-slow opacity-10" />
+              <HeroShowcase skills={showcaseSkills} />
+            </div>
           </div>
         </Container>
       </section>
 
-      {/* Skills */}
-      <section className="pt-6 pb-12">
+      {/* Skills Section */}
+      <section className="reveal pt-6 pb-12 md:pt-8 md:pb-16">
         <Container>
-          {/* New UI for categories, search, and sort */}
           <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             {/* Left side: Categories (FilterChips) */}
             <div className="w-full overflow-x-auto pb-2 lg:w-auto lg:pb-0">
@@ -134,29 +154,53 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
   );
 }
 
-/**
- * Skeleton fallback for the entire home page while data is loading.
- */
 function HomePageSkeleton() {
   return (
     <div className="flex flex-col">
-      <section className="border-b-2 border-border py-12 md:py-16">
-        <Container>
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
-            <div className="flex flex-col gap-6">
-              <Skeleton className="h-4 w-48" />
-              <Skeleton className="h-12 w-full max-w-md" />
-              <Skeleton className="h-16 w-full max-w-xl" />
-              <Skeleton className="h-4 w-64" />
+      <section className="relative overflow-hidden border-b border-border pt-12 pb-20 md:pt-16 md:pb-32">
+        <div className="bg-grid absolute inset-0 opacity-[0.4]" />
+        <Container className="relative z-10">
+          <div className="grid grid-cols-1 gap-16 lg:grid-cols-12 lg:items-center">
+            {/* Skeleton Left: Copy */}
+            <div className="flex flex-col items-start gap-8 lg:col-span-6">
+              <Skeleton className="h-8 w-48 rounded-full" />
+              <div className="space-y-6 w-full">
+                <div className="space-y-4">
+                  <Skeleton className="h-16 w-full max-w-lg" />
+                  <Skeleton className="h-16 w-3/4" />
+                </div>
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                  <Skeleton className="h-4 w-4/6" />
+                </div>
+                <div className="flex items-center gap-16 pt-2">
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                </div>
+              </div>
             </div>
-            <Skeleton className="h-[500px] w-full rounded-lg" />
+
+            {/* Skeleton Right: Showcase */}
+            <div className="lg:col-span-6 relative lg:ml-auto w-full max-w-2xl">
+              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#080808]">
+                <Skeleton className="h-full w-full opacity-50" />
+                <div className="absolute inset-x-0 bottom-0 h-14 border-t border-white/10 bg-black/50" />
+              </div>
+            </div>
           </div>
         </Container>
       </section>
 
-      <section className="pt-6 pb-12">
+      <section className="py-12 md:py-16">
         <Container>
-          <div className="mb-8 flex justify-between gap-4">
+          <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <Skeleton className="h-10 w-full max-w-md" />
             <Skeleton className="h-10 w-64" />
           </div>

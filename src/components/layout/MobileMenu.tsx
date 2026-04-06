@@ -24,7 +24,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 
   return (
     <div
-      className="border-t-2 border-border bg-background md:hidden"
+      className="border-t border-border bg-background/95 backdrop-blur-xl md:hidden transition-transform duration-300 ease-out"
       role="dialog"
       aria-modal="true"
       aria-label="Mobile navigation"
@@ -37,9 +37,9 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
           <Link
             href="/admin"
             onClick={onClose}
-            className="border-2 border-accent px-4 py-3 text-center text-sm font-semibold tracking-widest text-accent uppercase transition-colors hover:bg-accent hover:text-accent-foreground"
+            className="rounded-xl bg-accent/10 px-4 py-3 text-center text-sm font-medium text-accent hover:bg-accent/20 transition-all duration-200"
           >
-            ADMIN
+            Admin
           </Link>
         )}
 
@@ -48,7 +48,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
           <div className="flex items-center justify-center gap-2">
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="border-2 border-border p-2 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-muted-foreground transition-all duration-200 hover:bg-muted/50 hover:text-foreground"
               aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             >
               {theme === "dark" ? (
@@ -66,7 +66,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               href="https://github.com/Samyk000/skillshelf"
               target="_blank"
               rel="noopener noreferrer"
-              className="border-2 border-border p-2 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-muted-foreground transition-all duration-200 hover:bg-muted/50 hover:text-foreground"
               title="GitHub"
               aria-label="GitHub repository"
             >
@@ -78,7 +78,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               href="https://x.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="border-2 border-border p-2 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-muted-foreground transition-all duration-200 hover:bg-muted/50 hover:text-foreground"
               title="X (Twitter)"
               aria-label="X (Twitter)"
             >
@@ -89,24 +89,24 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
           </div>
 
           {loading ? (
-            <div className="h-12 animate-pulse border-2 border-border" />
+            <div className="h-12 animate-pulse rounded-xl border border-border bg-muted/30" />
           ) : user ? (
             <>
-              <div className="border-2 border-border px-4 py-3 text-center text-xs tracking-wider text-muted-foreground">
-                {user.email.toUpperCase()}
+              <div className="rounded-xl border border-border bg-muted/30 px-4 py-3 text-center text-sm text-muted-foreground">
+                {user.email}
               </div>
               <Link
                 href="/dashboard/settings"
                 onClick={onClose}
-                className="border-2 border-border px-4 py-3 text-center text-sm font-semibold tracking-widest text-foreground uppercase transition-colors hover:border-primary hover:text-primary"
+                className="w-full rounded-xl border border-border px-4 py-3 text-center text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted/50"
               >
-                SETTINGS
+                Settings
               </Link>
               <button
                 onClick={handleSignOut}
-                className="border-2 border-destructive px-4 py-3 text-center text-sm font-semibold tracking-widest text-destructive uppercase transition-colors hover:bg-destructive hover:text-destructive-foreground"
+                className="w-full rounded-xl border border-border border-destructive/30 px-4 py-3 text-center text-sm font-medium text-destructive transition-all duration-200 hover:bg-destructive/10"
               >
-                SIGN OUT
+                Sign out
               </button>
             </>
           ) : (
@@ -116,18 +116,18 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                   onClose();
                   openAuthModal("login");
                 }}
-                className="w-full border-2 border-border px-4 py-3 text-center text-sm font-semibold tracking-widest text-foreground uppercase transition-colors hover:border-primary hover:text-primary"
+                className="w-full rounded-xl border border-border px-4 py-3 text-center text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted/50"
               >
-                LOGIN
+                Login
               </button>
               <button
                 onClick={() => {
                   onClose();
                   openAuthModal("signup");
                 }}
-                className="w-full border-2 border-primary bg-primary px-4 py-3 text-center text-sm font-semibold tracking-widest text-primary-foreground uppercase transition-colors hover:bg-transparent hover:text-primary"
+                className="w-full rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-primary-foreground transition-all duration-200 hover:opacity-90"
               >
-                SIGN UP
+                Sign up
               </button>
             </>
           )}

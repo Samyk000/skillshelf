@@ -1,4 +1,7 @@
+"use client";
+
 import { memo } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SkillGridSkeletonProps {
   count?: number;
@@ -10,24 +13,23 @@ export const SkillGridSkeleton = memo(function SkillGridSkeleton({ count = 9 }: 
       {Array.from({ length: count }, (_, i) => (
         <div
           key={i}
-          className="flex flex-col overflow-hidden rounded-xl border border-border/40 bg-card/50"
+          className="flex flex-col overflow-hidden rounded-xl border border-border/40 bg-card/30"
         >
-          {/* Image Placeholder 16/7.5 */}
-          <div className="aspect-[16/7.5] w-full animate-pulse bg-muted/20" />
+          {/* Exact Aspect Ratio Match for Skill Cards (16:9) */}
+          <div className="aspect-[16/9] w-full animate-shimmer opacity-20" />
           
-          {/* Content Placeholder side-by-side */}
-          <div className="flex items-center justify-between p-3 border-t border-border/10">
-            <div className="flex-1 space-y-2">
-              <div className="h-3 w-3/4 animate-pulse rounded bg-muted/20" />
-              <div className="h-2 w-1/2 animate-pulse rounded bg-muted/10" />
+          {/* Metadata Footer Skeleton */}
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border/10">
+            <div className="flex items-center gap-2">
+              {/* Title Placeholder */}
+              <Skeleton className="h-3.5 w-24 rounded" />
+              {/* Category Badge Placeholder */}
+              <Skeleton className="h-3.5 w-12 rounded-md" />
             </div>
-            <div className="w-20 space-y-2">
-              <div className="ml-auto h-2 w-12 animate-pulse rounded bg-muted/20" />
-              <div className="flex justify-end gap-1.5">
-                <div className="h-5 w-5 animate-pulse rounded bg-muted/10" />
-                <div className="h-5 w-5 animate-pulse rounded bg-muted/10" />
-                <div className="h-5 w-5 animate-pulse rounded bg-muted/10" />
-              </div>
+            <div className="flex items-center gap-3">
+              {/* Stats Placeholders */}
+              <Skeleton className="h-2.5 w-8 rounded" />
+              <Skeleton className="h-2.5 w-8 rounded" />
             </div>
           </div>
         </div>

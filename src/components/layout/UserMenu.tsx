@@ -15,12 +15,11 @@ export function UserMenu() {
     window.location.href = "/";
   };
 
-  // Loading state — show placeholder with fixed dimensions to prevent layout shift
   if (loading) {
     return (
-      <div className="hidden items-center gap-3 md:flex">
-        <div className="h-8 w-20 border-2 border-border bg-muted" />
-        <div className="h-8 w-20 border-2 border-border bg-muted" />
+      <div className="hidden items-center gap-2 md:flex">
+        <div className="h-9 w-20 rounded-xl bg-muted/50 animate-pulse" />
+        <div className="h-9 w-20 rounded-xl bg-muted/50 animate-pulse" />
       </div>
     );
   }
@@ -30,15 +29,15 @@ export function UserMenu() {
       <div className="hidden items-center gap-3 md:flex">
         <button
           onClick={() => openAuthModal("login")}
-          className="border-2 border-border px-4 py-2 text-sm font-semibold tracking-widest text-foreground uppercase transition-colors hover:border-primary hover:text-primary"
+          className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted/50"
         >
-          LOGIN
+          Login
         </button>
         <button
           onClick={() => openAuthModal("signup")}
-          className="border-2 border-primary bg-primary px-4 py-2 text-sm font-semibold tracking-widest text-primary-foreground uppercase transition-colors hover:bg-transparent hover:text-primary"
+          className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all duration-200 hover:opacity-90"
         >
-          SIGN UP
+          Sign Up
         </button>
       </div>
     );
@@ -49,31 +48,22 @@ export function UserMenu() {
       {user.role === "admin" && (
         <Link
           href="/admin"
-          className="border-2 border-accent px-3 py-1.5 text-xs font-semibold tracking-widest text-accent uppercase transition-colors hover:bg-accent hover:text-accent-foreground"
+          className="rounded-xl bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-all duration-200 hover:bg-accent/20"
         >
-          ADMIN
+          Admin
         </Link>
       )}
       <div className="relative">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="flex items-center gap-2 border-2 border-border px-3 py-2 text-sm font-semibold tracking-wider text-foreground uppercase transition-colors hover:border-primary hover:text-primary"
+          className="flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-medium text-foreground transition-all duration-200 hover:bg-muted/50"
           aria-expanded={menuOpen}
           aria-haspopup="true"
         >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="square"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="square" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
-          {user.email.split("@")[0].toUpperCase()}
+          {user.email.split("@")[0]}
         </button>
 
         {menuOpen && (
@@ -87,7 +77,7 @@ export function UserMenu() {
               role="presentation"
             />
             <div
-              className="absolute right-0 top-full z-50 mt-1 w-48 border-2 border-border bg-card"
+              className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-border bg-card shadow-xl overflow-hidden"
               role="menu"
               aria-label="User menu"
               onKeyDown={(e) => {
@@ -98,24 +88,24 @@ export function UserMenu() {
                 href="/dashboard"
                 role="menuitem"
                 onClick={() => setMenuOpen(false)}
-                className="block border-b border-border px-4 py-3 text-xs font-semibold tracking-widest text-muted-foreground uppercase transition-colors hover:bg-muted hover:text-primary"
+                className="block border-b border-border px-4 py-2.5 text-sm text-muted-foreground transition-colors duration-200 hover:bg-muted/50 hover:text-foreground"
               >
-                DASHBOARD
+                Dashboard
               </Link>
               <Link
                 href="/dashboard/settings"
                 role="menuitem"
                 onClick={() => setMenuOpen(false)}
-                className="block border-b border-border px-4 py-3 text-xs font-semibold tracking-widest text-muted-foreground uppercase transition-colors hover:bg-muted hover:text-primary"
+                className="block border-b border-border px-4 py-2.5 text-sm text-muted-foreground transition-colors duration-200 hover:bg-muted/50 hover:text-foreground"
               >
-                SETTINGS
+                Settings
               </Link>
               <button
                 onClick={handleSignOut}
                 role="menuitem"
-                className="block w-full px-4 py-3 text-left text-xs font-semibold tracking-widest text-destructive uppercase transition-colors hover:bg-muted"
+                className="block w-full px-4 py-2.5 text-left text-sm text-destructive transition-colors duration-200 hover:bg-destructive/10"
               >
-                SIGN OUT
+                Sign out
               </button>
             </div>
           </>
