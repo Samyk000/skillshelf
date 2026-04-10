@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { getBaseUrl } from "@/lib/url";
 
 // We rely entirely on Supabase's native Auth rate limits,
 // which are configured in the Supabase Dashboard.
@@ -74,10 +75,7 @@ export async function signupUser(email: string, password: string) {
     return { error: passwordError };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (!siteUrl && process.env.NODE_ENV === "production") {
-    console.error("Critical: NEXT_PUBLIC_SITE_URL missing in production");
-  }
+  const siteUrl = getBaseUrl();
 
   const supabase = await createClient();
 
@@ -85,7 +83,7 @@ export async function signupUser(email: string, password: string) {
     email: email.trim(),
     password,
     options: {
-      emailRedirectTo: `${siteUrl ?? "http://localhost:3000"}/api/auth/callback`,
+      emailRedirectTo: `${siteUrl}/api/auth/callback`,
     },
   });
 
@@ -104,15 +102,12 @@ export async function forgotPassword(email: string) {
     return { error: emailError };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (!siteUrl && process.env.NODE_ENV === "production") {
-    console.error("Critical: NEXT_PUBLIC_SITE_URL missing in production");
-  }
+  const siteUrl = getBaseUrl();
 
   const supabase = await createClient();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-    redirectTo: `${siteUrl ?? "http://localhost:3000"}/api/auth/callback?next=/dashboard/settings`,
+    redirectTo: `${siteUrl}/api/auth/callback?next=/dashboard/settings`,
   });
 
   // Always return success to prevent user enumeration

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import Image from "next/image";
 import type { Skill } from "@/types/skill";
 
 interface HeroShowcaseProps {
@@ -96,11 +97,23 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
               }`}
             >
               {skill.cover_image_url ? (
-                <img 
-                  src={skill.cover_image_url} 
-                  alt={skill.title} 
-                  className="h-full w-full object-cover" 
-                />
+                <>
+                  <Image 
+                    src={skill.cover_image_url} 
+                    alt="" 
+                    fill
+                    className="object-cover opacity-20 blur-3xl" 
+                    priority={index === 0}
+                    aria-hidden="true"
+                  />
+                  <Image 
+                    src={skill.cover_image_url} 
+                    alt={skill.title} 
+                    fill
+                    className="z-10 object-contain" 
+                    priority={index === 0}
+                  />
+                </>
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-[#090909]" />
               )}
@@ -113,17 +126,17 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
               <div className="flex items-center justify-between">
                 
                 {/* Clean Title Component */}
-                <h3 className="text-[11px] md:text-[13px] font-bold text-white uppercase tracking-[0.2em] md:tracking-[0.3em] font-display truncate max-w-[70%]">
+                <div className="text-[9px] font-bold text-white uppercase tracking-[0.2em] font-display truncate max-w-[70%]">
                   {currentSkill.title}
-                </h3>
+                </div>
 
                 {/* Dashboard Navigation Line */}
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {skills.slice(0, 5).map((_, index) => (
+                <div className="flex items-center gap-1.5 shrink-0 overflow-x-auto max-w-[150px] md:max-w-xs scrollbar-hide">
+                  {skills.map((_, index) => (
                     <button 
                       key={index} 
                       onClick={() => goToSlide(index)}
-                      className={`h-[3px] rounded-full transition-all duration-500 ${
+                      className={`h-[3px] rounded-full shrink-0 transition-all duration-500 ${
                         index === currentIndex ? "w-8 bg-primary" : "w-1.5 bg-white/10 hover:bg-white/20"
                       }`}
                       aria-label={`Slide ${index + 1}`}
@@ -138,11 +151,22 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
         {/* Primary Activity Diver (Bottom Detail) */}
         <div className="absolute bottom-0 left-0 h-[2px] w-full bg-white/[0.05]">
            <div 
-             className="h-full bg-primary/40 transition-all duration-[6000ms] ease-linear"
-             style={{ width: isPaused ? "0%" : "100%" }}
-             key={currentIndex}
+             className="h-full bg-primary/40 origin-left"
+             style={{ 
+               animation: `progressBar 6s linear`,
+               animationPlayState: isPaused ? "paused" : "running",
+               animationIterationCount: 1,
+               animationFillMode: "forwards"
+             }}
+             key={`progress-${currentIndex}`}
            />
         </div>
+        <style>{`
+          @keyframes progressBar {
+            0% { transform: scaleX(0); }
+            100% { transform: scaleX(1); }
+          }
+        `}</style>
       </div>
     </div>
   );

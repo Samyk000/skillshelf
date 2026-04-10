@@ -2,9 +2,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { Container } from "@/components/layout/Container";
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { SkillGridSkeleton } from "@/components/skills/SkillGridSkeleton";
-import { Skeleton } from "@/components/ui/skeleton";
 import { FilterChips } from "@/components/explore/FilterChips";
 import { SearchBar } from "@/components/explore/SearchBar";
 import { SortTabs } from "@/components/explore/SortTabs";
@@ -22,48 +21,61 @@ const HeroShowcase = dynamic(
   ) }
 );
 
-export const revalidate = 60;
+export const unstable_instant = { 
+  prefetch: 'static',
+  samples: [{ searchParams: { q: null, category: null, sort: null } }]
+};
 
 type SearchParams = Promise<{ q?: string; category?: string; sort?: string }>;
 
-async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
-  const supabase = await createClient();
+async function getHeroData() {
+  "use cache";
+  
+  const supabase = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const columns =
     "id, slug, title, short_description, category, cover_image_url, preview_html, preview_external_url, featured, created_at, updated_at";
 
-  const { data: showcaseData } = await supabase
-    .from("skills")
-    .select(columns)
-    .eq("status", "published")
-    .eq("featured", true)
-    .order("updated_at", { ascending: false })
-    .limit(5);
-
-  const { count: totalSkills } = await supabase
-    .from("skills")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "published");
-
-  const showcaseSkills = (showcaseData as Skill[]) ?? [];
+  const [{ data: showcaseData }, { count: totalSkills }, { data: counts }] = await Promise.all([
+    supabase
+      .from("skills")
+      .select(columns)
+      .eq("status", "published")
+      .eq("featured", true)
+      .order("updated_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("skills")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "published"),
+    supabase.rpc("get_category_counts")
+  ]);
 
   const categoryCounts: Record<string, number> = {};
   for (const cat of CATEGORIES) {
     categoryCounts[cat] = 0;
   }
 
-  try {
-    const { data: counts } = await supabase.rpc("get_category_counts");
-    if (counts) {
-      for (const row of counts) {
-        if (row.category in categoryCounts) {
-          categoryCounts[row.category] = Number(row.count);
-        }
+  if (counts) {
+    for (const row of counts) {
+      if (row.category in categoryCounts) {
+        categoryCounts[row.category] = Number(row.count);
       }
     }
-  } catch {
-    // RPC not available yet, use defaults
   }
+
+  return {
+    showcaseSkills: (showcaseData as Skill[]) ?? [],
+    totalSkills: totalSkills ?? 0,
+    categoryCounts
+  };
+}
+
+export default async function HomePage(props: { searchParams: SearchParams }) {
+  const { showcaseSkills, totalSkills, categoryCounts } = await getHeroData();
 
   return (
     <div className="flex flex-col">
@@ -103,7 +115,7 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
 
                 <div className="flex items-center gap-16 pt-2">
                   {[
-                    { label: "Genomic Skills", value: (totalSkills ?? 37).toString() },
+                    { label: "Genomic Skills", value: (totalSkills ?? 0).toString() },
                     { label: "Output Accuracy", value: "99%" },
                   ].map((stat) => (
                     <div key={stat.label} className="space-y-1">
@@ -128,93 +140,30 @@ async function HomeContent({ searchParams }: { searchParams: SearchParams }) {
       {/* Skills Section */}
       <section className="reveal pt-6 pb-12 md:pt-8 md:pb-16">
         <Container>
-          <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            {/* Left side: Categories (FilterChips) */}
-            <div className="w-full overflow-x-auto pb-2 lg:w-auto lg:pb-0">
-              <FilterChips categoryCounts={categoryCounts} />
-            </div>
+          <Suspense fallback={<div className="h-10 w-full animate-pulse bg-muted rounded-md mb-8" />}>
+            <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              {/* Left side: Categories (FilterChips) */}
+              <div className="w-full overflow-x-auto pb-2 lg:w-auto lg:pb-0">
+                <FilterChips categoryCounts={categoryCounts} />
+              </div>
 
-            {/* Right side: Search Bar & Sort */}
-            <div className="flex w-full shrink-0 flex-row items-center justify-between gap-2 sm:gap-4 lg:w-auto lg:justify-end">
-              <div className="flex-1 min-w-0">
-                <SearchBar />
-              </div>
-              <div className="h-6 w-px bg-border/50 shrink-0" />
-              <div className="shrink-0 w-28 sm:w-auto">
-                <SortTabs />
+              {/* Right side: Search Bar & Sort */}
+              <div className="flex w-full shrink-0 flex-row items-center justify-between gap-2 sm:gap-4 lg:w-auto lg:justify-end">
+                <div className="flex-1 min-w-0">
+                  <SearchBar />
+                </div>
+                <div className="h-6 w-px bg-border/50 shrink-0" />
+                <div className="shrink-0 w-28 sm:w-auto">
+                  <SortTabs />
+                </div>
               </div>
             </div>
-          </div>
+          </Suspense>
           <Suspense fallback={<SkillGridSkeleton count={9} />}>
-            <SkillsList searchParams={searchParams} />
+            <SkillsList searchParams={props.searchParams} />
           </Suspense>
         </Container>
       </section>
     </div>
-  );
-}
-
-function HomePageSkeleton() {
-  return (
-    <div className="flex flex-col">
-      <section className="relative overflow-hidden border-b border-border pt-12 pb-20 md:pt-16 md:pb-32">
-        <div className="bg-grid absolute inset-0 opacity-[0.4]" />
-        <Container className="relative z-10">
-          <div className="grid grid-cols-1 gap-16 lg:grid-cols-12 lg:items-center">
-            {/* Skeleton Left: Copy */}
-            <div className="flex flex-col items-start gap-8 lg:col-span-6">
-              <Skeleton className="h-8 w-48 rounded-full" />
-              <div className="space-y-6 w-full">
-                <div className="space-y-4">
-                  <Skeleton className="h-16 w-full max-w-lg" />
-                  <Skeleton className="h-16 w-3/4" />
-                </div>
-                <div className="space-y-3">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-5/6" />
-                  <Skeleton className="h-4 w-4/6" />
-                </div>
-                <div className="flex items-center gap-16 pt-2">
-                  <div className="space-y-2">
-                    <Skeleton className="h-8 w-16" />
-                    <Skeleton className="h-3 w-20" />
-                  </div>
-                  <div className="space-y-2">
-                    <Skeleton className="h-8 w-16" />
-                    <Skeleton className="h-3 w-20" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Skeleton Right: Showcase */}
-            <div className="lg:col-span-6 relative lg:ml-auto w-full max-w-2xl">
-              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#080808]">
-                <Skeleton className="h-full w-full opacity-50" />
-                <div className="absolute inset-x-0 bottom-0 h-14 border-t border-white/10 bg-black/50" />
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      <section className="py-12 md:py-16">
-        <Container>
-          <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <Skeleton className="h-10 w-full max-w-md" />
-            <Skeleton className="h-10 w-64" />
-          </div>
-          <SkillGridSkeleton count={9} />
-        </Container>
-      </section>
-    </div>
-  );
-}
-
-export default function HomePage(props: { searchParams: SearchParams }) {
-  return (
-    <Suspense fallback={<HomePageSkeleton />}>
-      <HomeContent searchParams={props.searchParams} />
-    </Suspense>
   );
 }

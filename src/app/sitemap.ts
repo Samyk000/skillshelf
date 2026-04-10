@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { getBaseUrl } from "@/lib/url";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://skillshelf.com";
+  const baseUrl = getBaseUrl();
 
   // Get all published skills
   const supabase = await createClient();

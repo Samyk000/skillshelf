@@ -12,6 +12,8 @@ const dashboardLinks = [
 
 import type { Metadata } from "next";
 
+export const unstable_instant = false;
+
 export const metadata: Metadata = {
   title: "Dashboard | Skillshelf",
   description: "Manage your saved and liked skills.",

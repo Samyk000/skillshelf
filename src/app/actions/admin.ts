@@ -3,15 +3,34 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { sanitizeSkillInput } from "@/lib/sanitize";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 
-async function requireAdmin() {
+// ---------------------------------------------------------------------------
+// Auth Guard — Discriminated Union (no redundant null checks downstream)
+// ---------------------------------------------------------------------------
+
+type AdminAuthSuccess = {
+  ok: true;
+  supabase: SupabaseClient;
+  user: User;
+};
+
+type AdminAuthFailure = {
+  ok: false;
+  error: string;
+};
+
+type AdminAuthResult = AdminAuthSuccess | AdminAuthFailure;
+
+async function requireAdmin(): Promise<AdminAuthResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "Not authenticated", supabase: null, user: null };
+    return { ok: false, error: "Not authenticated" };
   }
 
   const { data: profile } = await supabase
@@ -21,11 +40,15 @@ async function requireAdmin() {
     .single();
 
   if (profile?.role !== "admin") {
-    return { error: "Not authorized", supabase: null, user: null };
+    return { ok: false, error: "Not authorized" };
   }
 
-  return { error: null, supabase, user };
+  return { ok: true, supabase, user };
 }
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 export interface SkillFormData {
   title: string;
@@ -39,12 +62,13 @@ export interface SkillFormData {
   cover_image_url: string | null;
 }
 
-export async function createSkill(data: SkillFormData) {
-  const { error: authError, supabase, user } = await requireAdmin();
+// ---------------------------------------------------------------------------
+// Actions
+// ---------------------------------------------------------------------------
 
-  if (authError || !supabase || !user) {
-    return { error: authError ?? "Not authorized" };
-  }
+export async function createSkill(data: SkillFormData) {
+  const auth = await requireAdmin();
+  if (!auth.ok) return { error: auth.error };
 
   if (!/^[a-z0-9-]+$/.test(data.slug)) {
     return { error: "Slug must only contain lowercase letters, numbers, and hyphens" };
@@ -58,7 +82,7 @@ export async function createSkill(data: SkillFormData) {
     preview_html: data.preview_html,
   });
 
-  const { error } = await supabase.from("skills").insert({
+  const { error } = await auth.supabase.from("skills").insert({
     title: sanitized.title,
     slug: sanitized.slug,
     short_description: sanitized.short_description,
@@ -68,7 +92,7 @@ export async function createSkill(data: SkillFormData) {
     status: data.status,
     featured: data.featured,
     cover_image_url: data.cover_image_url || null,
-    created_by: user.id,
+    created_by: auth.user.id,
   });
 
   if (error) {
@@ -85,17 +109,14 @@ export async function createSkill(data: SkillFormData) {
 }
 
 export async function updateSkill(skillId: string, data: SkillFormData) {
-  const { error: authError, supabase } = await requireAdmin();
-
-  if (authError || !supabase) {
-    return { error: authError ?? "Not authorized" };
-  }
+  const auth = await requireAdmin();
+  if (!auth.ok) return { error: auth.error };
 
   if (!/^[a-z0-9-]+$/.test(data.slug)) {
     return { error: "Slug must only contain lowercase letters, numbers, and hyphens" };
   }
 
-  const { data: existingSlug } = await supabase
+  const { data: existingSlug } = await auth.supabase
     .from("skills")
     .select("id")
     .eq("slug", data.slug)
@@ -114,7 +135,7 @@ export async function updateSkill(skillId: string, data: SkillFormData) {
     preview_html: data.preview_html,
   });
 
-  const { error } = await supabase
+  const { error } = await auth.supabase
     .from("skills")
     .update({
       title: sanitized.title,
@@ -144,13 +165,10 @@ export async function updateSkill(skillId: string, data: SkillFormData) {
 }
 
 export async function deleteSkill(skillId: string) {
-  const { error: authError, supabase } = await requireAdmin();
+  const auth = await requireAdmin();
+  if (!auth.ok) return { error: auth.error };
 
-  if (authError || !supabase) {
-    return { error: authError ?? "Not authorized" };
-  }
-
-  const { error } = await supabase.from("skills").delete().eq("id", skillId);
+  const { error } = await auth.supabase.from("skills").delete().eq("id", skillId);
 
   if (error) {
     console.error("Failed to delete skill:", error);
@@ -163,15 +181,12 @@ export async function deleteSkill(skillId: string) {
 }
 
 export async function toggleSkillStatus(skillId: string, currentStatus: string) {
-  const { error: authError, supabase } = await requireAdmin();
-
-  if (authError || !supabase) {
-    return { error: authError ?? "Not authorized" };
-  }
+  const auth = await requireAdmin();
+  if (!auth.ok) return { error: auth.error };
 
   const newStatus = currentStatus === "published" ? "draft" : "published";
 
-  const { error } = await supabase
+  const { error } = await auth.supabase
     .from("skills")
     .update({ status: newStatus })
     .eq("id", skillId);
@@ -186,15 +201,12 @@ export async function toggleSkillStatus(skillId: string, currentStatus: string) 
 }
 
 export async function toggleFeatured(skillId: string, currentFeatured: boolean) {
-  const { error: authError, supabase } = await requireAdmin();
-
-  if (authError || !supabase) {
-    return { error: authError ?? "Not authorized" };
-  }
+  const auth = await requireAdmin();
+  if (!auth.ok) return { error: auth.error };
 
   const newFeatured = !currentFeatured;
 
-  const { error } = await supabase
+  const { error } = await auth.supabase
     .from("skills")
     .update({ featured: newFeatured })
     .eq("id", skillId);

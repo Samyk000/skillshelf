@@ -1,4 +1,4 @@
-import { cache } from "react";
+import { cache, Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -11,7 +11,10 @@ import { ViewTracker } from "@/components/skills/ViewTracker";
 import { BackButton } from "@/components/skills/BackButton";
 import { createClient } from "@/lib/supabase/server";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getBaseUrl } from "@/lib/url";
 import type { Skill } from "@/types/skill";
+import { SKILL_STATUS } from "@/types/enums";
+import { SkillDetailSkeleton } from "@/components/skills/SkillDetailSkeleton";
 
 const SkillPreview = dynamic(
   () => import("@/components/skills/SkillPreview").then((mod) => ({ default: mod.SkillPreview })),
@@ -30,14 +33,18 @@ const getSkill = cache(async (slug: string) => {
       "id, slug, title, short_description, long_description, category, status, skill_markdown, preview_html, preview_external_url, cover_image_url, featured, created_by, created_at, updated_at"
     )
     .eq("slug", slug)
-    .eq("status", "published")
+    .eq("status", SKILL_STATUS.PUBLISHED)
     .maybeSingle();
   return data;
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://skillshelf-liart.vercel.app";
+const baseUrl = getBaseUrl();
 
-export const revalidate = 60;
+
+export const unstable_instant = { 
+  prefetch: 'static',
+  samples: [{ params: { slug: 'sample-slug' } }]
+};
 
 export async function generateMetadata({ params }: SkillDetailPageProps) {
   const { slug } = await params;
@@ -54,11 +61,24 @@ export async function generateMetadata({ params }: SkillDetailPageProps) {
   };
 }
 
-export default async function SkillDetailPage({
+export default function SkillDetailPage({
   params,
 }: SkillDetailPageProps) {
-  const { slug } = await params;
+  return (
+    <Container className="py-8">
+      {/* Back Button */}
+      <BackButton />
 
+      <Suspense fallback={<SkillDetailSkeleton />}>
+        {params.then(({ slug }) => (
+          <SkillDetailPageContent slug={slug} />
+        ))}
+      </Suspense>
+    </Container>
+  );
+}
+
+async function SkillDetailPageContent({ slug }: { slug: string }) {
   // Batch 1: Fetch skill + auth in parallel (skill uses cache for dedup with generateMetadata)
   const [skill, userResult] = await Promise.all([
     getSkill(slug),
@@ -116,7 +136,7 @@ export default async function SkillDetailPage({
         supabase
           .from("skills")
           .select("id, slug, title, short_description, category")
-          .eq("status", "published")
+          .eq("status", SKILL_STATUS.PUBLISHED)
           .eq("category", skill.category)
           .neq("id", skill.id)
           .limit(3),
@@ -132,14 +152,11 @@ export default async function SkillDetailPage({
   }
 
   return (
-    <Container className="py-8">
+    <>
       <ViewTracker skillId={skill.id} />
 
-      {/* Back Button */}
-      <BackButton />
-
       {/* Main Content: Preview (left) + Details (right) */}
-      <div className="mb-10 flex flex-col gap-6 lg:flex-row">
+      <div className="mb-10 mt-6 flex flex-col gap-6 lg:flex-row">
         {/* Preview - Left */}
         <div className="min-w-0 flex-1">
           {skill.preview_html ? (
@@ -255,6 +272,6 @@ export default async function SkillDetailPage({
           </div>
         </div>
       )}
-    </Container>
+    </>
   );
 }

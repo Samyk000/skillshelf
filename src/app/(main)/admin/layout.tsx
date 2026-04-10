@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Container } from "@/components/layout/Container";
 
+export const unstable_instant = false;
+
 export default async function AdminLayout({
   children,
 }: {

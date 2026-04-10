@@ -5,6 +5,8 @@ interface PreviewPageProps {
   params: Promise<{ slug: string }>;
 }
 
+export const unstable_instant = false;
+
 export async function generateMetadata({ params }: PreviewPageProps) {
   const { slug } = await params;
   const supabase = await createClient();

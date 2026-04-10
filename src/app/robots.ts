@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
-
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://skillshelf.com";
+import { getBaseUrl } from "@/lib/url";
 
 export default function robots(): MetadataRoute.Robots {
+  const baseUrl = getBaseUrl();
+
   return {
     rules: {
       userAgent: "*",

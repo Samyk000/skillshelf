@@ -24,7 +24,7 @@ CREATE TABLE public.skills (
   preview_external_url text,
   cover_image_url text,
   featured boolean DEFAULT false,
-  created_by uuid REFERENCES public.profiles(id),
+  created_by uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now()
 );

@@ -1,3 +1,5 @@
+import { SkillStatus } from "./enums";
+
 export interface Skill {
   id: string;
   slug: string;
@@ -5,7 +7,7 @@ export interface Skill {
   short_description: string;
   long_description: string | null;
   category: string;
-  status: "draft" | "published" | "archived";
+  status: SkillStatus;
   skill_markdown: string;
   preview_html: string | null;
   preview_external_url: string | null;

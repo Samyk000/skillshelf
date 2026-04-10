@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
+import { getBaseUrl } from "@/lib/url";
 import "./globals.css";
 
 const inter = Inter({
@@ -17,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://skillshelf-liart.vercel.app";
+const baseUrl = getBaseUrl();
 
 export const metadata: Metadata = {
   title: {
