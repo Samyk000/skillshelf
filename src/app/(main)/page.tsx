@@ -13,15 +13,17 @@ import type { Skill } from "@/types/skill";
 
 const HeroShowcase = dynamic(
   () => import("@/components/skills/HeroShowcase").then((mod) => ({ default: mod.HeroShowcase })),
-  { loading: () => (
-    <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#080808]">
-      <div className="h-full w-full animate-shimmer opacity-30" />
-      <div className="absolute inset-x-0 bottom-0 h-14 border-t border-white/10 bg-black/50" />
-    </div>
-  ) }
+  {
+    loading: () => (
+      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#080808]">
+        <div className="h-full w-full animate-shimmer opacity-30" />
+        <div className="absolute inset-x-0 bottom-0 h-14 border-t border-white/10 bg-black/50" />
+      </div>
+    )
+  }
 );
 
-export const unstable_instant = { 
+export const unstable_instant = {
   prefetch: 'static',
   samples: [{ searchParams: { q: null, category: null, sort: null } }]
 };
@@ -30,7 +32,7 @@ type SearchParams = Promise<{ q?: string; category?: string; sort?: string }>;
 
 async function getHeroData() {
   "use cache";
-  
+
   const supabase = createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -46,7 +48,7 @@ async function getHeroData() {
       .eq("status", "published")
       .eq("featured", true)
       .order("updated_at", { ascending: false })
-      .limit(5),
+      .limit(20),
     supabase
       .from("skills")
       .select("id", { count: "exact", head: true })
@@ -80,61 +82,58 @@ export default async function HomePage(props: { searchParams: SearchParams }) {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="reveal relative overflow-hidden border-b border-border pt-12 pb-14 md:pt-16 md:pb-20">
+      <section className="reveal relative overflow-hidden border-b border-border pt-10 pb-0 md:pt-12">
         {/* Background Decorations */}
-        <div className="bg-grid absolute inset-0 opacity-[0.4]" />
+        <div className="bg-grid absolute inset-0 opacity-[0.1]" />
         <div className="bg-grid-mask absolute inset-0" />
-        <div className="bg-orb bg-orb-blue absolute -top-24 -left-24 h-96 w-96 opacity-[0.08]" />
-        <div className="bg-orb bg-orb-violet absolute top-1/2 -right-48 h-[500px] w-[500px] -translate-y-1/2 opacity-[0.06]" />
+        <div className="bg-orb bg-orb-blue absolute top-0 left-1/2 -translate-x-1/2 h-[350px] w-[500px] opacity-[0.1] blur-[80px]" />
 
-        <Container className="relative z-10">
-          <div className="grid grid-cols-1 gap-16 lg:grid-cols-12 lg:items-center">
-            {/* Left: Copy */}
-            <div className="flex flex-col items-start gap-8 lg:col-span-6">
-              <div className="inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 backdrop-blur-sm">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
-                </span>
-                <span className="text-[10px] font-bold tracking-[0.2em] text-primary uppercase font-mono">
-                  The Visual Genome for AI
-                </span>
-              </div>
-              
-              <div className="space-y-6">
-                <h1 className="max-w-3xl font-display text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl">
-                  Your AI doesn&apos;t know Design. <br />
-                  <span className="text-primary">
-                    Now it does.
-                  </span>
-                </h1>
-                <p className="max-w-xl text-xl leading-relaxed text-muted-foreground/80">
-                  Bridge the gap between generic AI code and premium UI. Skillshelf provides the
-                  proven blueprints your AI needs to build pixel-perfect interfaces with exact design DNA.
-                </p>
-
-                <div className="flex items-center gap-16 pt-2">
-                  {[
-                    { label: "Genomic Skills", value: (totalSkills ?? 0).toString() },
-                    { label: "Output Accuracy", value: "99%" },
-                  ].map((stat) => (
-                    <div key={stat.label} className="space-y-1">
-                      <p className="text-2xl font-bold tracking-tight text-foreground">{stat.value}</p>
-                      <p className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        <Container className="relative z-10 px-6">
+          <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-6">
+            {/* Tagline Pill */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 backdrop-blur-sm">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary"></span>
+              </span>
+              <span className="text-[9px] font-bold tracking-[0.2em] text-primary uppercase font-mono">
+                The Visual Genome for AI
+              </span>
             </div>
 
-            {/* Right: Showcase */}
-            <div className="lg:col-span-6 relative lg:ml-auto w-full max-w-2xl">
-              <div className="bg-shape bg-shape-rect absolute -top-8 -right-8 h-32 w-32 animate-rotate-slow opacity-10" />
-              <div className="bg-shape bg-shape-circle absolute -bottom-12 -left-12 h-48 w-48 animate-float-slow opacity-10" />
-              <HeroShowcase skills={showcaseSkills} />
+            {/* Headline Stack */}
+            <div className="space-y-4">
+              <h1 className="font-display text-4xl font-bold leading-[1.1] tracking-tight md:text-6xl text-foreground md:whitespace-nowrap">
+                Your AI doesn&apos;t know Design.{" "}
+                <span className="bg-linear-to-r from-primary via-primary/80 to-primary/40 bg-clip-text text-transparent">
+                  Now it does.
+                </span>
+              </h1>
+              <p className="max-w-2xl mx-auto text-base md:text-xl font-medium text-foreground/80 leading-relaxed">
+                Bridge the gap between generic AI code and premium UI. Skillshelf provides the 
+                proven blueprints your AI needs to build pixel-perfect interfaces with exact design DNA.
+              </p>
+
+              {/* Stats Bar */}
+              <div className="flex items-center justify-center gap-10 pt-4 border-t border-border/10">
+                {[
+                  { label: "Skills", value: (totalSkills ?? 0).toString() },
+                  { label: "Accuracy", value: "99%" },
+                ].map((stat) => (
+                  <div key={stat.label} className="flex items-center gap-2.5">
+                    <p className="text-xl font-bold tracking-tight text-foreground">{stat.value}</p>
+                    <p className="text-[10px] font-bold tracking-[0.2em] text-foreground/50 uppercase">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </Container>
+
+        {/* Full-Width Showcase Strip */}
+        <div className="mt-12 w-full relative group/marquee overflow-hidden py-10">
+          <HeroShowcase skills={showcaseSkills} />
+        </div>
       </section>
 
       {/* Skills Section */}
