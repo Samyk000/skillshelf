@@ -17,37 +17,28 @@ export const SkillCard = memo(function SkillCard({
   viewCount = 0,
 }: SkillCardProps) {
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 ease-out hover:-translate-y-[6px] hover:border-white/[0.12] hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_12px_40px_rgba(0,0,0,0.3)]">
-      <Link href={`/skills/${skill.slug}`} className="relative block aspect-[16/9] w-full overflow-hidden bg-muted/5">
-        {skill.cover_image_url ? (
-          <>
-            {/* Background Blur Layer for consistent feel regardless of aspect ratio */}
-            <Image
-              src={skill.cover_image_url}
-              alt=""
-              fill
-              sizes="(max-width: 768px) 50vw, 33vw"
-              className="object-cover opacity-30 blur-2xl transition-transform duration-700 ease-out group-hover:scale-110"
-              aria-hidden="true"
-            />
-            {/* Foreground layer (NO CROP) */}
+    <div className="group relative flex flex-col overflow-hidden rounded-[2rem] border border-border bg-card transition-all duration-300 ease-out h-full">
+      <Link href={`/skills/${skill.slug}`} className="relative block aspect-[16/10] w-full overflow-hidden bg-black shrink-0">
+        {/* Main Content Image - Stealth Blend Logic */}
+        <div className="absolute inset-0 z-10">
+          {skill.cover_image_url ? (
             <Image
               src={skill.cover_image_url}
               alt={skill.title}
               fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="z-10 object-contain transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              className="object-contain transition-transform duration-1000 ease-out group-hover:scale-[1.03]"
             />
-          </>
-        ) : (
-          <div className="h-full w-full flex items-center justify-center bg-muted/20 text-[10px] font-medium text-muted-foreground/40 tracking-wide">
-            {skill.title}
-          </div>
-        )}
+          ) : (
+            <div className="h-full w-full flex items-center justify-center bg-muted/20 text-[10px] font-medium text-muted-foreground/40 tracking-wide">
+              {skill.title}
+            </div>
+          )}
+        </div>
       </Link>
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-5 py-3.5">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="font-display text-[16px] font-bold tracking-tight truncate text-foreground leading-none">
+          <div className="font-display text-[14px] font-bold tracking-tight truncate text-foreground leading-none">
             {skill.title}
           </div>
           <span className="shrink-0 rounded-md bg-muted border border-black/10 dark:border-white/10 px-1.5 py-0.5 text-[9px] font-mono font-bold tracking-wider text-[#000000] dark:text-[#FFFFFF] uppercase">

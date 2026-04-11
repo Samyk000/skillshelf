@@ -97,23 +97,16 @@ export function HeroShowcase({ skills }: HeroShowcaseProps) {
               }`}
             >
               {skill.cover_image_url ? (
-                <>
-                  <Image 
-                    src={skill.cover_image_url} 
-                    alt="" 
-                    fill
-                    className="object-cover opacity-20 blur-3xl" 
-                    priority={index === 0}
-                    aria-hidden="true"
-                  />
-                  <Image 
-                    src={skill.cover_image_url} 
-                    alt={skill.title} 
-                    fill
-                    className="z-10 object-contain" 
-                    priority={index === 0}
-                  />
-                </>
+                <div className="relative h-full w-full">
+                  {/* Main Subject - Floating Zero-Crop */}
+                  <div className="absolute inset-0 z-10 flex items-center justify-center">
+                    <img 
+                      src={skill.cover_image_url} 
+                      alt={skill.title} 
+                      className="max-h-full max-w-full w-auto h-auto block object-contain shadow-2xl rounded-lg" 
+                    />
+                  </div>
+                </div>
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-[#090909]" />
               )}

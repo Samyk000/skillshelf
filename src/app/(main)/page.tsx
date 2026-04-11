@@ -159,7 +159,7 @@ export default async function HomePage(props: { searchParams: SearchParams }) {
               </div>
             </div>
           </Suspense>
-          <Suspense fallback={<SkillGridSkeleton count={9} />}>
+          <Suspense fallback={<SkillGridSkeleton count={12} />}>
             <SkillsList searchParams={props.searchParams} />
           </Suspense>
         </Container>

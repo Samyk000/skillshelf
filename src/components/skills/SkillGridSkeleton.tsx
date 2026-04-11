@@ -7,16 +7,16 @@ interface SkillGridSkeletonProps {
   count?: number;
 }
 
-export const SkillGridSkeleton = memo(function SkillGridSkeleton({ count = 9 }: SkillGridSkeletonProps) {
+export const SkillGridSkeleton = memo(function SkillGridSkeleton({ count = 12 }: SkillGridSkeletonProps) {
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {Array.from({ length: count }, (_, i) => (
         <div
           key={i}
-          className="flex flex-col overflow-hidden rounded-xl border border-border/40 bg-card/30"
+          className="flex flex-col overflow-hidden rounded-[2rem] border border-border/40 bg-card/30"
         >
-          {/* Exact Aspect Ratio Match for Skill Cards (16:9) */}
-          <div className="aspect-[16/9] w-full animate-shimmer opacity-20" />
+          {/* Exact Aspect Ratio Match for Skill Cards (16:10) */}
+          <div className="aspect-[16/10] w-full animate-shimmer opacity-20" />
           
           {/* Metadata Footer Skeleton */}
           <div className="flex items-center justify-between px-4 py-3 border-t border-border/10">

@@ -8,7 +8,7 @@ import { SkillCard } from "@/components/skills/SkillCard";
 import { SkillGridSkeleton } from "@/components/skills/SkillGridSkeleton";
 import type { Skill } from "@/types/skill";
 
-const BATCH_SIZE = 9;
+const BATCH_SIZE = 8;
 
 interface SkillsListClientProps {
   initialSkills: Skill[];
@@ -195,7 +195,7 @@ export function SkillsListClient({
   if (isPendingSearch && currentClientQuery) {
     return (
       <div>
-        <SkillGridSkeleton count={9} />
+        <SkillGridSkeleton count={12} />
       </div>
     );
   }
@@ -203,7 +203,7 @@ export function SkillsListClient({
   return (
     <div>
       {displaySkills.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {displaySkills.map((skill) => (
             <SkillCard
               key={skill.id}
