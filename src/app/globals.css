@@ -81,7 +81,7 @@
 .light,
 :root:has(.light),
 html:not(.dark) {
-  --background: #F7F7F5;
+  --background: #FFFFFF;
   --foreground: #09090B;
   --surface: #FFFFFF;
   --surface-soft: #FCFCFC;
@@ -184,7 +184,7 @@ body {
   font-family: var(--font-mono);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: background 0.5s ease-in-out, color 0.5s ease-in-out;
 }
 
 /* ========================================
