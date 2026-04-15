@@ -63,7 +63,7 @@ export async function SkillsList({ searchParams }: SkillsListProps) {
     let query = supabase
       .from("skills")
       .select(
-        "id, slug, title, short_description, category, preview_html, preview_external_url, cover_image_url, featured, created_at, updated_at",
+        "id, slug, title, short_description, category, preview_html, preview_external_url, cover_image_url, featured, created_at, updated_at, view_count, like_count",
         { count: "exact" }
       )
       .eq("status", "published")
@@ -101,28 +101,10 @@ export async function SkillsList({ searchParams }: SkillsListProps) {
 
   const hasMore = INITIAL_BATCH_SIZE < totalCount;
 
-  // Fetch view/like counts
-  const skillIds = skills.map(s => s.id);
-  const viewCounts: Record<string, number> = {};
-  const likeCounts: Record<string, number> = {};
-
-  if (skillIds.length > 0) {
-    const { data: countsData } = await supabase.rpc("get_skills_counts", {
-      p_skill_ids: skillIds
-    });
-
-    for (const row of countsData ?? []) {
-      viewCounts[row.skill_id] = Number(row.view_count || 0);
-      likeCounts[row.skill_id] = Number(row.like_count || 0);
-    }
-  }
-
   return (
     <SkillsListClient
       initialSkills={skills}
       initialHasMore={hasMore}
-      initialViewCounts={viewCounts}
-      initialLikeCounts={likeCounts}
       searchQuery={q}
       category={category}
       sort={sort}

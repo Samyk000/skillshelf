@@ -16,4 +16,6 @@ export interface Skill {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  view_count?: number;
+  like_count?: number;
 }

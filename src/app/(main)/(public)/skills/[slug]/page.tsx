@@ -175,62 +175,64 @@ async function SkillDetailPageContent({ slug }: { slug: string }) {
         </div>
 
         {/* Details Sidebar - Right */}
-        <div className="flex shrink-0 flex-col gap-5 lg:w-[260px]">
-          {/* Category + Title */}
-          <div>
-            <span className="mb-2 inline-block border border-primary px-2 py-0.5 text-[10px] font-semibold tracking-[0.15em] text-primary">
-              {skill.category.toUpperCase()}
-            </span>
-            <h1 className="font-display text-xl font-bold tracking-wide">
-              {skill.title}
-            </h1>
-            {skill.short_description && (
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {skill.short_description}
-              </p>
-            )}
+        <div className="flex shrink-0 flex-col justify-between lg:h-[522px] lg:w-[260px]">
+          <div className="flex flex-col gap-5">
+            {/* Category + Title */}
+            <div>
+              <span className="mb-2 inline-block border border-primary px-2 py-0.5 text-[10px] font-semibold tracking-[0.15em] text-primary">
+                {skill.category.toUpperCase()}
+              </span>
+              <h1 className="font-display text-xl font-bold tracking-wide">
+                {skill.title}
+              </h1>
+              {skill.short_description && (
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {skill.short_description}
+                </p>
+              )}
+            </div>
+
+            {/* Stats Row: Views + Like + Save */}
+            <div className="grid grid-cols-3 border-y-2 border-border py-3">
+              {/* Views */}
+              <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <span className="tracking-wider">{viewsCount}</span>
+              </div>
+
+              {/* Like */}
+              <div className="flex items-center justify-center border-x-2 border-border">
+                <LikeButton
+                  skillId={skill.id}
+                  skillSlug={skill.slug}
+                  initialLiked={isLiked}
+                  initialCount={likesCount}
+                  isAuthenticated={!!user}
+                />
+              </div>
+
+              {/* Save */}
+              <div className="flex items-center justify-center">
+                <SaveButton
+                  skillId={skill.id}
+                  skillSlug={skill.slug}
+                  initialSaved={isSaved}
+                  isAuthenticated={!!user}
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Stats Row: Views + Like + Save */}
-          <div className="grid grid-cols-3 border-y-2 border-border py-3">
-            {/* Views */}
-            <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              <span className="tracking-wider">{viewsCount}</span>
-            </div>
-
-            {/* Like */}
-            <div className="flex items-center justify-center border-x-2 border-border">
-              <LikeButton
-                skillId={skill.id}
-                skillSlug={skill.slug}
-                initialLiked={isLiked}
-                initialCount={likesCount}
-                isAuthenticated={!!user}
-              />
-            </div>
-
-            {/* Save */}
-            <div className="flex items-center justify-center">
-              <SaveButton
-                skillId={skill.id}
-                skillSlug={skill.slug}
-                initialSaved={isSaved}
-                isAuthenticated={!!user}
-              />
-            </div>
-          </div>
-
-          {/* Actions: Copy + Download (stacked) */}
+          {/* Actions: Copy + Download (pinned to bottom) */}
           <div className="flex flex-col gap-3">
             {/* Copy */}
             <CopyButton content={skill.skill_markdown} />
@@ -238,7 +240,6 @@ async function SkillDetailPageContent({ slug }: { slug: string }) {
             {/* Download */}
             <DownloadButton slug={skill.slug} content={skill.skill_markdown} />
           </div>
-
         </div>
       </div>
 

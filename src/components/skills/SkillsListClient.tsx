@@ -13,8 +13,6 @@ const BATCH_SIZE = 8;
 interface SkillsListClientProps {
   initialSkills: Skill[];
   initialHasMore: boolean;
-  initialViewCounts: Record<string, number>;
-  initialLikeCounts: Record<string, number>;
   searchQuery?: string;
   category?: string;
   sort?: string;
@@ -23,8 +21,6 @@ interface SkillsListClientProps {
 export function SkillsListClient({
   initialSkills,
   initialHasMore,
-  initialViewCounts,
-  initialLikeCounts,
   searchQuery,
   category,
   sort,
@@ -39,8 +35,6 @@ export function SkillsListClient({
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(initialSkills.length);
-  const [viewCounts, setViewCounts] = useState<Record<string, number>>(initialViewCounts);
-  const [likeCounts, setLikeCounts] = useState<Record<string, number>>(initialLikeCounts);
   const [clientPending, setClientPending] = useState(false);
 
   useEffect(() => {
@@ -53,9 +47,10 @@ export function SkillsListClient({
   const defaultCache = useRef<{
     skills: Skill[];
     hasMore: boolean;
-    viewCounts: Record<string, number>;
-    likeCounts: Record<string, number>;
   } | null>(null);
+
+  // Track previous filters to prevent resetting state on router.back()
+  const prevFiltersRef = useRef({ searchQuery, category, sort });
 
   useEffect(() => {
     // If there's no search query or category, this is our default state
@@ -63,19 +58,25 @@ export function SkillsListClient({
       defaultCache.current = {
         skills: initialSkills,
         hasMore: initialHasMore,
-        viewCounts: initialViewCounts,
-        likeCounts: initialLikeCounts,
       };
     }
     
-    // Sync state when props change. This replaces the full remount behavior.
-    setClientPending(false);
-    setSkills(initialSkills);
-    setHasMore(initialHasMore);
-    setOffset(initialSkills.length);
-    setViewCounts(initialViewCounts);
-    setLikeCounts(initialLikeCounts);
-  }, [initialSkills, initialHasMore, initialViewCounts, initialLikeCounts, searchQuery, category, sort]);
+    // ONLY reset the list if the actual filter parameters changed.
+    // This prevents wiping out "Load More" history when the user clicks 'Go Back'
+    // and Next.js passes fresh prop references with the identical list.
+    const filtersChanged = 
+      prevFiltersRef.current.searchQuery !== searchQuery ||
+      prevFiltersRef.current.category !== category ||
+      prevFiltersRef.current.sort !== sort;
+
+    if (filtersChanged) {
+      prevFiltersRef.current = { searchQuery, category, sort };
+      setClientPending(false);
+      setSkills(initialSkills);
+      setHasMore(initialHasMore);
+      setOffset(initialSkills.length);
+    }
+  }, [initialSkills, initialHasMore, searchQuery, category, sort]);
 
   // If client query from URL doesn't match the server prop searchQuery,
   // we are in the middle of a Next.js transition fetching new data.
@@ -88,36 +89,9 @@ export function SkillsListClient({
   const displaySkills = (isPendingTransition && !currentClientQuery && !currentClientCategory && defaultCache.current)
     ? defaultCache.current.skills
     : skills;
-  const displayViewCounts = (isPendingTransition && !currentClientQuery && !currentClientCategory && defaultCache.current)
-    ? defaultCache.current.viewCounts
-    : viewCounts;
-  const displayLikeCounts = (isPendingTransition && !currentClientQuery && !currentClientCategory && defaultCache.current)
-    ? defaultCache.current.likeCounts
-    : likeCounts;
   const displayHasMore = (isPendingTransition && !currentClientQuery && !currentClientCategory && defaultCache.current)
     ? defaultCache.current.hasMore
     : hasMore;
-
-  const fetchCounts = useCallback(async (skillIds: string[]) => {
-    if (skillIds.length === 0) return;
-
-    const { data: countsData, error } = await supabase.rpc("get_skills_counts", {
-      p_skill_ids: skillIds
-    });
-
-    if (error || !countsData) return;
-
-    const newViewCounts: Record<string, number> = {};
-    const newLikeCounts: Record<string, number> = {};
-
-    for (const row of countsData) {
-      newViewCounts[row.skill_id] = Number(row.view_count || 0);
-      newLikeCounts[row.skill_id] = Number(row.like_count || 0);
-    }
-
-    setViewCounts((prev) => ({ ...prev, ...newViewCounts }));
-    setLikeCounts((prev) => ({ ...prev, ...newLikeCounts }));
-  }, [supabase]);
 
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
@@ -163,7 +137,7 @@ export function SkillsListClient({
       let query = supabase
         .from("skills")
         .select(
-          "id, slug, title, short_description, category, preview_html, preview_external_url, cover_image_url, featured, created_at, updated_at"
+          "id, slug, title, short_description, category, preview_html, preview_external_url, cover_image_url, featured, created_at, updated_at, view_count, like_count"
         )
         .eq("status", "published")
         .order("created_at", { ascending: false })
@@ -198,11 +172,10 @@ export function SkillsListClient({
     if (newSkills.length > 0) {
       setSkills((prev) => [...prev, ...newSkills]);
       setOffset((prev) => prev + newSkills.length);
-      fetchCounts(newSkills.map(s => s.id));
     }
 
     setLoading(false);
-  }, [loading, hasMore, offset, sort, searchQuery, category, supabase, fetchCounts]);
+  }, [loading, hasMore, offset, sort, searchQuery, category, supabase]);
 
   if (isPendingTransition && (currentClientQuery || currentClientCategory || currentClientSort || clientPending)) {
     return (
@@ -220,8 +193,8 @@ export function SkillsListClient({
             <SkillCard
               key={skill.id}
               skill={skill}
-              viewCount={displayViewCounts[skill.id] ?? 0}
-              likeCount={displayLikeCounts[skill.id] ?? 0}
+              viewCount={skill.view_count ?? 0}
+              likeCount={skill.like_count ?? 0}
             />
           ))}
         </div>

@@ -59,7 +59,9 @@ function injectStorageShim(html: string): string {
 
 export function SkillPreview({ previewHtml, title, slug }: SkillPreviewProps) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [forceDesktop, setForceDesktop] = useState(true);
 
   // Create a Blob URL with the storage shim injected
   const blobUrl = useMemo(() => {
@@ -73,27 +75,49 @@ export function SkillPreview({ previewHtml, title, slug }: SkillPreviewProps) {
     return () => URL.revokeObjectURL(blobUrl);
   }, [blobUrl]);
 
-  return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-      {/* Header Bar */}
-      <div className="flex h-10 items-center justify-between border-b border-border bg-muted/40 px-4">
-        <div className="flex items-center gap-3">
-          <div className="flex gap-1.5">
-            <div className="h-2.5 w-2.5 rounded-full bg-red-500/20" />
-            <div className="h-2.5 w-2.5 rounded-full bg-amber-500/20" />
-            <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/20" />
-          </div>
-          <div className="h-3.5 w-px bg-border/60" />
-          <span className="text-[10px] font-bold tracking-[0.15em] text-primary uppercase">
-            // PREVIEW
-          </span>
-        </div>
+  // Compute reactive scaling size to force "desktop" target resolution
+  useEffect(() => {
+    if (!containerRef.current) return;
 
+    const updateScale = (entry: ResizeObserverEntry) => {
+      // Don't force desktop scaling if the user is physically on a tablet/mobile.
+      if (window.innerWidth < 1024) {
+        setForceDesktop(false);
+        setScale(1);
+        return;
+      }
+      
+      setForceDesktop(true);
+      const rw = entry.contentRect.width;
+      // 1440px is our target standard desktop "canvas" width
+      if (rw > 0) setScale(rw / 1440);
+    };
+
+    const observer = new ResizeObserver((entries) => {
+      if (entries.length) updateScale(entries[0]);
+    });
+    
+    observer.observe(containerRef.current);
+    
+    const rw = containerRef.current.getBoundingClientRect().width;
+    if (window.innerWidth < 1024) {
+      setForceDesktop(false);
+    } else if (rw > 0) {
+      setScale(rw / 1440);
+    }
+    
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-2">
+      {/* Action Button Above Preview */}
+      <div className="flex justify-end">
         <a
           href={`/preview/${slug}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-[11px] tracking-wider text-muted-foreground transition-colors hover:text-primary"
+          className="flex w-fit items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-[10px] font-bold tracking-wider text-muted-foreground transition-colors hover:border-primary hover:text-primary"
         >
           OPEN FULL PREVIEW
           <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -102,8 +126,9 @@ export function SkillPreview({ previewHtml, title, slug }: SkillPreviewProps) {
         </a>
       </div>
 
-      {/* Preview Area — 480px original working height */}
-      <div className="relative w-full overflow-hidden" style={{ height: "480px" }}>
+      <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        {/* Preview Area */}
+        <div ref={containerRef} className="relative w-full overflow-hidden" style={{ height: "480px" }}>
         {!isLoaded && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-muted p-8">
             <Skeleton className="h-6 w-1/4" />
@@ -120,15 +145,24 @@ export function SkillPreview({ previewHtml, title, slug }: SkillPreviewProps) {
           leaking into the parent app's theme state.
         */}
         <iframe
-          ref={iframeRef}
           src={blobUrl}
           sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
           title={`Preview: ${title}`}
-          className={`absolute inset-0 h-full w-full border-none transition-opacity duration-500 ${
+          style={forceDesktop ? {
+            width: "1440px",
+            height: `${Math.round(480 / scale)}px`,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left"
+          } : {
+            width: "100%",
+            height: "100%"
+          }}
+          className={`absolute inset-0 border-none transition-opacity duration-500 ${
             isLoaded ? "opacity-100" : "opacity-0"
           }`}
           onLoad={() => setIsLoaded(true)}
         />
+        </div>
       </div>
     </div>
   );

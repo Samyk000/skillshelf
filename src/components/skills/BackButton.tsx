@@ -2,7 +2,13 @@
 
 import { useRouter } from "next/navigation";
 
-export function BackButton() {
+import { cn } from "@/lib/utils";
+
+interface BackButtonProps {
+  className?: string;
+}
+
+export function BackButton({ className }: BackButtonProps) {
   const router = useRouter();
 
   const handleBack = () => {
@@ -19,7 +25,7 @@ export function BackButton() {
   return (
     <button
       onClick={handleBack}
-      className="mb-6 flex items-center gap-2 text-xs font-semibold tracking-wider text-muted-foreground hover:text-primary transition-colors"
+      className={cn("mb-6 flex w-fit items-center gap-2 text-xs font-semibold tracking-wider text-muted-foreground hover:text-primary transition-colors", className)}
       aria-label="Go back"
     >
       <svg

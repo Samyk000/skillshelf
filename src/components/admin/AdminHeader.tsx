@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { BackButton } from "../skills/BackButton";
 
 interface AdminHeaderProps {
   children?: React.ReactNode;
@@ -16,13 +17,7 @@ export function AdminHeader({ children }: AdminHeaderProps) {
   return (
     <div className="mb-8 flex items-center justify-between">
       <div>
-        <p className="text-xs font-semibold tracking-[0.2em] text-primary">
-          // {isNewSkillPage
-            ? "CREATE NEW SKILL"
-            : isEditPage
-              ? "EDIT SKILL"
-              : "ADMIN"}
-        </p>
+        <BackButton className="!mb-0" />
       </div>
       {isSkillFormPage && children ? (
         <div className="flex items-center gap-4">

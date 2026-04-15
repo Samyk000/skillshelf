@@ -26,7 +26,9 @@ CREATE TABLE public.skills (
   featured boolean DEFAULT false,
   created_by uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
   created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now()
+  updated_at timestamp with time zone DEFAULT now(),
+  view_count bigint DEFAULT 0,
+  like_count bigint DEFAULT 0
 );
 
 -- 3. Create skill interactions
@@ -131,3 +133,81 @@ CREATE TRIGGER on_auth_user_created
 
 -- To make YOURSELF an admin, run this after you sign up on your hosted app:
 -- UPDATE public.profiles SET role = 'admin' WHERE email = 'your-email@example.com';
+
+-- 8. Indexes for Sorting Performance
+CREATE INDEX IF NOT EXISTS idx_skills_view_count ON public.skills (view_count DESC);
+CREATE INDEX IF NOT EXISTS idx_skills_like_count ON public.skills (like_count DESC);
+
+-- 9. Triggers for Automatic Counting
+CREATE OR REPLACE FUNCTION increment_skill_view_count()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  UPDATE public.skills SET view_count = view_count + 1 WHERE id = NEW.skill_id;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_skill_view_inserted ON public.skill_views;
+CREATE TRIGGER on_skill_view_inserted
+  AFTER INSERT ON public.skill_views
+  FOR EACH ROW EXECUTE PROCEDURE increment_skill_view_count();
+
+CREATE OR REPLACE FUNCTION handle_skill_like_count()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE public.skills SET like_count = like_count + 1 WHERE id = NEW.skill_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE public.skills SET like_count = like_count - 1 WHERE id = OLD.skill_id;
+    RETURN OLD;
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_skill_like_changed ON public.skill_likes;
+CREATE TRIGGER on_skill_like_changed
+  AFTER INSERT OR DELETE ON public.skill_likes
+  FOR EACH ROW EXECUTE PROCEDURE handle_skill_like_count();
+
+-- 10. Optimized Sorting RPCs
+CREATE OR REPLACE FUNCTION public.get_skills_sorted_by_views(p_limit integer DEFAULT 6, p_offset integer DEFAULT 0, p_category text DEFAULT NULL::text)
+ RETURNS SETOF skills
+ LANGUAGE plpgsql
+ STABLE
+AS $function$
+BEGIN
+  RETURN QUERY
+  SELECT *
+  FROM skills
+  WHERE status = 'published'
+    AND (p_category IS NULL OR category = p_category)
+  ORDER BY view_count DESC, created_at DESC
+  LIMIT p_limit
+  OFFSET p_offset;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.get_skills_sorted_by_likes(p_limit integer DEFAULT 6, p_offset integer DEFAULT 0, p_category text DEFAULT NULL::text)
+ RETURNS SETOF skills
+ LANGUAGE plpgsql
+ STABLE
+AS $function$
+BEGIN
+  RETURN QUERY
+  SELECT *
+  FROM skills
+  WHERE status = 'published'
+    AND (p_category IS NULL OR category = p_category)
+  ORDER BY like_count DESC, created_at DESC
+  LIMIT p_limit
+  OFFSET p_offset;
+END;
+$function$;
