@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useTransition } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,15 +20,20 @@ export function SortTabs() {
   const currentSortValue = searchParams.get("sort") ?? "recent";
   const currentSort = SORT_OPTIONS.find((opt) => opt.value === currentSortValue) ?? SORT_OPTIONS[0];
 
+  const [isPending, startTransition] = useTransition();
+
   const handleSelect = (value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (value === "recent") {
-      params.delete("sort");
-    } else {
-      params.set("sort", value);
-    }
-    router.push(`/?${params.toString()}`, { scroll: false });
-    setIsOpen(false);
+    window.dispatchEvent(new Event("on-filter-start"));
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value === "recent") {
+        params.delete("sort");
+      } else {
+        params.set("sort", value);
+      }
+      router.push(`/?${params.toString()}`, { scroll: false });
+      setIsOpen(false);
+    });
   };
 
   useEffect(() => {
@@ -46,15 +51,21 @@ export function SortTabs() {
       {/* Trigger Area - Solid Surface */}
       <button
         onClick={() => setIsOpen(!isOpen)}
+        disabled={isPending}
         className={cn(
           "flex w-full h-9 items-center justify-between rounded-xl border px-3 text-[13px] font-medium transition-all duration-200 outline-none shadow-sm",
           isOpen 
             ? "border-primary bg-white dark:bg-[#111111] ring-2 ring-primary/20" 
-            : "border-border bg-white dark:bg-[#111111] hover:bg-gray-50 dark:hover:bg-[#161616]"
+            : "border-border bg-white dark:bg-[#111111] hover:bg-gray-50 dark:hover:bg-[#161616]",
+          isPending && "opacity-70 pointer-events-none"
         )}
       >
         <span className="text-black dark:text-white truncate">{currentSort.label}</span>
-        <ChevronDown className={cn("h-3.5 w-3.5 text-black/40 dark:text-white/40 transition-transform duration-200", isOpen && "rotate-180")} />
+        {isPending ? (
+          <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-border border-t-primary" />
+        ) : (
+          <ChevronDown className={cn("h-3.5 w-3.5 text-black/40 dark:text-white/40 transition-transform duration-200", isOpen && "rotate-180")} />
+        )}
       </button>
 
       {/* Popover - 100% Opaque Solid (No transparency/blur) */}

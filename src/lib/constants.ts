@@ -1,10 +1,7 @@
 export const CATEGORIES = [
-  "Product Design",
-  "Typography",
-  "Web Design",
-  "Branding",
-  "Illustration",
-  "Mobile",
+  "Landing Page",
+  "SaaS",
+  "Dashboard",
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];

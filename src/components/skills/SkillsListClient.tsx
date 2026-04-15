@@ -29,16 +29,25 @@ export function SkillsListClient({
   category,
   sort,
 }: SkillsListClientProps) {
-  const supabase = useMemo(() => createClient(), []);
   const searchParamsHook = useSearchParams();
   const currentClientQuery = searchParamsHook.get("q") ?? "";
+  const currentClientCategory = searchParamsHook.get("category") ?? "";
+  const currentClientSort = searchParamsHook.get("sort") ?? "";
 
+  const supabase = useMemo(() => createClient(), []);
   const [skills, setSkills] = useState<Skill[]>(initialSkills);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(initialSkills.length);
   const [viewCounts, setViewCounts] = useState<Record<string, number>>(initialViewCounts);
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>(initialLikeCounts);
+  const [clientPending, setClientPending] = useState(false);
+
+  useEffect(() => {
+    const handleFilterStart = () => setClientPending(true);
+    window.addEventListener("on-filter-start", handleFilterStart);
+    return () => window.removeEventListener("on-filter-start", handleFilterStart);
+  }, []);
 
   // Keep a copy of the default, unfiltered skills for instant recall
   const defaultCache = useRef<{
@@ -60,6 +69,7 @@ export function SkillsListClient({
     }
     
     // Sync state when props change. This replaces the full remount behavior.
+    setClientPending(false);
     setSkills(initialSkills);
     setHasMore(initialHasMore);
     setOffset(initialSkills.length);
@@ -70,37 +80,39 @@ export function SkillsListClient({
   // If client query from URL doesn't match the server prop searchQuery,
   // we are in the middle of a Next.js transition fetching new data.
   const isPendingSearch = currentClientQuery !== (searchQuery ?? "");
+  const isPendingCategory = currentClientCategory !== (category ?? "");
+  const isPendingSort = currentClientSort !== (sort ?? "");
+  const isPendingTransition = isPendingSearch || isPendingCategory || isPendingSort || clientPending;
 
   // Instant recall: if clearing search, instantly show cache if available
-  const displaySkills = (isPendingSearch && !currentClientQuery && defaultCache.current)
+  const displaySkills = (isPendingTransition && !currentClientQuery && !currentClientCategory && defaultCache.current)
     ? defaultCache.current.skills
     : skills;
-  const displayViewCounts = (isPendingSearch && !currentClientQuery && defaultCache.current)
+  const displayViewCounts = (isPendingTransition && !currentClientQuery && !currentClientCategory && defaultCache.current)
     ? defaultCache.current.viewCounts
     : viewCounts;
-  const displayLikeCounts = (isPendingSearch && !currentClientQuery && defaultCache.current)
+  const displayLikeCounts = (isPendingTransition && !currentClientQuery && !currentClientCategory && defaultCache.current)
     ? defaultCache.current.likeCounts
     : likeCounts;
-  const displayHasMore = (isPendingSearch && !currentClientQuery && defaultCache.current)
+  const displayHasMore = (isPendingTransition && !currentClientQuery && !currentClientCategory && defaultCache.current)
     ? defaultCache.current.hasMore
     : hasMore;
 
   const fetchCounts = useCallback(async (skillIds: string[]) => {
     if (skillIds.length === 0) return;
 
-    const [viewsResult, likesResult] = await Promise.all([
-      supabase.from("skill_views").select("skill_id").in("skill_id", skillIds),
-      supabase.from("skill_likes").select("skill_id").in("skill_id", skillIds),
-    ]);
+    const { data: countsData, error } = await supabase.rpc("get_skills_counts", {
+      p_skill_ids: skillIds
+    });
+
+    if (error || !countsData) return;
 
     const newViewCounts: Record<string, number> = {};
     const newLikeCounts: Record<string, number> = {};
 
-    for (const row of viewsResult.data ?? []) {
-      newViewCounts[row.skill_id] = (newViewCounts[row.skill_id] ?? 0) + 1;
-    }
-    for (const row of likesResult.data ?? []) {
-      newLikeCounts[row.skill_id] = (newLikeCounts[row.skill_id] ?? 0) + 1;
+    for (const row of countsData) {
+      newViewCounts[row.skill_id] = Number(row.view_count || 0);
+      newLikeCounts[row.skill_id] = Number(row.like_count || 0);
     }
 
     setViewCounts((prev) => ({ ...prev, ...newViewCounts }));
@@ -192,7 +204,7 @@ export function SkillsListClient({
     setLoading(false);
   }, [loading, hasMore, offset, sort, searchQuery, category, supabase, fetchCounts]);
 
-  if (isPendingSearch && currentClientQuery) {
+  if (isPendingTransition && (currentClientQuery || currentClientCategory || currentClientSort || clientPending)) {
     return (
       <div>
         <SkillGridSkeleton count={12} />
@@ -224,7 +236,7 @@ export function SkillsListClient({
         </div>
       )}
 
-      {displayHasMore && !isPendingSearch && (
+      {displayHasMore && !isPendingTransition && (
         <div className="mt-8 text-center">
           <button
             onClick={loadMore}

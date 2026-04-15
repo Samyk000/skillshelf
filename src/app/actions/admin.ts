@@ -55,7 +55,6 @@ export interface SkillFormData {
   slug: string;
   short_description: string | null;
   category: string;
-  status: "draft" | "published" | "archived";
   skill_markdown: string;
   preview_html: string | null;
   featured: boolean;
@@ -89,7 +88,7 @@ export async function createSkill(data: SkillFormData) {
     skill_markdown: sanitized.skill_markdown,
     preview_html: sanitized.preview_html,
     category: data.category,
-    status: data.status,
+    status: "published",
     featured: data.featured,
     cover_image_url: data.cover_image_url || null,
     created_by: auth.user.id,
@@ -144,7 +143,7 @@ export async function updateSkill(skillId: string, data: SkillFormData) {
       skill_markdown: sanitized.skill_markdown,
       preview_html: sanitized.preview_html,
       category: data.category,
-      status: data.status,
+      status: "published",
       featured: data.featured,
       cover_image_url: data.cover_image_url || null,
     })
@@ -180,25 +179,6 @@ export async function deleteSkill(skillId: string) {
   return { error: null };
 }
 
-export async function toggleSkillStatus(skillId: string, currentStatus: string) {
-  const auth = await requireAdmin();
-  if (!auth.ok) return { error: auth.error };
-
-  const newStatus = currentStatus === "published" ? "draft" : "published";
-
-  const { error } = await auth.supabase
-    .from("skills")
-    .update({ status: newStatus })
-    .eq("id", skillId);
-
-  if (error) {
-    console.error("Failed to toggle skill status:", error);
-    return { error: "Failed to update status. Please try again." };
-  }
-
-  revalidatePath("/admin");
-  return { error: null, newStatus };
-}
 
 export async function toggleFeatured(skillId: string, currentFeatured: boolean) {
   const auth = await requireAdmin();

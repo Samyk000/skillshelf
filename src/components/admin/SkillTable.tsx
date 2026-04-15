@@ -5,7 +5,6 @@ import Link from "next/link";
 import { toast } from "sonner";
 import {
   deleteSkill,
-  toggleSkillStatus,
   toggleFeatured,
 } from "@/app/actions/admin";
 import type { Skill } from "@/types/skill";
@@ -16,24 +15,9 @@ interface SkillTableProps {
 
 export function SkillTable({ skills }: SkillTableProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [togglingFeaturedId, setTogglingFeaturedId] = useState<string | null>(
     null
   );
-
-  const handleTogglePublish = async (skill: Skill) => {
-    setTogglingId(skill.id);
-    const result = await toggleSkillStatus(skill.id, skill.status);
-
-    if (result.error) {
-      toast.error("Failed to update status");
-    } else {
-      toast.success(
-        `Skill ${result.newStatus === "published" ? "published" : "unpublished"}`
-      );
-    }
-    setTogglingId(null);
-  };
 
   const handleToggleFeatured = async (skill: Skill) => {
     setTogglingFeaturedId(skill.id);
@@ -89,9 +73,6 @@ export function SkillTable({ skills }: SkillTableProps) {
               Category
             </th>
             <th className="px-4 py-3 text-left text-xs font-bold tracking-wider text-foreground uppercase">
-              Status
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-bold tracking-wider text-foreground uppercase">
               Featured
             </th>
             <th className="px-4 py-3 text-left text-xs font-bold tracking-wider text-foreground uppercase">
@@ -110,17 +91,6 @@ export function SkillTable({ skills }: SkillTableProps) {
               </td>
               <td className="px-4 py-3 text-muted-foreground">
                 {skill.category}
-              </td>
-              <td className="px-4 py-3">
-                <span
-                  className={`border px-2 py-0.5 text-[10px] font-semibold tracking-wider ${
-                    skill.status === "published"
-                      ? "border-primary text-primary"
-                      : "border-border text-muted-foreground"
-                  }`}
-                >
-                  {skill.status.toUpperCase()}
-                </span>
               </td>
               <td className="px-4 py-3">
                 <button
@@ -146,13 +116,6 @@ export function SkillTable({ skills }: SkillTableProps) {
                   >
                     EDIT
                   </Link>
-                  <button
-                    onClick={() => handleTogglePublish(skill)}
-                    disabled={togglingId === skill.id}
-                    className="border border-border px-2 py-1 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase hover:border-primary hover:text-primary disabled:opacity-50"
-                  >
-                    {skill.status === "published" ? "UNPUBLISH" : "PUBLISH"}
-                  </button>
                   <button
                     onClick={() => handleDelete(skill)}
                     disabled={deletingId === skill.id}

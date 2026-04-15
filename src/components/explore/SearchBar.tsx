@@ -20,6 +20,7 @@ export function SearchBar() {
       }
 
       debounceRef.current = setTimeout(() => {
+        window.dispatchEvent(new Event("on-filter-start"));
         startTransition(() => {
           const params = new URLSearchParams(searchParams.toString());
           if (value) {

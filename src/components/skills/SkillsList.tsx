@@ -107,16 +107,13 @@ export async function SkillsList({ searchParams }: SkillsListProps) {
   const likeCounts: Record<string, number> = {};
 
   if (skillIds.length > 0) {
-    const [viewsResult, likesResult] = await Promise.all([
-      supabase.from("skill_views").select("skill_id").in("skill_id", skillIds),
-      supabase.from("skill_likes").select("skill_id").in("skill_id", skillIds),
-    ]);
+    const { data: countsData } = await supabase.rpc("get_skills_counts", {
+      p_skill_ids: skillIds
+    });
 
-    for (const row of viewsResult.data ?? []) {
-      viewCounts[row.skill_id] = (viewCounts[row.skill_id] ?? 0) + 1;
-    }
-    for (const row of likesResult.data ?? []) {
-      likeCounts[row.skill_id] = (likeCounts[row.skill_id] ?? 0) + 1;
+    for (const row of countsData ?? []) {
+      viewCounts[row.skill_id] = Number(row.view_count || 0);
+      likeCounts[row.skill_id] = Number(row.like_count || 0);
     }
   }
 

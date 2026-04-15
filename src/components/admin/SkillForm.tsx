@@ -33,7 +33,6 @@ export function SkillForm({ skill }: SkillFormProps) {
     skill_markdown: skill?.skill_markdown ?? "",
     preview_html: skill?.preview_html ?? "",
     cover_image_url: skill?.cover_image_url ?? "",
-    status: (skill?.status as "draft" | "published" | "archived") ?? "draft",
     featured: skill?.featured ?? false,
   });
 
@@ -180,22 +179,7 @@ export function SkillForm({ skill }: SkillFormProps) {
             onChange={(url) => setForm((prev) => ({ ...prev, cover_image_url: url }))}
           />
           
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
-                STATUS
-              </label>
-              <select
-                value={form.status}
-                onChange={(e) => setForm((p) => ({ ...p, status: e.target.value as any }))}
-                className="border-2 border-input bg-background px-3 py-2 text-xs font-semibold tracking-wider text-foreground uppercase focus:border-primary focus:outline-none"
-              >
-                <option value="draft">DRAFT</option>
-                <option value="published">PUBLISHED</option>
-                <option value="archived">ARCHIVED</option>
-              </select>
-            </div>
-
+          <div className="grid grid-cols-1 gap-3">
             <div className="flex flex-col gap-2">
               <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
                 SPOTLIGHT
